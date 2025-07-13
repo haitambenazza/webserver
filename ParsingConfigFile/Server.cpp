@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 19:43:32 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/13 20:33:02 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,34 @@ void    Server::SetData( std::string s )
 std::vector< Location >&     Server::GetLocations()
 {
     return (Locations);
+}
+
+
+void Server::SetServer( Block& block) 
+{
+	std::vector<Block>& children = block.GetBlocks();
+	size_t 	i;
+
+	i = 0;
+    while ( i < children.size() ) 
+	{
+		if (children[i].GetLvl() == 1)
+		{
+			StringToMap(children[i].GetArg(), Commands);
+		}
+		else if (children[i].GetLvl() == 2)
+		{
+			std::cout << children[i].GetName() << std::endl;
+			std::map < std::string, std::vector< std::string > >  Com;
+			Location NewLocation;
+
+			StringToMap( children[i].GetArg(), Com );
+			NewLocation.SetCommands( Com );
+			Locations.push_back(NewLocation);
+		}
+        SetServer( children[i] ); 
+		i++;
+    }
 }
 
 std::map < std::string, std::vector< std::string > >    Server::GetCommands()

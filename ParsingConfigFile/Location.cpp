@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:25 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 19:38:14 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/13 20:16:46 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,16 @@ Location&   Location::operator=( const Location&  copy )
 void        Location::SetCommands( std::map < std::string, std::vector< std::string > >& Ref )
 {
     Commands = Ref;
+}
+
+
+std::string&         Location::GetPath()
+{
+    return (Path);
+}
+void                 Location::SetPath( std::string& s )
+{
+    Path = s;
 }
 
 std::map < std::string, std::vector< std::string > >    Location::GetCommands()

@@ -77,6 +77,7 @@ void    File::ReadLines()
         RawString += line;
         i++;
     }
+    //std::cout << RawString << std::endl;
     if (i == 0)
     {
         std::cerr << "empty file" << std::endl;

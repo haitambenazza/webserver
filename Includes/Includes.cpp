@@ -19,3 +19,56 @@ void    TrimSpaces( std::string& s )
         start++;
     s = s.substr(start, end - start + 1);
 }
+
+std::vector<std::string>	FillVector( std::vector<std::string> Src )
+{
+	int i;
+	std::vector<std::string> Dst;
+
+	i = 1;
+	while ( i < (int)Src.size() )
+	{
+		Dst.push_back(Src[i]);
+		i++;
+	}
+	return (Dst);
+}
+
+void	StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp )
+{
+	std::vector< std::string > 	tmp;
+	std::string					key;
+	std::vector< std::string >  values;
+	int 						i;
+
+	
+	tmp = split(s, ";");
+	i = 0;
+	while ( i < (int)tmp.size() )
+	{
+		key = split( tmp[i], " " )[0];
+		values = FillVector( split(tmp[i], " ") );
+		Mp.insert(std::make_pair(key, values));
+		i++;
+	}
+}
+
+void	PrintMap(std::map<std::string , std::vector <std::string> > Commands)
+{
+	std::map<std::string, std::vector<std::string> >::iterator k = Commands.begin();
+	while (k != Commands.end())
+	{
+		std::cout << k->first << " : ";
+		std::vector<std::string> lol = k->second;
+		std::vector<std::string>::iterator lolit;
+
+		lolit = lol.begin();
+		while ( lolit != lol.end())
+		{
+			std::cout << *lolit << " "  ;
+			lolit++;
+		}
+		std::cout << std::endl;
+		k++;
+	}
+}
