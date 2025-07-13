@@ -3,24 +3,24 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
+#    By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/06/30 20:31:31 by hbenazza         ###   ########.fr        #
+#    Updated: 2025/07/13 18:21:46 by kbassim          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = webserver
 
-SRC = $(wildcard *.cpp)
+SRC = $(wildcard *.cpp) $(wildcard ParsingConfigFile/*.cpp) $(wildcard Includes/*.cpp)
 
-HEADER = $(wildcard *.hpp)
+HEADER = $(wildcard *.hpp) $(wildcard Includes/*.hpp)
 
 OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3 #-fsanitize=address
 
 %.o: %.cpp
 	echo $(SRC)
@@ -39,6 +39,7 @@ fclean:
 
 debugg: $(NAME)
 	@valgrind --track-fds=yes ./$(NAME)
+
 
 re:fclean $(NAME)
 
