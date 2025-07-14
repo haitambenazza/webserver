@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 19:16:05 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/13 23:42:36 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ class Server
         std::vector < Location >                                Locations;
     public :
         Server();
-        Server( Server& copy );
-        Server& operator=( Server& copy );
+        Server( const Server& copy );
+        Server& operator=( const Server& copy );
         ~Server();
         
         void            SetData( std::string s );

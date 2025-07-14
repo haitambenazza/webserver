@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 20:33:02 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/14 00:12:09 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,14 @@ Server::Server()
 
 }
 
-Server::Server( Server& copy )
+Server::Server( const Server& copy )
 {
     Data = copy.Data;
     Locations = copy.Locations;
     Commands = copy.Commands;
 }
 
-Server& Server::operator=( Server& copy )
+Server& Server::operator=( const Server& copy )
 {
     if (this != & copy)
     {
@@ -66,13 +66,15 @@ void Server::SetServer( Block& block)
 		}
 		else if (children[i].GetLvl() == 2)
 		{
-			std::cout << children[i].GetName() << std::endl;
+            std::vector<std::string> lst;
+            lst = split(children[i].GetName(), " ");
 			std::map < std::string, std::vector< std::string > >  Com;
 			Location NewLocation;
 
 			StringToMap( children[i].GetArg(), Com );
 			NewLocation.SetCommands( Com );
-			Locations.push_back(NewLocation);
+            NewLocation.SetPath( lst[1] );
+			Locations.push_back( NewLocation );
 		}
         SetServer( children[i] ); 
 		i++;

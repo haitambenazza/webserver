@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/13 20:33:45 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/14 21:21:48 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,31 +26,81 @@ void	PrintServer( Server& Serv )
 	i = 0;
 	while ( i < size )
 	{
-		std::cout << "  ";
+		std::cout << "              ";
 		PrintMap(Serv.GetLocations()[i].GetCommands());
 		i++;
 	}
+	std::cout << "----------------" << std::endl;
 }
 
-
-int main( int ac, char **av, char **envp )
+std::vector<std::string> GetServers( std::string& s )
 {
-	(void)envp;
-	
-	Block bl;
-	Server srvr;
+	size_t	i;
+	size_t	pos;
+	size_t	pos0;
+	std::vector<std::string> ServersData;
 
-	int x = 0;
-	int y = 0;
+	i = 0;
+	while (s[i])
+	{
+		pos = s.find("server", i);
+		if ( pos == std::string::npos )
+			break ;
+		pos0 = s.find("server", i + 6);
+		if (pos0 == std::string::npos)
+			pos0 = s.length();
+		ServersData.push_back(s.substr(pos, pos0 - pos));
+		i = pos0;
+	}
+	return ( ServersData );
+}
 
-	if (ac != 2)
-		return (1);
-	File hey( av[1] );
+std::vector<Server>   GetFullServers( char* FileName )
+{
+	std::vector<Server> 		srvs;
+	std::vector<std::string> 	lst;
+	int 						i;
+	int 						x;
+	int 						y;
+	Server 						NewServer;
+	Block 						NewBlock;
+
+	File hey( FileName );
 	hey.SetExtention();
 	hey.OpenFile();
 	hey.ReadLines();
-	bl.FillBlock(hey.GetRawString(), bl, x, y);
-	srvr.SetServer( bl ) ;
-	//PrintServer(srvr);
+	lst = GetServers( hey.GetRawString() );
+	i = 0;
+	while ( i < (int)lst.size() )
+	{
+		x = 0;
+		y = 0;
+		NewBlock.FillBlock(lst[i], NewBlock, x, y);
+		srvs.push_back( NewServer );
+		srvs.back().SetServer( NewBlock );
+		i++;
+	}
+	return (srvs);
+}
+
+int main( int ac, char **av, char **envp )
+{
+	(void)						envp;
+	std::vector<Server> 		srvs;
+	int							i;
+
+	if (ac != 2)
+	{
+		std::cerr << "Invalid number of arguments" << std::endl;
+		std::cerr << "./Webserv file_name.conf" << std::endl;
+		return (1);
+	}
+	srvs = GetFullServers( av[1] );
+	i = 0;
+	while ( i < (int)srvs.size() )
+	{
+		PrintServer(srvs[i]);
+		i++;
+	}
 	return (0);
 }

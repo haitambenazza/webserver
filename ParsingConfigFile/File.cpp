@@ -60,6 +60,8 @@ void    File::ReadLines()
     i = 0;
     while (std::getline(file, line))
     {
+        if (line.empty() || line[0] == '#')
+            continue ;
         if (line[line.size() - 1] == '{' || line[line.size() - 1] == '}')
         {
             i++;
@@ -77,7 +79,6 @@ void    File::ReadLines()
         RawString += line;
         i++;
     }
-    //std::cout << RawString << std::endl;
     if (i == 0)
     {
         std::cerr << "empty file" << std::endl;

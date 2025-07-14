@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 20:29:11 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/14 00:24:36 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,6 @@ void    Block::SetBlockName( std::string& s, Block& block, size_t pos )
     int         j;
 
     j = pos;
-    
     while (s[pos])
     {
         if (s[pos] == '{')
@@ -162,7 +161,7 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
     int     pos;
     pos = i;
 
-    while ( s[i] )
+    while ( s[i] && i < (int)s.length())
     {
         if (s[i] == '}' || s[i] == '{')
         {

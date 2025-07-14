@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:25 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 20:16:46 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/13 21:31:08 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,16 @@ Location::Location(  )
 
 Location::Location( const Location&  copy )
 {
+    Path = copy.Path;
     Commands = copy.Commands;
-    Data = copy.Data;
 }
 
 Location&   Location::operator=( const Location&  copy )
 {
     if ( this != &copy )
     {
+        Path = copy.Path;
         Commands = copy.Commands;
-        Data = copy.Data;
     } 
     return (*this);
 }
