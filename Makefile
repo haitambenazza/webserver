@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+         #
+#    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/14 00:03:01 by kbassim          ###   ########.fr        #
+#    Updated: 2025/07/14 23:17:21 by hbenazza         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3 -fsanitize=address
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3 
 
 %.o: %.cpp
 	echo $(SRC)

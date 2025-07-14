@@ -44,6 +44,11 @@ void         File::SetExtention()
         i--;
     }
     extention = name.substr(i, name.length() - i);
+    if (extention != ".conf")
+    {
+        std::cerr << "wrong extention, webserver takes only .conf\n";
+        exit(1);
+    }
 }
 
 std::string&         File::GetRawString()
@@ -55,7 +60,7 @@ void    File::ReadLines()
 {
     std::string                 line;
     std::string                 tmp;
-    int                         i;   
+    int                         i;
 
     i = 0;
     while (std::getline(file, line))
