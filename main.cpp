@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/14 21:21:48 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/14 23:48:36 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ void	PrintServer( Server& Serv )
 	std::cout << "----------------" << std::endl;
 }
 
+void	CheckBrackets(std::string s);
+
 std::vector<std::string> GetServers( std::string& s )
 {
 	size_t	i;
@@ -49,12 +51,34 @@ std::vector<std::string> GetServers( std::string& s )
 		pos0 = s.find("server", i + 6);
 		if (pos0 == std::string::npos)
 			pos0 = s.length();
+		//std::cout << s.substr(pos, pos0 - pos) << std::endl;
+		CheckBrackets(s.substr(pos, pos0 - pos));
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
 	return ( ServersData );
 }
 
+void	CheckBrackets(std::string s)
+{
+	int	i;
+	int	j = 0;
+
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == '{')
+			j++;
+		else if (s[i] == '}')
+			j--;
+		i++;
+	}
+	if (j != 0)
+	{
+		std::cout << "Unclosed brackets" << std::endl;
+		exit(1);
+	}
+}
 std::vector<Server>   GetFullServers( char* FileName )
 {
 	std::vector<Server> 		srvs;
@@ -87,7 +111,7 @@ int main( int ac, char **av, char **envp )
 {
 	(void)						envp;
 	std::vector<Server> 		srvs;
-	int							i;
+	//int							i;
 
 	if (ac != 2)
 	{
@@ -96,11 +120,11 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	srvs = GetFullServers( av[1] );
-	i = 0;
-	while ( i < (int)srvs.size() )
-	{
-		PrintServer(srvs[i]);
-		i++;
-	}
+	// i = 0;
+	// while ( i < (int)srvs.size() )
+	// {
+	// 	PrintServer(srvs[i]);
+	// 	i++;
+	// }
 	return (0);
 }

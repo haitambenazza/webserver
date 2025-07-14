@@ -76,7 +76,7 @@ void    File::ReadLines()
         }
         if (line[line.size() - 1] != ';')
         {
-            std::cout<< "Error at line " << i + 1 << " " << line << std::endl;
+            std::cout<< " line " << i + 1 << " " << line << std::endl;
             file.close();
             return ;
         }
@@ -98,7 +98,7 @@ int         File::OpenFile()
     file.open(name.c_str(), std::fstream::in);
     if (!file.is_open())
     {
-        std::cout << "Error openning file" << std::endl;
+        std::cout << "Error opening file" << std::endl;
         return (1);
     }
     return (0);

@@ -1,15 +1,16 @@
 1- parsing config file
 	- syntax errors (check allowed keys and values for each specific key)
+	- fill the data for the server and location
 	- check for nested servers (forbidden)
 	- check for server_name (IP:port can be the same but not the name)
 	- create a map of HTTP errors (404)
 	- specify the location for POST method
 	- specify redirection key
 
-2- establish the server with multiplexing and Non-blocking I/O
+2- establish the server with multiplexing and Non-blocking I/O (concurrency)
 	- iterate tho the list of servers and socket()/bind()
 	- enable the Non-blocking I/O with fcntl()
 	- enable multiplexing (using epoll())
 	- handle the clients (accpet the connection)
 	- read/write to the socket
-	
+
