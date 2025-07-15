@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/15 12:34:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/15 14:13:48 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,9 +110,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 
 int main( int ac, char **av, char **envp )
 {
-	(void)						envp;
 	std::vector<Server> 		srvs;
-	//int							i;
+	(void)						envp;
 
 	if (ac != 2)
 	{
@@ -121,11 +120,5 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	srvs = GetFullServers( av[1] );
-	// i = 0;
-	// while ( i < (int)srvs.size() )
-	// {
-	// 	PrintServer(srvs[i]);
-	// 	i++;
-	// }
 	return (0);
 }
