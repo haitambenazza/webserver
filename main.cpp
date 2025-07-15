@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/14 23:48:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/15 12:34:36 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "Includes/Server.hpp"
 #include "Includes/Location.hpp"
 
+void	CheckBrackets(std::string s);
 
 void	PrintServer( Server& Serv )
 {
@@ -33,25 +34,25 @@ void	PrintServer( Server& Serv )
 	std::cout << "----------------" << std::endl;
 }
 
-void	CheckBrackets(std::string s);
 
 std::vector<std::string> GetServers( std::string& s )
 {
+	std::vector<std::string> ServersData;
 	size_t	i;
 	size_t	pos;
 	size_t	pos0;
-	std::vector<std::string> ServersData;
+	std::string server("server");
 
 	i = 0;
 	while (s[i])
 	{
-		pos = s.find("server", i);
+		pos = s.find(server, i);
 		if ( pos == std::string::npos )
 			break ;
-		pos0 = s.find("server", i + 6);
+		pos0 = s.find(server, i + server.length());
 		if (pos0 == std::string::npos)
 			pos0 = s.length();
-		//std::cout << s.substr(pos, pos0 - pos) << std::endl;
+		// the indexing is wrong it doesnt count the last character
 		CheckBrackets(s.substr(pos, pos0 - pos));
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
@@ -75,7 +76,7 @@ void	CheckBrackets(std::string s)
 	}
 	if (j != 0)
 	{
-		std::cout << "Unclosed brackets" << std::endl;
+		std::cout << "\nUnclosed brackets" << std::endl;
 		exit(1);
 	}
 }
