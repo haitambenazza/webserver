@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 21:10:08 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 21:20:49 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,14 @@ class Server
         std::vector <std::string>                               keys;
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
-        int                                                     fd;
+		// u_int16_t	fd;
+		// u_int16_t	port;
+		// u_int32_t	ip;
+		// std::string	server_name;
+		// std::string root;
+		// std::string index;
+		// u_int64_t	max_body_size;
+		// std::map<u_int16_t , std::string>error_map;
     public :
         Server();
         Server( const Server& copy );
