@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 19:59:25 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 20:05:18 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 #include "Includes/Server.hpp"
 #include "Includes/Location.hpp"
 
-void	CheckBrackets(std::string s);
 
 void	PrintServer( Server& Serv )
 {
@@ -82,26 +81,6 @@ std::vector<std::string> GetServers( std::string& s )
 	return ( ServersData );
 }
 
-void	CheckBrackets(std::string s)
-{
-	int	i;
-	int	j = 0;
-
-	i = 0;
-	while (s[i])
-	{
-		if (s[i] == '{')
-			j++;
-		else if (s[i] == '}')
-			j--;
-		i++;
-	}
-	if (j != 0)
-	{
-		std::cout << "\nUnclosed brackets" << std::endl;
-		exit(1);
-	}
-}
 std::vector<Server>   GetFullServers( char* FileName )
 {
 	std::vector<Server> 		srvs;
