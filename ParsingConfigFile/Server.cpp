@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 21:02:20 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 21:10:36 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,11 @@
 
 Server::Server()
 {
-    fd = 1;
+    fd = socket(AF_UNIX, SOCK_STREAM, 0);
 }
 
 Server::Server( const Server& copy )
 {
-    fd = copy.fd;
     Data = copy.Data;
     keys = copy.keys;
     Locations = copy.Locations;
@@ -34,6 +33,7 @@ Server& Server::operator=( const Server& copy )
         fd = copy.fd;
         keys = copy.keys;
         Data = copy.Data;
+        close(fd);
         fd = socket(AF_UNIX, SOCK_STREAM, 0);
         Locations = copy.Locations;
         Commands = copy.Commands;
@@ -59,7 +59,6 @@ void Server::SetServer( Block& block)
 	i = 0;
     while ( i < children.size() )
 	{
-       // std::cout << children[i].GetLvl() << std::endl;
 		if ( children[i].GetLvl() == 1 )
         {
 			StringToMap(children[i].GetArg(), Commands, 1);
@@ -72,7 +71,6 @@ void Server::SetServer( Block& block)
 			Location NewLocation;
 			StringToMap( children[i].GetArg(), Com, 0 );
 			NewLocation.SetCommands( Com );
-            //std::cout<< lst[1] << std::endl;
             if ( lst.size() != 1 )
                 NewLocation.SetPath( lst[1] );
             else
@@ -107,10 +105,17 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	}
 }
 
+int Server::Getfd() const{
+    return (fd);
+}
+
 
 std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 {
     return (Commands);
 }
 
-Server::~Server(){}
+Server::~Server()
+{
+    close(fd);
+}
