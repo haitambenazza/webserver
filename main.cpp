@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 21:00:10 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 21:11:08 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -177,7 +177,7 @@ int main( int ac, char **av, char **envp )
 	i = 0;
 	while ( i < (int)srvs.size() )
 	{
-		//PrintServer( srvs[i] );
+		std::cout << srvs[i].Getfd() << '\n';
 		i++;
 	}
 	return (0);

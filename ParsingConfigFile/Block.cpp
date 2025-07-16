@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Block.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 19:58:42 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 21:13:49 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ Block::Block() : Lvl(0), ArgStart(0), Parent(NULL)
 
 Block::Block( const Block& copy )
 {
+    Lvl = copy.Lvl;
     BlockName = copy.BlockName;
     Arg = copy.Arg;
     Blocks = copy.Blocks;
@@ -27,6 +28,7 @@ Block& Block::operator=( const Block& copy )
 {
     if (this != &copy)
     {
+        Lvl = copy.Lvl;
         BlockName = copy.BlockName;
         Arg = copy.Arg;
         Blocks = copy.Blocks;
@@ -166,7 +168,7 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
     int     pos;
     pos = i;
 
-    
+
     while ( s[i] && i < (int)s.length())
     {
         if (s[i] == '}' || s[i] == '{')
