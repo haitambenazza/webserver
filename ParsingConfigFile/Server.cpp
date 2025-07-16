@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 04:11:17 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 21:02:20 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
+    fd = socket(AF_UNIX, SOCK_STREAM, 0);
 }
 
 Server& Server::operator=( const Server& copy )
@@ -33,6 +34,7 @@ Server& Server::operator=( const Server& copy )
         fd = copy.fd;
         keys = copy.keys;
         Data = copy.Data;
+        fd = socket(AF_UNIX, SOCK_STREAM, 0);
         Locations = copy.Locations;
         Commands = copy.Commands;
     }
@@ -49,13 +51,13 @@ std::vector<std::string>    Server::GetKeys()
     return (keys);
 }
 
-void Server::SetServer( Block& block) 
+void Server::SetServer( Block& block)
 {
 	std::vector<Block>& children = block.GetBlocks();
 	size_t 	i;
 
 	i = 0;
-    while ( i < children.size() ) 
+    while ( i < children.size() )
 	{
        // std::cout << children[i].GetLvl() << std::endl;
 		if ( children[i].GetLvl() == 1 )
@@ -80,7 +82,7 @@ void Server::SetServer( Block& block)
             }
 			Locations.push_back( NewLocation );
 		}
-        SetServer( children[i] ); 
+        SetServer( children[i] );
 		i++;
     }
 }

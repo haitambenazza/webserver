@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 20:05:18 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 21:00:10 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ std::vector<Server>   GetFullServers( char* FileName )
 	int 						x;
 	int 						y;
 	Block 						NewBlock;
-	
 	File hey( FileName );
 	hey.SetExtention();
 	hey.OpenFile();
@@ -163,9 +162,9 @@ bool Check_if_valid(const std::vector<std::string> str)
 
 int main( int ac, char **av, char **envp )
 {
-	(void)						envp;
 	std::vector<Server> 		srvs;
 
+	(void)envp;
 	if (ac != 2)
 	{
 		std::cerr << "Invalid number of arguments" << std::endl;
