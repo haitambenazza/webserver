@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 22:55:34 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 23:56:11 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,22 +19,24 @@ bool    Server::SetServer()
     if (fd == -1)
     {
         perror("Socket");
-        return ;
+        return false;
     }
+    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR, NULL,0);
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(8080);
-    addr.sin_addr.s_addr = StrToIp("127.0.0.1");
+    addr.sin_port = htons(1235);
+    addr.sin_addr.s_addr = INADDR_LOOPBACK;
     if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
     {
         perror("Bind");
-        return ;
+        return false;
     }
     if ((listen(fd, SOMAXCONN)) == -1)
     {
         perror("Listen");
-        return ;
+        return false;
     }
+    return true;
 }
 
 Server::Server()
