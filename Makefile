@@ -3,14 +3,16 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+         #
+#    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/16 20:00:58 by kbassim          ###   ########.fr        #
+#    Updated: 2025/07/16 21:00:41 by hbenazza         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = webserver
+
+CONFIG = lol.conf
 
 SRC = $(wildcard *.cpp) $(wildcard ParsingConfigFile/*.cpp) $(wildcard Includes/*.cpp)
 
@@ -20,7 +22,7 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3 #-fsanitize=address
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
 
 %.o: %.cpp
 	echo $(SRC)
@@ -38,7 +40,7 @@ fclean:
 	@echo "objects and executable are removed"
 
 debugg: $(NAME)
-	@valgrind --track-fds=yes ./$(NAME)
+	@valgrind --track-fds=yes ./$(NAME) $(CONFIG)
 
 
 re:fclean $(NAME)
