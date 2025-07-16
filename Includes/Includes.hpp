@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 14:48:05 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 20:34:14 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 20:04:49 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ void                        MaskInsideBrace( std::string& s );
 void                        RemoveNewLine( std::string& s );
 void                        TrimSpaces( std::string& s );
 std::vector<std::string>	FillVector( std::vector<std::string> Src );
-void	                    StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp );
 void	                    PrintMap(std::map<std::string , std::vector <std::string> > Commands);
+bool                        CheckBrackets( std::string s );
 
 #endif
 

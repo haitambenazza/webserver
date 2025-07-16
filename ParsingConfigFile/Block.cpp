@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Block.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/14 23:35:46 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 19:58:42 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,11 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
         pos++;
     }
     blk.Arg = NewString;
+    if (blk.Lvl > 2)
+    {
+        std::cerr << "Nested Location detected" << std::endl;
+        return ;
+    }
     ArgEpur( s, blk );
 }
 
@@ -161,6 +166,7 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
     int     pos;
     pos = i;
 
+    
     while ( s[i] && i < (int)s.length())
     {
         if (s[i] == '}' || s[i] == '{')

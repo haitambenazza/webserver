@@ -1,5 +1,6 @@
 #include "../Includes/File.hpp"
 #include "../Includes/Block.hpp"
+#include "../Includes/Includes.hpp"
 
 File::File( std::string name )
 {
@@ -56,37 +57,62 @@ std::string&         File::GetRawString()
     return (RawString);
 }
 
+
 void    File::ReadLines()
 {
     std::string                 line;
     std::string                 tmp;
     int                         i;
+    int                         fl;
+    int                         j;
 
     i = 0;
+    j = 0;
+    fl = 0;
     while (std::getline(file, line))
     {
+        TrimSpaces( line );
         if (line.empty() || line[0] == '#')
             continue ;
-        if (line[line.size() - 1] == '{' || line[line.size() - 1] == '}')
-        {
-            i++;
-            TrimSpaces( line );
-            RawString += line;
-            continue ;
-        }
         if (line[line.size() - 1] != ';')
         {
-            std::cout<< " line " << i + 1 << " " << line << std::endl;
-            file.close();
-            return ;
+            if (line[line.size() - 1] != '{' && line[line.size() - 1] != '}')
+            {
+                i++;
+                RawString += line;
+                tmp = line;
+                std::getline(file, line);
+                TrimSpaces( line );
+                if (!line.compare("{"))
+                {
+                    if (!line.compare("{"))
+                    {
+                        i++;
+                        RawString += line;
+                        continue ;
+                    }
+                }
+                else
+                {
+                    std::cout<< "Error at line " << i  << " " << tmp << std::endl;
+                    RawString.clear();
+                    file.close();
+                    return ;
+                }
+            }
         }
-        TrimSpaces( line );
         RawString += line;
         i++;
     }
     if (i == 0)
     {
         std::cerr << "empty file" << std::endl;
+        file.close();
+        return ;
+    }
+    if (!CheckBrackets(RawString))
+    {
+        std::cerr << "Invalid Brackets" << std::endl;
         file.close();
         return ;
     }

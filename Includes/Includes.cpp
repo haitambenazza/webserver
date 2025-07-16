@@ -10,9 +10,10 @@ void    TrimSpaces( std::string& s )
     int start;
     int end;
 
-
+	if (s.empty())
+		return ;
     start = 0;
-    end = (int)s.length() - 1;
+    end = (int)s.length();
     while (s[end] && IsWhiteSpace(s[end]))
         end--;
     while (s[start] && IsWhiteSpace(s[start]))
@@ -32,25 +33,6 @@ std::vector<std::string>	FillVector( std::vector<std::string> Src )
 		i++;
 	}
 	return (Dst);
-}
-
-void	StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp )
-{
-	std::vector< std::string > 	tmp;
-	std::string					key;
-	std::vector< std::string >  values;
-	int 						i;
-
-	
-	tmp = split(s, ";");
-	i = 0;
-	while ( i < (int)tmp.size() )
-	{
-		key = split( tmp[i], " " )[0];
-		values = FillVector( split(tmp[i], " ") );
-		Mp.insert(std::make_pair(key, values));
-		i++;
-	}
 }
 
 void	PrintMap(std::map<std::string , std::vector <std::string> > Commands)
