@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 21:02:00 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 21:10:08 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,4 +34,5 @@ class Server
         std::vector < Location >&                               GetLocations();
         void	        StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
         std::vector<std::string>                                GetKeys();
+        int Getfd() const;
 };
