@@ -1,5 +1,4 @@
 1- parsing config file
-	- syntax errors (check allowed keys and values for each specific key)
 	- fill the data for the server and location
 	- check for nested servers (forbidden)
 	- check for server_name (IP:port can be the same but not the name)
