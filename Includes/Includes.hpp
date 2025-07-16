@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Includes.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 14:48:05 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 20:04:49 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 22:39:54 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 #include <cctype>
 #include <cstdlib>
 #include <map>
+#include <sys/types.h>
+#include <netinet/in.h>
 #include "Location.hpp"
 
 std::vector<std::string>    split(std::string s, std::string delimiter);

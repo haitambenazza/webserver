@@ -6,15 +6,40 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 21:10:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 22:55:34 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Server.hpp"
+#include "../headers/webserver.hpp"
+
+bool    Server::SetServer()
+{
+    struct sockaddr_in addr;
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1)
+    {
+        perror("Socket");
+        return ;
+    }
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(8080);
+    addr.sin_addr.s_addr = StrToIp("127.0.0.1");
+    if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
+    {
+        perror("Bind");
+        return ;
+    }
+    if ((listen(fd, SOMAXCONN)) == -1)
+    {
+        perror("Listen");
+        return ;
+    }
+}
 
 Server::Server()
 {
-    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    this->SetServer();
 }
 
 Server::Server( const Server& copy )
@@ -23,18 +48,17 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
-    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    SetServer();
 }
 
 Server& Server::operator=( const Server& copy )
 {
     if (this != & copy)
     {
-        fd = copy.fd;
         keys = copy.keys;
         Data = copy.Data;
         close(fd);
-        fd = socket(AF_UNIX, SOCK_STREAM, 0);
+        SetServer();
         Locations = copy.Locations;
         Commands = copy.Commands;
     }

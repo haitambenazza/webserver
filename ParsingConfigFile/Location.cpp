@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   Location.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:25 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 21:31:08 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 22:42:40 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Location.hpp"
+#include "../headers/webserver.hpp"
 
 Location::Location(  )
 {
-    
+
 }
 
 Location::Location( const Location&  copy )
@@ -29,7 +29,7 @@ Location&   Location::operator=( const Location&  copy )
     {
         Path = copy.Path;
         Commands = copy.Commands;
-    } 
+    }
     return (*this);
 }
 
@@ -55,5 +55,5 @@ std::map < std::string, std::vector< std::string > >    Location::GetCommands()
 
 Location::~Location()
 {
-    
+
 }

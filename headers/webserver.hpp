@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 19:44:34 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 22:41:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,14 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "../Includes/Block.hpp"
+#include "../Includes/File.hpp"
+#include "../Includes/Includes.hpp"
+#include "../Includes/Block.hpp"
+#include "../Includes/Location.hpp"
+#include "../Includes/Macros.hpp"
+#include "../Includes/Server.hpp"
+#include "../Includes/ServerTools.hpp"
 
 
 #endif

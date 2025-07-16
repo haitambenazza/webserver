@@ -6,15 +6,11 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 21:11:08 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 22:44:44 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Includes/File.hpp"
-#include "Includes/Block.hpp"
-#include "Includes/Server.hpp"
-#include "Includes/Location.hpp"
-
+#include "headers/webserver.hpp"
 
 void	PrintServer( Server& Serv )
 {
