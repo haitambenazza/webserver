@@ -6,11 +6,13 @@
 #    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/14 23:17:21 by hbenazza         ###   ########.fr        #
+#    Updated: 2025/07/16 19:45:24 by hbenazza         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = webserver
+
+CONFIG = lol.conf
 
 SRC = $(wildcard *.cpp) $(wildcard ParsingConfigFile/*.cpp) $(wildcard Includes/*.cpp)
 
@@ -20,7 +22,7 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3 
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
 
 %.o: %.cpp
 	echo $(SRC)
@@ -38,7 +40,7 @@ fclean:
 	@echo "objects and executable are removed"
 
 debugg: $(NAME)
-	@valgrind --track-fds=yes ./$(NAME)
+	@valgrind --track-fds=yes ./$(NAME) $(CONFIG)
 
 
 re:fclean $(NAME)

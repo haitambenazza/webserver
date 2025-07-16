@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/14 00:12:09 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 19:52:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,22 @@
 
 Server::Server()
 {
+        std::cout << "SERVER  constructor\n";
+    fd = -1;
+}
 
+u_int16_t Server::GetFd() const
+{
+    return (fd);
 }
 
 Server::Server( const Server& copy )
 {
+    std::cout << "server copy constructor\n";
     Data = copy.Data;
     Locations = copy.Locations;
     Commands = copy.Commands;
+    fd = socket(AF_UNIX, SOCK_STREAM, 0);
 }
 
 Server& Server::operator=( const Server& copy )
@@ -29,6 +37,7 @@ Server& Server::operator=( const Server& copy )
     if (this != & copy)
     {
         Data = copy.Data;
+        fd = socket(AF_UNIX, SOCK_STREAM, 0);
         Locations = copy.Locations;
         Commands = copy.Commands;
     }
@@ -52,13 +61,13 @@ std::vector< Location >&     Server::GetLocations()
 }
 
 
-void Server::SetServer( Block& block) 
+void Server::SetServer( Block& block)
 {
 	std::vector<Block>& children = block.GetBlocks();
 	size_t 	i;
 
 	i = 0;
-    while ( i < children.size() ) 
+    while ( i < children.size() )
 	{
 		if (children[i].GetLvl() == 1)
 		{
@@ -76,7 +85,7 @@ void Server::SetServer( Block& block)
             NewLocation.SetPath( lst[1] );
 			Locations.push_back( NewLocation );
 		}
-        SetServer( children[i] ); 
+        SetServer( children[i] );
 		i++;
     }
 }
@@ -88,5 +97,6 @@ std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 
 Server::~Server()
 {
-    
+    std::cout << "destructor called \n";
+    close(fd);
 }

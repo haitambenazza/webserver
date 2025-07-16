@@ -47,7 +47,7 @@ void         File::SetExtention()
     if (extention != ".conf")
     {
         std::cerr << "wrong extention, webserver takes only .conf\n";
-        exit(1);
+        return ;
     }
 }
 

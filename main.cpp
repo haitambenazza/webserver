@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/15 14:13:48 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/16 19:50:07 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ void	CheckBrackets(std::string s)
 	if (j != 0)
 	{
 		std::cout << "\nUnclosed brackets" << std::endl;
-		exit(1);
+		return ;
 	}
 }
 std::vector<Server>   GetFullServers( char* FileName )
@@ -87,8 +87,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 	int 						i;
 	int 						x;
 	int 						y;
-	Server 						NewServer;
 	Block 						NewBlock;
+	Server 						NewServer;
 
 	File hey( FileName );
 	hey.SetExtention();
@@ -120,5 +120,14 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	srvs = GetFullServers( av[1] );
+	for (std::vector<Server>::iterator i = srvs.begin(); i != srvs.end(); i++)
+	{
+		std::cout << i->GetFd() << '\n';
+	}
+	// size_t i = 0;
+	// while (i < srvs.size())
+	// {
+	// 	std::cout << srvs[i].GetCommands()
+	// }
 	return (0);
 }

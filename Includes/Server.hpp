@@ -6,13 +6,14 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/15 19:47:07 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/15 23:43:38 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #include "Includes.hpp"
 #include "../Includes/Block.hpp"
+#include "../headers/webserver.hpp"
 
 class Server
 {
@@ -20,7 +21,7 @@ class Server
         std::vector <std::string>                               Data;
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
-		// u_int16_t	fd;
+		u_int16_t	fd;
 		// u_int16_t	port;
 		// u_int32_t	ip;
 		// std::string	server_name;
@@ -39,5 +40,6 @@ class Server
         void            SetServer( Block& block);
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::vector < Location >&                               GetLocations();
+        u_int16_t GetFd() const ;
 
 };
