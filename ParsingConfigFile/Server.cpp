@@ -6,11 +6,19 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/17 19:45:40 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 22:36:08 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/webserver.hpp"
+
+void	SetAddrServer(struct sockaddr_in *addr)
+{
+	memset(addr, 0, sizeof(struct sockaddr_in));
+	addr->sin_family = AF_INET;
+	addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	addr->sin_port = htons(8080);
+}
 
 bool    Server::SetServer()
 {
@@ -18,17 +26,15 @@ bool    Server::SetServer()
     int opt = 1;
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
     {
         perror("Socket");
         return false;
     }
     setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(1235);
-    addr.sin_addr.s_addr = htonl(StrToIp("255"));
-    if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
+	SetAddrServer(&addr);
+	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
     {
         perror("Bind");
         return false;
@@ -41,14 +47,14 @@ bool    Server::SetServer()
     return true;
 }
 
-void Server::Setfd_client(int16_t fd)
+void Server::Setfd_endpoint(int16_t fd)
 {
-    fd_client = fd;
+    fd_endpoint = fd;
 }
 
-int16_t	Server::Getfd_client() const
+int16_t	Server::Getfd_endpoint() const
 {
-    return (fd_client);
+    return (fd_endpoint);
 }
 
 Server::Server()
@@ -58,7 +64,6 @@ Server::Server()
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
-    std::cout << server_name << " is up\n";
 }
 
 Server::Server( const Server& copy )
@@ -72,7 +77,6 @@ Server::Server( const Server& copy )
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
-    std::cout << server_name << " is up\n";
 }
 
 Server& Server::operator=( const Server& copy )
