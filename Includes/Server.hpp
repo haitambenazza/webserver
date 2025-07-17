@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 23:01:17 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 12:39:40 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ class Server
         int16_t	fd;
 		// u_int16_t	port;
 		// std::string	ip;
-		// std::string	server_name;
+		std::string	server_name;
 		// std::string root;
 		// std::string index;
 		// u_int64_t	max_body_size;
