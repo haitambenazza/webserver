@@ -1,5 +1,4 @@
 #include "Includes.hpp"
-
 int     IsWhiteSpace( char c )
 {
     return (c == 32 || (c >= 9 && c <= 13));
