@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/17 19:49:45 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 22:37:10 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,15 +168,12 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	srvs = GetFullServers( av[1] );
-	for (int i = 0; i < (int)srvs.size(); i++)
-		std::cout << srvs[i].Getfd() << '\n';
-	while (true)// we need to set the fd to non blocking so the accept can return 
+	while (true)
 	{
 		for (int i = 0; i < (int)srvs.size(); i++)
 		{
-			srvs[i].Setfd_client(accept(srvs[i].Getfd(), NULL, NULL));
-			if (srvs[i].Getfd_client() == -1)
-				perror("accept");
+			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
+			fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 		}
 	}
 	return (0);
