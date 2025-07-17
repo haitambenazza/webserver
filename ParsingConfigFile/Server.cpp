@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/17 13:56:53 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 19:45:40 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ bool    Server::SetServer()
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(1235);
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_addr.s_addr = htonl(StrToIp("255"));
     if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
     {
         perror("Bind");
@@ -39,6 +39,16 @@ bool    Server::SetServer()
         return false;
     }
     return true;
+}
+
+void Server::Setfd_client(int16_t fd)
+{
+    fd_client = fd;
+}
+
+int16_t	Server::Getfd_client() const
+{
+    return (fd_client);
 }
 
 Server::Server()
