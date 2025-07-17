@@ -6,15 +6,11 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 21:11:08 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 22:37:10 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Includes/File.hpp"
-#include "Includes/Block.hpp"
-#include "Includes/Server.hpp"
-#include "Includes/Location.hpp"
-
+#include "headers/webserver.hpp"
 
 void	PrintServer( Server& Serv )
 {
@@ -172,13 +168,13 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	srvs = GetFullServers( av[1] );
-	int i;
-
-	i = 0;
-	while ( i < (int)srvs.size() )
+	while (true)
 	{
-		std::cout << srvs[i].Getfd() << '\n';
-		i++;
+		for (int i = 0; i < (int)srvs.size(); i++)
+		{
+			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
+			fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
+		}
 	}
 	return (0);
 }

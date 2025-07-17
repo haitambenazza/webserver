@@ -1,6 +1,16 @@
-#include "../Includes/File.hpp"
-#include "../Includes/Block.hpp"
-#include "../Includes/Includes.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   File.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/16 22:42:47 by hbenazza          #+#    #+#             */
+/*   Updated: 2025/07/16 22:42:52 by hbenazza         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../headers/webserver.hpp"
 
 File::File( std::string name )
 {

@@ -6,15 +6,64 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 21:10:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 22:36:08 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../Includes/Server.hpp"
+#include "../headers/webserver.hpp"
+
+void	SetAddrServer(struct sockaddr_in *addr)
+{
+	memset(addr, 0, sizeof(struct sockaddr_in));
+	addr->sin_family = AF_INET;
+	addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	addr->sin_port = htons(8080);
+}
+
+bool    Server::SetServer()
+{
+    struct sockaddr_in addr;
+    int opt = 1;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+    if (fd == -1)
+    {
+        perror("Socket");
+        return false;
+    }
+    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+	SetAddrServer(&addr);
+	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
+    {
+        perror("Bind");
+        return false;
+    }
+    if ((listen(fd, SOMAXCONN)) == -1)
+    {
+        perror("Listen");
+        return false;
+    }
+    return true;
+}
+
+void Server::Setfd_endpoint(int16_t fd)
+{
+    fd_endpoint = fd;
+}
+
+int16_t	Server::Getfd_endpoint() const
+{
+    return (fd_endpoint);
+}
 
 Server::Server()
 {
-    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (this->SetServer() == false)
+    {
+        std::cerr << server_name <<" encountered an error\n";
+        return ;
+    }
 }
 
 Server::Server( const Server& copy )
@@ -23,20 +72,23 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
-    fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (!SetServer())
+    {
+        std::cerr << server_name <<" encountered an error\n";
+        return ;
+    }
 }
 
 Server& Server::operator=( const Server& copy )
 {
     if (this != & copy)
     {
-        fd = copy.fd;
         keys = copy.keys;
         Data = copy.Data;
-        close(fd);
-        fd = socket(AF_UNIX, SOCK_STREAM, 0);
         Locations = copy.Locations;
         Commands = copy.Commands;
+        close(fd);
+        SetServer();
     }
     return (*this);
 }
