@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/17 12:39:40 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 15:24:40 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class Server
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
         int16_t	fd;
+        int16_t	fd_client;
 		// u_int16_t	port;
 		// std::string	ip;
 		std::string	server_name;
@@ -43,4 +44,6 @@ class Server
         std::vector<std::string>                                GetKeys();
         bool SetServer();
         int Getfd() const;
+		void	Setfd_client(int16_t fd);
+		int16_t	Getfd_client() const;
 };
