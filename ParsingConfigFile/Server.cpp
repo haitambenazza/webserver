@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 23:56:11 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/17 13:56:53 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,19 @@
 bool    Server::SetServer()
 {
     struct sockaddr_in addr;
+    int opt = 1;
+
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == -1)
     {
         perror("Socket");
         return false;
     }
-    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR, NULL,0);
+    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(1235);
-    addr.sin_addr.s_addr = INADDR_LOOPBACK;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
     {
         perror("Bind");
@@ -41,7 +43,12 @@ bool    Server::SetServer()
 
 Server::Server()
 {
-    this->SetServer();
+    if (this->SetServer() == false)
+    {
+        std::cerr << server_name <<" encountered an error\n";
+        return ;
+    }
+    std::cout << server_name << " is up\n";
 }
 
 Server::Server( const Server& copy )
@@ -50,7 +57,12 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
-    SetServer();
+    if (!SetServer())
+    {
+        std::cerr << server_name <<" encountered an error\n";
+        return ;
+    }
+    std::cout << server_name << " is up\n";
 }
 
 Server& Server::operator=( const Server& copy )
@@ -59,10 +71,10 @@ Server& Server::operator=( const Server& copy )
     {
         keys = copy.keys;
         Data = copy.Data;
-        close(fd);
-        SetServer();
         Locations = copy.Locations;
         Commands = copy.Commands;
+        close(fd);
+        SetServer();
     }
     return (*this);
 }
