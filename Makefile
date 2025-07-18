@@ -6,7 +6,7 @@
 #    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/16 21:00:41 by hbenazza         ###   ########.fr        #
+#    Updated: 2025/07/18 13:58:47 by hbenazza         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,9 +14,9 @@ NAME = webserver
 
 CONFIG = lol.conf
 
-SRC = $(wildcard *.cpp) $(wildcard ParsingConfigFile/*.cpp) $(wildcard Includes/*.cpp)
+SRC = $(filter-out client.cpp, $(wildcard */*.cpp) $(wildcard *.cpp))
 
-HEADER = $(wildcard *.hpp) $(wildcard Includes/*.hpp)
+HEADER = $(wildcard */*.hpp)
 
 OBJ = ${SRC:.cpp=.o}
 
