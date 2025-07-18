@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/18 21:16:37 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 00:15:09 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,73 @@ void Server::Setfd_endpoint(int16_t fd)
 {
     fd_endpoint = fd;
 }
+
+
+void    Server::InitializeServerSettings()
+{
+    for (size_t i = 0; i < this->keys.size(); ++i)
+    {
+        const std::string& currentKey = this->keys[i];
+
+        std::map<std::string, std::vector<std::string> >::iterator it = this->Commands.find(currentKey);
+
+        if (it != this->Commands.end()) {
+            const std::vector<std::string>& values = it->second;
+            if (currentKey == "listen")
+            {
+                if (!values.empty()) {
+                    std::string listen_val = values[0];
+                    size_t colon_pos = listen_val.find(':');
+                    if (colon_pos != std::string::npos)
+                        this->port = static_cast<u_int16_t>(atoi(listen_val.substr(colon_pos + 1).c_str()));
+                    else
+                    {
+                        this->port = static_cast<u_int16_t>(atoi(listen_val.c_str()));
+                    }
+                }
+            } else if (currentKey == "root")
+            {
+                if (!values.empty()) {
+                    this->root = values[0];
+                }
+            } else if (currentKey == "index")
+            {
+                if (!values.empty()) {
+                    this->index = values[0];
+                }
+            }
+            else if (currentKey == "host")
+            {
+                if (values.empty())
+                    this->ip = "0.0.0.0";
+                else
+                    this->ip = values[0];
+            } else if (currentKey == "client_max_body_size")
+            {
+                if (!values.empty()) {
+                    this->max_body_size = static_cast<u_int64_t>(atol(values[0].c_str()));
+                }
+            } else if (currentKey == "error_page")
+            {
+                if (values.size() >= 2) {
+                    u_int16_t error_code = static_cast<u_int16_t>(atoi(values[0].c_str()));
+                    std::string error_path = values[1];
+                    this->error_map[error_code] = error_path;
+                }
+            }
+        }
+    }
+}
+
+void Server::PrintData()
+{
+    std::cout << "IP : " << this->ip << "\n";
+    std::cout << "PORT : " << this->port << "\n";
+    std::cout << "INDEX : " << this->index << "\n";
+    std::cout << "ROOT : " << this->root << "\n";
+    std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";
+}
+
 
 int16_t	Server::Getfd_endpoint() const
 {
