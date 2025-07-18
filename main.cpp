@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/18 20:10:56 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/18 21:44:55 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,8 @@ bool Check_if_valid(const std::vector<std::string> str)
 int main( int ac, char **av, char **envp )
 {
 	std::vector<Server> 		srvs;
-	char	buffer[10];
+	std::string buffer;
+	char tmp[100] = {0};
 	int read;
 
 	(void)envp;
@@ -176,10 +177,13 @@ int main( int ac, char **av, char **envp )
 			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
 			if (srvs[i].Getfd_endpoint() != -1)
 			{
-				// fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
+				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-				while ( (read = recv(srvs[i].Getfd_endpoint(), &buffer, 10, 0)) > 0)
+				while ( (read = recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
+				{
+					buffer += tmp;
 					std::cout << buffer <<read  <<'\n';
+				}
 				srvs[i].CloseFd();
 			}
 		}

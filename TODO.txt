@@ -6,8 +6,9 @@
 	- specify redirection key
 
 2- establish the server with multiplexing and Non-blocking I/O (concurrency)
-	- enable the Non-blocking I/O with fcntl()
-	- try to create a client program to send msgs to the server/Servers
 	- enable multiplexing (using epoll())
+	=> for multiplexer
+		. add every Fd using epoll() to notify the thread when a event occur in that Fd
+		. use it with accpet() send() recv() and other Read/Write operation
 	- handle the clients (accpet the connection)
 	- read/write to the socket

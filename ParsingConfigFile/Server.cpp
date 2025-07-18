@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/18 20:06:28 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/18 21:16:37 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ bool    Server::SetServer()
     int opt = 1;
 
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    // fcntl(fd, F_SETFL, O_NONBLOCK);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
     {
         perror("Socket");
