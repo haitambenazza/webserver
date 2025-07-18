@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/17 22:36:08 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/18 21:16:37 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,11 @@ void Server::Setfd_endpoint(int16_t fd)
 int16_t	Server::Getfd_endpoint() const
 {
     return (fd_endpoint);
+}
+
+std::string Server::GetServerName()const
+{
+    return (server_name);
 }
 
 Server::Server()
@@ -165,6 +170,11 @@ int Server::Getfd() const{
 std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 {
     return (Commands);
+}
+
+int Server::CloseFd()
+{
+    return (close(fd_endpoint));
 }
 
 Server::~Server()
