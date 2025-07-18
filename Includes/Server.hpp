@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/17 22:21:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/18 18:34:21 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,7 @@ class Server
         int Getfd() const;
 		void	Setfd_endpoint(int16_t fd);
 		int16_t	Getfd_endpoint() const;
+        std::string GetServerName()const;
+        int     CloseFd();
+
 };

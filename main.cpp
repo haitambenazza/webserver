@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/18 14:34:59 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/18 18:35:22 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,6 +158,8 @@ bool Check_if_valid(const std::vector<std::string> str)
 int main( int ac, char **av, char **envp )
 {
 	std::vector<Server> 		srvs;
+	char	buffer;
+	int read;
 
 	(void)envp;
 	if (ac != 2)
@@ -168,7 +170,7 @@ int main( int ac, char **av, char **envp )
 	}
 	srvs = GetFullServers( av[1] );
 	for (int i = 0; i < (int)srvs.size(); i++)
-	
+
 	while (true)
 	{
 		for (int i = 0; i < (int)srvs.size(); i++)
@@ -176,7 +178,12 @@ int main( int ac, char **av, char **envp )
 			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
 			fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 			if (srvs[i].Getfd_endpoint() != -1)
-				std::cout << "a new client connected\n";
+			{
+				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
+				while ( (read = recv(srvs[i].Getfd_endpoint(), &buffer, 1, 0)) > 0)
+					std::cout << buffer <<read  <<'\n';
+				srvs[i].CloseFd();
+			}
 		}
 	}
 	return (0);
