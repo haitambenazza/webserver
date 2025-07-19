@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 20:01:11 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 21:51:26 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,12 +199,12 @@ int main( int ac, char **av, char **envp )
 			{
 				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-				while ( (recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
+				while ( (recv(srvs[i].Getfd_endpoint(), &tmp, 1, 0)) > 0)
 				{
 					buffer += tmp;
 					memset(tmp, 0, sizeof(tmp));
 				}
-				std::cout << buffer << '\n';
+				std::cout << buffer;
 				buffer.clear();
 				srvs[i].CloseFd();
 			}
