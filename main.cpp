@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 01:51:06 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/19 02:00:22 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,8 +159,8 @@ int main( int ac, char **av, char **envp )
 {
 	std::vector<Server> 		srvs;
 	std::string buffer;
-	// char tmp[100] = {0};
-	// int read;
+	char tmp[100] = {0};
+	int read;
 
 	(void)envp;
 	if (ac != 2)
@@ -171,34 +171,28 @@ int main( int ac, char **av, char **envp )
 	}
 	//init data
 	srvs = GetFullServers( av[1] );
-	// for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
-	// {
-	// 	srvs[serv].InitializeServerSettings();
-	// 	srvs[serv].PrintData();
-	// }
+	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
+	{
+		srvs[serv].InitializeServerSettings();
+		srvs[serv].PrintData();
+	}
 
-	// for (int i = 0; i <(int)srvs.size(); i++)
-	// 	srvs[i].PrintData();
-
-	// std::vector<std::string> vct  = srvs[0].GetKeys();
-	// for(int j = 0 ; j < (int)srvs.size(); j++)
-	// 	std::cout << vct[j] << std::endl;
-	// while (true)
-	// {
-	// 	for (int i = 0; i < (int)srvs.size(); i++)
-	// 	{
-	// 		srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
-	// 		if (srvs[i].Getfd_endpoint() != -1)
-	// 		{
-	// 			fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-	// 			std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-	// 			while ( (read = recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
-	// 				buffer += tmp;
-	// 			std::cout << buffer << '\n';
-	// 			buffer.clear();
-	// 			srvs[i].CloseFd();
-	// 		}
-	// 	}
-	// }
+	while (true)
+	{
+		for (int i = 0; i < (int)srvs.size(); i++)
+		{
+			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
+			if (srvs[i].Getfd_endpoint() != -1)
+			{
+				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
+				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
+				while ( (read = recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
+					buffer += tmp;
+				std::cout << buffer << '\n';
+				buffer.clear();
+				srvs[i].CloseFd();
+			}
+		}
+	}
 	return (0);
 }
