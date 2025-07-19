@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 02:28:06 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 15:34:48 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,16 +65,8 @@ void    Server::InitializeServerSettings()
             const std::vector<std::string>& values = it->second;
             if (currentKey == "listen")
             {
-                if (!values.empty()) {
-                    std::string listen_val = values[0];
-                    size_t colon_pos = listen_val.find(':');
-                    if (colon_pos != std::string::npos)
-                        this->port = static_cast<u_int16_t>(atoi(listen_val.substr(colon_pos + 1).c_str()));
-                    else
-                    {
-                        this->port = static_cast<u_int16_t>(atoi(listen_val.c_str()));
-                    }
-                }
+                if (!values.empty())
+                    this->port = values[0];
             } else if (currentKey == "root")
             {
                 if (!values.empty()) {
@@ -97,6 +89,8 @@ void    Server::InitializeServerSettings()
                 if (!values.empty()) {
                     this->max_body_size = static_cast<u_int64_t>(atol(values[0].c_str()));
                 }
+                else
+                    this->max_body_size = MAX_CLIENT_BODY;
             } else if (currentKey == "error_page")
             {
                 if (values.size() >= 2) {

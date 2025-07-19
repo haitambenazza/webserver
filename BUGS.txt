@@ -1,4 +1,5 @@
 - for the Parser
 	. Port doesn't get initialized correctly because the Port member is a string not integer
 	. Max body size is not initialized
-	. 
+	. for the Max body size and other values that arent decalared in the config file they will not be initialized
+so we need a function that set the default values for each server before reading from the config file
