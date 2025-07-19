@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 15:30:52 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 19:44:43 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,19 +53,32 @@ std::vector<std::string> GetServers( std::string& s )
 	size_t	i;
 	size_t	pos;
 	size_t	pos0;
-	std::string server("server");
 
 	if (s.empty())
 		return (ServersData);
 	i = 0;
 	while (s[i])
 	{
-		pos = s.find(server, i);
+		pos = s.find("server", i);
 		if ( pos == std::string::npos )
 			break ;
-		pos0 = s.find(server, i + server.length());
+		pos0 = s.find("server", i + 6);
 		if (pos0 == std::string::npos)
 			pos0 = s.length();
+		if (!(s.substr(pos0, 11).compare ("server_name")))
+		{
+			pos0 = s.find("server", pos0 + 11);
+			if (pos0 == std::string::npos)
+				pos0 = s.size();
+		}
+		else if (pos0 == std::string::npos)
+			pos0 = s.size();
+		if ( !CheckBrackets(s.substr(pos, pos0 - pos)))
+		{
+			std::cerr << "Nested Server" << std::endl;
+			ServersData.clear();
+			return (ServersData);
+		}
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -79,17 +92,20 @@ std::vector<Server>   GetFullServers( char* FileName )
 	int 						i;
 	int 						x;
 	int 						y;
-	Block 						NewBlock;
 	File hey( FileName );
-	hey.SetExtention();
+	if (hey.SetExtention() == 1)
+		return (srvs);
 	hey.OpenFile();
 	hey.ReadLines();
 	lst = GetServers( hey.GetRawString() );
+	if (lst.empty())
+		return (srvs);
 	hey.GetRawString().clear();
 	i = 0;
 	while ( i < (int)lst.size() )
 	{
-		Server NewServer;
+		Block 	NewBlock;
+		Server 	NewServer;
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock(lst[i], NewBlock, x, y);
@@ -154,7 +170,7 @@ bool Check_if_valid(const std::vector<std::string> str)
 
 int main( int ac, char **av, char **envp )
 {
-	std::vector<Server> 		srvs;
+	std::vector<Server> 		srvs(false);
 	std::string buffer;
 	char tmp[100] = {0};
 
@@ -167,9 +183,11 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	srvs = GetFullServers( av[1] );
+	if (srvs.empty())
+		return (1);
 	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
 	{
-		srvs[serv].InitializeServerSettings();
+		//srvs[serv].InitializeServerSettings();
 		srvs[serv].PrintData();
 	}
 	while (true)

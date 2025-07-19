@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Block.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 22:42:58 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 19:24:57 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,14 @@ void        Block::ArgEpur(std::string &s, Block& blk )
     {
         Pos = blk.Arg.find(blk.Names[c]);
         if ( Pos != std::string::npos )
+        {
+            if (!blk.Arg.compare(Pos,11, "server_name"))
+            {
+                c++;
+                continue;
+            }
             blk.Arg.erase(Pos, blk.Names[c].length());
+        }
         c++;
     }
 }
@@ -88,6 +95,7 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
     std::string NewString;
 
     c = 1;
+    
     while ( pos < s.length() )
     {
         if (s[pos] == '{')
@@ -103,7 +111,7 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
         pos++;
     }
     blk.Arg = NewString;
-    if (blk.Lvl > 2)
+    if ( blk.Lvl > 2 )
     {
         std::cerr << "Nested Location detected" << std::endl;
         return ;
@@ -196,7 +204,7 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
         else
         {
             while (s[i] && s[i] != '{' && s[i] != '}')
-            i++;
+                i++;
             Child.Arg = s.substr(pos, i - pos + 1);
         }
     }

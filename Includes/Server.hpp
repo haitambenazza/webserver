@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 02:31:33 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 19:46:36 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,5 +49,6 @@ class Server
         std::string GetServerName()const;
         int     CloseFd();
         void    InitializeServerSettings();
+        Server( bool flag );
         void PrintData();
 };
