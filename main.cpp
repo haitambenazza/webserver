@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 02:11:08 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 15:30:52 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,14 +166,12 @@ int main( int ac, char **av, char **envp )
 		std::cerr << "./Webserv file_name.conf" << std::endl;
 		return (1);
 	}
-	//init data
 	srvs = GetFullServers( av[1] );
 	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
 	{
 		srvs[serv].InitializeServerSettings();
 		srvs[serv].PrintData();
 	}
-
 	while (true)
 	{
 		for (int i = 0; i < (int)srvs.size(); i++)
