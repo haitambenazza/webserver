@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 21:51:26 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 22:38:59 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,6 @@ int main( int ac, char **av, char **envp )
 	std::string buffer;
 	char tmp[100] = {0};
 
-
 	(void)envp;
 	if (ac != 2)
 	{
@@ -187,7 +186,7 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
 	{
-		//srvs[serv].InitializeServerSettings();
+		srvs[serv].InitializeServerSettings();
 		srvs[serv].PrintData();
 	}
 	while (true)
