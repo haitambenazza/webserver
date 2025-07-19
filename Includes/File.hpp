@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/01 14:46:14 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/12 04:10:23 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/19 02:29:03 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ class File
         File& operator=( const File& copy );
         std::string  GetName() const;
         std::string  GetExtention() const;
-        void         SetExtention();
+        int         SetExtention();
         int          CheckExtention();
         int          OpenFile();
         void         ReadLines();
