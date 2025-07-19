@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 01:53:27 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/19 02:26:15 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void    Server::InitializeServerSettings()
                 if (values.empty())
                     this->ip = "0.0.0.0";
                 else
-                    this->ip = values[0];
+                    this->ip = values[0];//heap buffer overflow need to be fixed
             } else if (currentKey == "client_max_body_size")
             {
                 if (!values.empty()) {
