@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/18 23:58:18 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 01:50:24 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,11 +66,6 @@ std::vector<std::string> GetServers( std::string& s )
 		pos0 = s.find(server, i + server.length());
 		if (pos0 == std::string::npos)
 			pos0 = s.length();
-		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
-		{
-			std::cerr << "Nested server detected" << std::endl;
-			return ( ServersData);
-		}
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -120,6 +115,8 @@ bool	IsPresent(const std::vector<std::string>& vctr, std::string s)
 	}
 	return (count != 0);
 }
+
+
 bool Check_if_valid(const std::vector<std::string> str)
 {
 	int j;
@@ -144,9 +141,15 @@ bool Check_if_valid(const std::vector<std::string> str)
 	size_t i = 0;
 	while (i < str.size())
 	{
+		std::cout << str[i] << '\n';
 		if (!IsPresent(valid_keys, str[i]))
 		{
 			std::cout << str[i] << " : is not valid. ";
+			return (false);
+		}
+		if (str[i] == "server")
+		{
+			std::cerr << "Nested server detected\n";
 			return (false);
 		}
 		i++;
@@ -154,13 +157,12 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
-
 int main( int ac, char **av, char **envp )
 {
 	std::vector<Server> 		srvs;
 	std::string buffer;
 	char tmp[100] = {0};
-	int read;
+
 
 	(void)envp;
 	if (ac != 2)
@@ -174,11 +176,7 @@ int main( int ac, char **av, char **envp )
 	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
 	{
 		srvs[serv].InitializeServerSettings();
-		srvs[serv].PrintData();
 	}
-
-	for (int i = 0; i <(int)srvs.size(); i++)
-		srvs[i].PrintData();
 
 	while (true)
 	{
@@ -189,7 +187,7 @@ int main( int ac, char **av, char **envp )
 			{
 				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-				while ( (read = recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
+				while ( ( recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
 					buffer += tmp;
 				std::cout << buffer << '\n';
 				buffer.clear();

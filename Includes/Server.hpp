@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/18 23:55:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 00:30:30 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,13 @@ class Server
         int16_t	fd;
         int16_t	fd_endpoint;
 		std::string	server_name;
-		u_int16_t	port;
-		std::string	ip;
 		std::string root;
 		std::string index;
 		u_int64_t	max_body_size;
 		std::map<u_int16_t , std::string>error_map;
-    public :
+        public :
+		u_int16_t	port;
+		std::string	ip;
         Server();
         Server( const Server& copy );
         Server& operator=( const Server& copy );
