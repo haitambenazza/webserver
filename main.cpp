@@ -66,11 +66,6 @@ std::vector<std::string> GetServers( std::string& s )
 		pos0 = s.find(server, i + server.length());
 		if (pos0 == std::string::npos)
 			pos0 = s.length();
-		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
-		{
-			std::cerr << "Nested server detected" << std::endl;
-			return ( ServersData);
-		}
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -120,6 +115,8 @@ bool	IsPresent(const std::vector<std::string>& vctr, std::string s)
 	}
 	return (count != 0);
 }
+
+
 bool Check_if_valid(const std::vector<std::string> str)
 {
 	int j;
@@ -144,9 +141,15 @@ bool Check_if_valid(const std::vector<std::string> str)
 	size_t i = 0;
 	while (i < str.size())
 	{
+		std::cout << str[i] << '\n';
 		if (!IsPresent(valid_keys, str[i]))
 		{
 			std::cout << str[i] << " : is not valid. ";
+			return (false);
+		}
+		if (str[i] == "server")
+		{
+			std::cerr << "Nested server detected\n";
 			return (false);
 		}
 		i++;
@@ -154,13 +157,11 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
-
 int main( int ac, char **av, char **envp )
 {
 	std::vector<Server> 		srvs;
 	std::string buffer;
-	// char tmp[100] = {0};
-	// int read;
+	char tmp[100] = {0};
 
 	(void)envp;
 	if (ac != 2)
@@ -171,34 +172,27 @@ int main( int ac, char **av, char **envp )
 	}
 	//init data
 	srvs = GetFullServers( av[1] );
-	// for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
-	// {
-	// 	srvs[serv].InitializeServerSettings();
-	// 	srvs[serv].PrintData();
-	// }
+	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
+	{
+		srvs[serv].InitializeServerSettings();
+	}
 
-	// for (int i = 0; i <(int)srvs.size(); i++)
-	// 	srvs[i].PrintData();
-
-	// std::vector<std::string> vct  = srvs[0].GetKeys();
-	// for(int j = 0 ; j < (int)srvs.size(); j++)
-	// 	std::cout << vct[j] << std::endl;
-	// while (true)
-	// {
-	// 	for (int i = 0; i < (int)srvs.size(); i++)
-	// 	{
-	// 		srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
-	// 		if (srvs[i].Getfd_endpoint() != -1)
-	// 		{
-	// 			fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-	// 			std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-	// 			while ( (read = recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
-	// 				buffer += tmp;
-	// 			std::cout << buffer << '\n';
-	// 			buffer.clear();
-	// 			srvs[i].CloseFd();
-	// 		}
-	// 	}
-	// }
+	while (true)
+	{
+		for (int i = 0; i < (int)srvs.size(); i++)
+		{
+			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
+			if (srvs[i].Getfd_endpoint() != -1)
+			{
+				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
+				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
+				while ( ( recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
+					buffer += tmp;
+				std::cout << buffer << '\n';
+				buffer.clear();
+				srvs[i].CloseFd();
+			}
+		}
+	}
 	return (0);
 }
