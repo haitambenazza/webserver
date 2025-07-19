@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 22:39:28 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 22:54:51 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,8 @@ bool    Server::SetServer()
         return false;
     }
     setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
-	SetAddrServer(&addr);
+	this->InitializeServerSettings();
+    SetAddrServer(&addr);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
     {
         perror("Bind");
@@ -66,11 +67,7 @@ std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& 
         values = it->second;
         return (values[0]);
     }
-    else
-    {
-        std::cerr << "Key not fount" << '\n';
-        return "";
-    }
+    return "";
 }
 
 void    Server::InitializeServerSettings()
@@ -110,6 +107,7 @@ Server::Server()
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
+    std::cout << "----------CONSTRUCTOR-------- PORT " << port << '\n';
 }
 
 Server::Server( bool flag )
@@ -121,9 +119,8 @@ Server::Server( bool flag )
             std::cerr << server_name <<" encountered an error\n";
             return ;
         }
+        std::cout << "----------PARAMTRIZED-------- PORT " << port << '\n';
     }
-    else
-        return ;
 }
 
 Server::Server( const Server& copy )
@@ -137,6 +134,7 @@ Server::Server( const Server& copy )
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
+    std::cout << "-------COPY---CONSTRUCTOR-------- PORT " << port << '\n';
 }
 
 Server& Server::operator=( const Server& copy )
