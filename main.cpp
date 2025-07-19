@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 02:05:14 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/19 02:11:08 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,11 +147,6 @@ bool Check_if_valid(const std::vector<std::string> str)
 			std::cout << str[i] << " : is not valid. ";
 			return (false);
 		}
-		if (str[i] == "server")
-		{
-			std::cerr << "Nested server detected\n";
-			return (false);
-		}
 		i++;
 	}
 	return true;
@@ -176,6 +171,7 @@ int main( int ac, char **av, char **envp )
 	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
 	{
 		srvs[serv].InitializeServerSettings();
+		srvs[serv].PrintData();
 	}
 
 	while (true)
