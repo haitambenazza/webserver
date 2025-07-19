@@ -1,4 +1,5 @@
 1- parsing config file
+	- getaddrinfo to parse the IP:PORT
 	- fill the data for the server and location
 	- check for server_name (IP:port can be the same but not the name)
 	- create a map of HTTP errors (404)

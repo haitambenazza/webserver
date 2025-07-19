@@ -19,6 +19,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 
 #include "../Includes/Block.hpp"
