@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 00:29:33 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 01:32:24 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 #include "../Includes/Location.hpp"
 #include "../Includes/Macros.hpp"
 #include "../Includes/Server.hpp"
+#include "../Includes/Client.hpp"
+#include "../Includes/Multiplexer.hpp"
 #include "../Includes/ServerTools.hpp"
 
 

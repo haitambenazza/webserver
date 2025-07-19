@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 01:50:24 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 01:51:06 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,6 @@ int main( int ac, char **av, char **envp )
 	std::vector<Server> 		srvs;
 	std::string buffer;
 	char tmp[100] = {0};
-
 
 	(void)envp;
 	if (ac != 2)
