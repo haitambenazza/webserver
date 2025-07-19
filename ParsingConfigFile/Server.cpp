@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 15:34:48 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 19:45:54 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,13 +55,23 @@ void Server::Setfd_endpoint(int16_t fd)
 
 void    Server::InitializeServerSettings()
 {
-    for (size_t i = 0; i < this->keys.size(); ++i)
+    size_t i;
+
+    i = 0;
+    while ( i < keys.size() )
     {
-        const std::string& currentKey = this->keys[i];
+        const std::string& currentKey = keys[i];
+        //std::map<std::string, std::vector<std::string> >::iterator it = Commands.find(currentKey);
+        std::cout << currentKey << std::endl;
+        i++;
+    }
+    for (size_t i = 0; i < keys.size(); ++i)
+    {
+        const std::string& currentKey = keys[i];
 
-        std::map<std::string, std::vector<std::string> >::iterator it = this->Commands.find(currentKey);
+        std::map<std::string, std::vector<std::string> >::iterator it = Commands.find(currentKey);
 
-        if (it != this->Commands.end()) {
+        if (it != Commands.end()) {
             const std::vector<std::string>& values = it->second;
             if (currentKey == "listen")
             {
@@ -70,24 +80,24 @@ void    Server::InitializeServerSettings()
             } else if (currentKey == "root")
             {
                 if (!values.empty()) {
-                    this->root = values[0];
+                    root = values[0];
                 }
             } else if (currentKey == "index")
             {
                 if (!values.empty()) {
-                    this->index = values[0];
+                    index = values[0];
                 }
             }
             else if (currentKey == "host")
             {
                 if (values.empty())
-                    this->ip = "0.0.0.0";
+                    ip = "0.0.0.0";
                 else
                     this->ip = values[0];//heap buffer overflow need to be fixed
             } else if (currentKey == "client_max_body_size")
             {
                 if (!values.empty()) {
-                    this->max_body_size = static_cast<u_int64_t>(atol(values[0].c_str()));
+                    max_body_size = static_cast<u_int64_t>(atol(values[0].c_str()));
                 }
                 else
                     this->max_body_size = MAX_CLIENT_BODY;
@@ -96,7 +106,7 @@ void    Server::InitializeServerSettings()
                 if (values.size() >= 2) {
                     u_int16_t error_code = static_cast<u_int16_t>(atoi(values[0].c_str()));
                     std::string error_path = values[1];
-                    this->error_map[error_code] = error_path;
+                    error_map[error_code] = error_path;
                 }
             }
         }
@@ -105,11 +115,12 @@ void    Server::InitializeServerSettings()
 
 void Server::PrintData()
 {
-    std::cout << "IP : " << this->ip << "\n";
-    std::cout << "PORT : " << this->port << "\n";
-    std::cout << "INDEX : " << this->index << "\n";
-    std::cout << "ROOT : " << this->root << "\n";
-    std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";//unitialized value here
+    std::cout << "IP : " << ip << "\n";
+    std::cout << "PORT : " << port << "\n";
+    std::cout << "INDEX : " << index << "\n";
+    std::cout << "ROOT : " << root << "\n";
+    std::cout << "MAX_BODY_SIZE : " << max_body_size << "\n";
+    std::cout << "server_name : " << server_name << "\n";
 }
 
 
@@ -130,6 +141,20 @@ Server::Server()
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
+}
+
+Server::Server( bool flag )
+{
+    if (flag == true )
+    {
+        if (this->SetServer() == false)
+        {
+            std::cerr << server_name <<" encountered an error\n";
+            return ;
+        }
+    }
+    else
+        return ;
 }
 
 Server::Server( const Server& copy )
@@ -215,15 +240,8 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
-        if (key == "server")
-        {
-            std::cerr << " Nested server" << std::endl;
-            exit(1);
-        }
         if (flag)
-        {
             keys.push_back(key);
-        }
 		values = FillVector( split(tmp[i], " ") );
 		Mp.insert(std::make_pair(key, values));
 		i++;
