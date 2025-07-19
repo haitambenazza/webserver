@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 02:26:15 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/19 02:28:06 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ void Server::PrintData()
     std::cout << "PORT : " << this->port << "\n";
     std::cout << "INDEX : " << this->index << "\n";
     std::cout << "ROOT : " << this->root << "\n";
-    std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";
+    std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";//unitialized value here
 }
 
 
