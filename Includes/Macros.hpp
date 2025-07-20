@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/14 21:53:32 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 21:28:25 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/20 20:20:10 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,5 +14,5 @@
 
 #define MAX_CLIENT_BODY 2147483647
 #define IP_ADDRESS "127.0.0.1"
-#define PORT 8080
+#define PORT "8080"
 
