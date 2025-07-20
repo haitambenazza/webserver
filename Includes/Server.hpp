@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/20 00:36:53 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 21:03:27 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Server
         public :
             Server();
             Server( const Server& copy );
+            Server(const char *filename);
             Server( bool flag );
             Server& operator=( const Server& copy );
             ~Server();
