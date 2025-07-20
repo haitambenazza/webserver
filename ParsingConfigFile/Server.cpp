@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 22:36:28 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/20 20:19:53 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ void    Server::InitializeServerSettings()
 
 void Server::PrintData()
 {
+    std::cout << "FD" << fd << '\n';
     std::cout << "IP : " << ip << "\n";
     std::cout << "PORT : " << port << "\n";
     std::cout << "INDEX : " << index << "\n";
