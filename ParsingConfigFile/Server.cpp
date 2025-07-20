@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/20 20:17:35 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 22:12:13 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,11 +118,6 @@ std::string Server::GetServerName()const
 
 Server::Server()
 {
-    // if (this->SetServer() == false)
-    // {
-    //     std::cerr << server_name <<" encountered an error\n";
-    //     return ;
-    // }
     SetDefaultValues();
 }
 
@@ -130,14 +125,6 @@ Server::Server( bool flag )
 {
     (void)flag;
     SetDefaultValues();
-    // if (flag == true )
-    // {
-    //     if (this->SetServer() == false)
-    //     {
-    //         std::cerr << server_name <<" encountered an error\n";
-    //         return ;
-    //     }
-    // }
 }
 
 Server::Server( const Server& copy )
@@ -147,11 +134,28 @@ Server::Server( const Server& copy )
     Locations = copy.Locations;
     Commands = copy.Commands;
     SetDefaultValues();
-    // if (!SetServer())
-    // {
-    //     std::cerr << server_name <<" encountered an error\n";
-    //     return ;
-    // }
+}
+
+Server::Server(const char *filename)
+{
+    Block 	                    NewBlock;
+	std::string              	data;
+	int 						x;
+	int 						y;
+	File                        file( filename );
+
+	if (file.SetExtention() == 1)
+		return ;
+	file.OpenFile();
+	file.ReadLines();
+	data = GetServers( file.GetRawString() );
+	if (data.empty())
+        return ;
+    x = 0;
+    y = 0;
+    if (data.size())
+        NewBlock.FillBlock(data, NewBlock, x, y);
+    SetServer(NewBlock);
 }
 
 Server& Server::operator=( const Server& copy )
@@ -249,6 +253,6 @@ int Server::CloseFd()
 
 Server::~Server()
 {
-    if (fd != -1)
+    if (fd != -1 && fd != 0)
         close(fd);
 }
