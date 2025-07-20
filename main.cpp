@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 01:13:44 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 16:23:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,7 +196,7 @@ int main( int ac, char **av, char **envp )
 			if (srvs[i].Getfd_endpoint() != -1)
 			{
 				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
+				std::cout << srvs[i].Getfd_endpoint()<< ":: new client is connected to " << srvs[i].GetServerName() << '\n';
 				usleep(100);
 				while ( (recv(srvs[i].Getfd_endpoint(), &tmp, 1, 0)) > 0)
 				{
