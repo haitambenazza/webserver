@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 23:54:23 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 01:01:38 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,8 @@ std::vector<std::string> GetServers( std::string& s )
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
+	i = 0;
+
 	return ( ServersData );
 }
 
@@ -106,6 +108,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 	{
 		Block 	NewBlock;
 		Server 	NewServer(false);
+
+		memset(&NewServer, 0, sizeof(NewServer));
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock(lst[i], NewBlock, x, y);
@@ -138,7 +142,7 @@ bool Check_if_valid(const std::vector<std::string> str)
 	int j;
 
 	j = 0;
-	std::vector<std::string> valid_keys;
+	std::vector<std::string> valid_keys;// implement inside a loop function to add each key
 	valid_keys.push_back("listen");
 	valid_keys.push_back("server_name");
 	valid_keys.push_back("host");
@@ -184,10 +188,6 @@ int main( int ac, char **av, char **envp )
 	srvs = GetFullServers( av[1] );
 	if (srvs.empty())
 		return (1);
-	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
-	{
-		srvs[serv].PrintData();
-	}
 	while (true)
 	{
 		for (int i = 0; i < (int)srvs.size(); i++)
@@ -197,6 +197,7 @@ int main( int ac, char **av, char **envp )
 			{
 				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
+				usleep(100);
 				while ( (recv(srvs[i].Getfd_endpoint(), &tmp, 1, 0)) > 0)
 				{
 					buffer += tmp;

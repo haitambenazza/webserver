@@ -6,18 +6,41 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 22:54:51 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 00:50:07 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/webserver.hpp"
 
-void	SetAddrServer(struct sockaddr_in *addr)
+
+std::string Server::GetIp() const
 {
+    return (ip);
+}
+std::string Server::GetPort() const
+{
+    return (port);
+}
+
+void	SetAddrServer(struct sockaddr_in *addr, const Server &serv)
+{
+    (void)serv;
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
-	addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	addr->sin_port = htons(8080);
+	addr->sin_addr.s_addr = htonl(StrToIp(serv.GetIp().c_str()));
+	addr->sin_port = htons(atoi(serv.GetPort().c_str()));
+}
+
+void    Server::SetDefaultValues()
+{
+    ip = IP_ADDRESS;
+    port = PORT;
+    max_body_size = MAX_CLIENT_BODY;
+    server_name = "";
+    fd = -1;
+    fd_endpoint = -1;
+    root = "/";
+    index = "/home/hbenazza/Desktop/webserver/index.html";
 }
 
 bool    Server::SetServer()
@@ -25,9 +48,8 @@ bool    Server::SetServer()
     struct sockaddr_in addr;
     int opt;
 
-    ip = IP_ADDRESS;
-    port = PORT;
     opt = 1;
+    this->SetDefaultValues();
     fd = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
@@ -37,13 +59,14 @@ bool    Server::SetServer()
     }
     setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
 	this->InitializeServerSettings();
-    SetAddrServer(&addr);
-	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
+    SetAddrServer(&addr, *this);
+	if (!server_name.empty() && (bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
     {
+        std::cout << " FD FOR NAME " <<server_name << fd << '\n';
         perror("Bind");
         return false;
     }
-    if ((listen(fd, SOMAXCONN)) == -1)
+    if (!server_name.empty() && (listen(fd, SOMAXCONN)) == -1)
     {
         perror("Listen");
         return false;
@@ -72,6 +95,7 @@ std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& 
 
 void    Server::InitializeServerSettings()
 {
+
     port = GetValuesFromKeys(Commands, "listen");
     server_name = GetValuesFromKeys(Commands, "server_name");
     ip = GetValuesFromKeys(Commands, "host");
