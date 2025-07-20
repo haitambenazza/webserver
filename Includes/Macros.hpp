@@ -6,14 +6,14 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/14 21:53:32 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 01:13:17 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 20:08:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #define MAX_CLIENT_BODY 2147483647
-#define IP_ADDRESS "127.0.0.1"
-#define PORT "8080"
+#define IP_ADDRESS "0.0.0.0"
+#define PORT "8000"
 
 
