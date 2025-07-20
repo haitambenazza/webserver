@@ -6,7 +6,7 @@
 #    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/19 22:45:34 by hbenazza         ###   ########.fr        #
+#    Updated: 2025/07/20 00:52:01 by hbenazza         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,10 +22,10 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
+CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3 #-fsanitize=address
 
 %.o: %.cpp
-	echo $(SRC)
+	@echo $(SRC)
 	$(CC) $(CXXFLAGS) -c $^ -o $@
 
 $(NAME): $(SRC) $(OBJ)
