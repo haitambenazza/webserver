@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 22:23:18 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 22:43:53 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ int main( int ac, char **av, char **envp )
 	if (ac == 2)
 	{
 		Server server(av[1]);
-
+		server.PrintData();
 	}
 	else
 		return (std::cerr << "Wrong number of arguments\n", 1);

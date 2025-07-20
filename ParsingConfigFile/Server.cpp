@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/20 22:12:13 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 22:46:11 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,6 +156,7 @@ Server::Server(const char *filename)
     if (data.size())
         NewBlock.FillBlock(data, NewBlock, x, y);
     SetServer(NewBlock);
+    SetServer();
 }
 
 Server& Server::operator=( const Server& copy )
