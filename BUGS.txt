@@ -1,0 +1,2 @@
+. the server doesnt get the packets from the clients (need to implement multiplexer)
+

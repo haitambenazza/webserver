@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 21:29:41 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/20 21:03:27 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Server
         public :
             Server();
             Server( const Server& copy );
+            Server(const char *filename);
             Server( bool flag );
             Server& operator=( const Server& copy );
             ~Server();
@@ -52,5 +53,8 @@ class Server
             int                                                     CloseFd();
             void                                                    InitializeServerSettings();
             void                                                    PrintData();
+            std::string                                             GetIp() const;
+            std::string                                             GetPort() const;
             void                                                    SetValue(std::string s1, std::string s2);
+            void                                                    SetDefaultValues();
 };
