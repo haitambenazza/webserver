@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 22:43:53 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 00:58:09 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,29 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
+int	RunServer(Server &server)
+{
+	std::string	buffer;
+	char tmp[6969] = {0};
+
+	while (true)
+	{
+		server.Setfd_endpoint(accept(server.Getfd(), NULL,NULL));
+		usleep(1000);
+		if (server.Getfd_endpoint() != -1)
+		{
+			fcntl(server.Getfd_endpoint(), F_SETFL, O_NONBLOCK);
+			std::cout << "new client " << server.Getfd_endpoint() << " connected\n";
+			while (recv(server.Getfd_endpoint(), &tmp, sizeof(tmp), 0) > 0)
+				buffer += tmp;
+			std::cout << buffer;
+			buffer.clear();
+			memset(tmp, 0, sizeof(tmp));
+			close(server.Getfd_endpoint());
+		}
+	}
+}
+
 int main( int ac, char **av, char **envp )
 {
 	(void)envp;
@@ -106,6 +129,7 @@ int main( int ac, char **av, char **envp )
 	{
 		Server server(av[1]);
 		server.PrintData();
+		RunServer(server);
 	}
 	else
 		return (std::cerr << "Wrong number of arguments\n", 1);
