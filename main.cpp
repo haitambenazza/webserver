@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 01:01:38 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 01:13:44 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ bool Check_if_valid(const std::vector<std::string> str)
 	int j;
 
 	j = 0;
-	std::vector<std::string> valid_keys;// implement inside a loop function to add each key
+	std::vector<std::string> valid_keys;
 	valid_keys.push_back("listen");
 	valid_keys.push_back("server_name");
 	valid_keys.push_back("host");
