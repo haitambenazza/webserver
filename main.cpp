@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 16:23:50 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 20:26:20 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,6 +179,7 @@ int main( int ac, char **av, char **envp )
 	char tmp[100] = {0};
 
 	(void)envp;
+	std::cout << "STARTING\n";
 	if (ac != 2)
 	{
 		std::cerr << "Invalid number of arguments" << std::endl;
@@ -188,6 +189,16 @@ int main( int ac, char **av, char **envp )
 	srvs = GetFullServers( av[1] );
 	if (srvs.empty())
 		return (1);
+	int a;
+	std::cin >> a;
+	std::cout << a << '\n';
+	for (int i = 0; i < (int)srvs.size(); i++)
+		srvs[i].SetServer();
+	for (int i = 0; i < (int)srvs.size(); i++)
+	{
+		std::cout << "-----------------------------\n";
+		srvs[i].PrintData();
+	}
 	while (true)
 	{
 		for (int i = 0; i < (int)srvs.size(); i++)
@@ -197,7 +208,7 @@ int main( int ac, char **av, char **envp )
 			{
 				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
 				std::cout << srvs[i].Getfd_endpoint()<< ":: new client is connected to " << srvs[i].GetServerName() << '\n';
-				usleep(100);
+				// usleep(100);
 				while ( (recv(srvs[i].Getfd_endpoint(), &tmp, 1, 0)) > 0)
 				{
 					buffer += tmp;
