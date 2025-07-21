@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/20 22:12:13 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 00:20:00 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ bool    Server::SetServer()
     opt = 1;
     this->SetDefaultValues();
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    std::cout << "IN CONSTRUCTION  " << fd << '\n';
     if (fd == -1)
     return (perror("Socket"), false);
     fcntl(fd, F_SETFL, O_NONBLOCK);
@@ -86,12 +85,16 @@ std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& 
 
 void    Server::InitializeServerSettings()
 {
-
-    port = GetValuesFromKeys(Commands, "listen");
-    server_name = GetValuesFromKeys(Commands, "server_name");
-    ip = GetValuesFromKeys(Commands, "host");
-    root = GetValuesFromKeys(Commands, "root");
-    index = GetValuesFromKeys(Commands, "index");
+    if (GetValuesFromKeys(Commands, "listen").size())
+        port = GetValuesFromKeys(Commands, "listen");
+    if (GetValuesFromKeys(Commands, "server_name").size())
+        server_name = GetValuesFromKeys(Commands, "server_name");
+    if (GetValuesFromKeys(Commands, "host").size())
+        ip = GetValuesFromKeys(Commands, "host");
+    if (GetValuesFromKeys(Commands, "root").size())
+        root = GetValuesFromKeys(Commands, "root");
+    if (GetValuesFromKeys(Commands, "index").size())
+        index = GetValuesFromKeys(Commands, "index");
 }
 
 void Server::PrintData()
@@ -156,6 +159,7 @@ Server::Server(const char *filename)
     if (data.size())
         NewBlock.FillBlock(data, NewBlock, x, y);
     SetServer(NewBlock);
+    SetServer();
 }
 
 Server& Server::operator=( const Server& copy )
@@ -253,6 +257,6 @@ int Server::CloseFd()
 
 Server::~Server()
 {
-    if (fd != -1 && fd != 0)
+    if (fd != -1)
         close(fd);
 }

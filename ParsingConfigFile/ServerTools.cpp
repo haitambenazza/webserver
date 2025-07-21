@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:26:43 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 22:45:12 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/20 22:46:37 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,6 @@ std::string GetServers( std::string& s )
 		pos0 = s.find("server", i + 6);
 		if ( pos0 != std::string::npos && s.substr(pos0, 11) != "server_name")
 		{
-			std::cout << s.substr(pos0, pos0 - pos) << '\n';
 			if (!CheckBrackets(s.substr(pos0, pos0 - pos)))
 			{
 				std::cerr << "Nested Server detected" << '\n';
