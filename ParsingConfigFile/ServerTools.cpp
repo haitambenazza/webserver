@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerTools.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:26:43 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 22:39:40 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 22:45:12 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,9 @@ std::string GetServers( std::string& s )
 		pos0 = s.find("server", i + 6);
 		if ( pos0 != std::string::npos && s.substr(pos0, 11) != "server_name")
 		{
-			if (!CheckBrackets(s.substr(pos, pos0 - pos)))
+			std::cout << s.substr(pos0, pos0 - pos) << '\n';
+			if (!CheckBrackets(s.substr(pos0, pos0 - pos)))
 			{
-				std::cout << s.substr(pos, pos0 - pos) << '\n';
 				std::cerr << "Nested Server detected" << '\n';
 			}
 			else
