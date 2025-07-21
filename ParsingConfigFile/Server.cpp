@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/19 22:54:51 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/20 00:06:39 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,6 @@ Server::Server()
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
-    std::cout << "----------CONSTRUCTOR-------- PORT " << port << '\n';
 }
 
 Server::Server( bool flag )
@@ -119,7 +118,6 @@ Server::Server( bool flag )
             std::cerr << server_name <<" encountered an error\n";
             return ;
         }
-        std::cout << "----------PARAMTRIZED-------- PORT " << port << '\n';
     }
 }
 
@@ -134,7 +132,6 @@ Server::Server( const Server& copy )
         std::cerr << server_name <<" encountered an error\n";
         return ;
     }
-    std::cout << "-------COPY---CONSTRUCTOR-------- PORT " << port << '\n';
 }
 
 Server& Server::operator=( const Server& copy )
