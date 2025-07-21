@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 02:21:46 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 03:27:24 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <cstdlib>
+#include <sstream>
 
 #include "../Includes/Block.hpp"
 #include "../Includes/File.hpp"
@@ -34,6 +35,7 @@
 #include "../Includes/Client.hpp"
 #include "../Includes/Multiplexer.hpp"
 #include "../Includes/ServerTools.hpp"
+#include "../Includes/Request.hpp"
 
 
 #endif
