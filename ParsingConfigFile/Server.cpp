@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/20 00:50:07 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 00:20:00 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void    Server::SetDefaultValues()
     fd = -1;
     fd_endpoint = -1;
     root = "/";
-    index = "/home/hbenazza/Desktop/webserver/index.html";
+    index = "/index.html";
 }
 
 bool    Server::SetServer()
@@ -51,26 +51,16 @@ bool    Server::SetServer()
     opt = 1;
     this->SetDefaultValues();
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
-    {
-        perror("Socket");
-        return false;
-    }
-    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+    return (perror("Socket"), false);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT | SO_LINGER, &opt, sizeof(opt));
 	this->InitializeServerSettings();
     SetAddrServer(&addr, *this);
 	if (!server_name.empty() && (bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
-    {
-        std::cout << " FD FOR NAME " <<server_name << fd << '\n';
-        perror("Bind");
-        return false;
-    }
+        return (perror("Bind"), false);
     if (!server_name.empty() && (listen(fd, SOMAXCONN)) == -1)
-    {
-        perror("Listen");
-        return false;
-    }
+        return (perror("Listen"), false);
     return true;
 }
 
@@ -95,16 +85,21 @@ std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& 
 
 void    Server::InitializeServerSettings()
 {
-
-    port = GetValuesFromKeys(Commands, "listen");
-    server_name = GetValuesFromKeys(Commands, "server_name");
-    ip = GetValuesFromKeys(Commands, "host");
-    root = GetValuesFromKeys(Commands, "root");
-    index = GetValuesFromKeys(Commands, "index");
+    if (GetValuesFromKeys(Commands, "listen").size())
+        port = GetValuesFromKeys(Commands, "listen");
+    if (GetValuesFromKeys(Commands, "server_name").size())
+        server_name = GetValuesFromKeys(Commands, "server_name");
+    if (GetValuesFromKeys(Commands, "host").size())
+        ip = GetValuesFromKeys(Commands, "host");
+    if (GetValuesFromKeys(Commands, "root").size())
+        root = GetValuesFromKeys(Commands, "root");
+    if (GetValuesFromKeys(Commands, "index").size())
+        index = GetValuesFromKeys(Commands, "index");
 }
 
 void Server::PrintData()
 {
+    std::cout << "FD : " << fd << "\n";
     std::cout << "IP : " << ip << "\n";
     std::cout << "PORT : " << port << "\n";
     std::cout << "INDEX : " << index << "\n";
@@ -126,25 +121,13 @@ std::string Server::GetServerName()const
 
 Server::Server()
 {
-    if (this->SetServer() == false)
-    {
-        std::cerr << server_name <<" encountered an error\n";
-        return ;
-    }
-    std::cout << "----------CONSTRUCTOR-------- PORT " << port << '\n';
+    SetDefaultValues();
 }
 
 Server::Server( bool flag )
 {
-    if (flag == true )
-    {
-        if (this->SetServer() == false)
-        {
-            std::cerr << server_name <<" encountered an error\n";
-            return ;
-        }
-        std::cout << "----------PARAMTRIZED-------- PORT " << port << '\n';
-    }
+    (void)flag;
+    SetDefaultValues();
 }
 
 Server::Server( const Server& copy )
@@ -153,12 +136,30 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
-    if (!SetServer())
-    {
-        std::cerr << server_name <<" encountered an error\n";
+    SetDefaultValues();
+}
+
+Server::Server(const char *filename)
+{
+    Block 	                    NewBlock;
+	std::string              	data;
+	int 						x;
+	int 						y;
+	File                        file( filename );
+
+	if (file.SetExtention() == 1)
+		return ;
+	file.OpenFile();
+	file.ReadLines();
+	data = GetServers( file.GetRawString() );
+	if (data.empty())
         return ;
-    }
-    std::cout << "-------COPY---CONSTRUCTOR-------- PORT " << port << '\n';
+    x = 0;
+    y = 0;
+    if (data.size())
+        NewBlock.FillBlock(data, NewBlock, x, y);
+    SetServer(NewBlock);
+    SetServer();
 }
 
 Server& Server::operator=( const Server& copy )
@@ -256,5 +257,6 @@ int Server::CloseFd()
 
 Server::~Server()
 {
-    close(fd);
+    if (fd != -1)
+        close(fd);
 }
