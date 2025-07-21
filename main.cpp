@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 01:01:38 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 00:58:09 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,79 +47,6 @@ bool	CheckBrackets( std::string s )
 	return (k == 0);
 }
 
-std::vector<std::string> GetServers( std::string& s )
-{
-	std::vector<std::string> ServersData;
-	size_t	i;
-	size_t	pos;
-	size_t	pos0;
-
-	if (s.empty())
-		return (ServersData);
-	i = 0;
-	while (s[i])
-	{
-		pos = s.find("server", i);
-		if ( pos == std::string::npos )
-			break ;
-		pos0 = s.find("server", i + 6);
-		if (pos0 == std::string::npos)
-			pos0 = s.length();
-		if (!(s.substr(pos0, 11).compare ("server_name")))
-		{
-			pos0 = s.find("server", pos0 + 11);
-			if (pos0 == std::string::npos)
-				pos0 = s.size();
-		}
-		else if (pos0 == std::string::npos)
-			pos0 = s.size();
-		if ( !CheckBrackets(s.substr(pos, pos0 - pos)))
-		{
-			std::cerr << "Nested Server" << std::endl;
-			ServersData.clear();
-			return (ServersData);
-		}
-		ServersData.push_back(s.substr(pos, pos0 - pos));
-		i = pos0;
-	}
-	i = 0;
-
-	return ( ServersData );
-}
-
-std::vector<Server>   GetFullServers( char* FileName )
-{
-	std::vector<Server> 		srvs;
-	std::vector<std::string> 	lst;
-	int 						i;
-	int 						x;
-	int 						y;
-	File hey( FileName );
-	if (hey.SetExtention() == 1)
-		return (srvs);
-	hey.OpenFile();
-	hey.ReadLines();
-	lst = GetServers( hey.GetRawString() );
-	if (lst.empty())
-		return (srvs);
-	hey.GetRawString().clear();
-	i = 0;
-	while ( i < (int)lst.size())
-	{
-		Block 	NewBlock;
-		Server 	NewServer(false);
-
-		memset(&NewServer, 0, sizeof(NewServer));
-		x = 0;
-		y = 0;
-		NewBlock.FillBlock(lst[i], NewBlock, x, y);
-		srvs.push_back( NewServer );
-		srvs.back().SetServer( NewBlock );
-		i++;
-	}
-	return (srvs);
-}
-
 bool	IsPresent(const std::vector<std::string>& vctr, std::string s)
 {
 	size_t	i;
@@ -142,7 +69,7 @@ bool Check_if_valid(const std::vector<std::string> str)
 	int j;
 
 	j = 0;
-	std::vector<std::string> valid_keys;// implement inside a loop function to add each key
+	std::vector<std::string> valid_keys;
 	valid_keys.push_back("listen");
 	valid_keys.push_back("server_name");
 	valid_keys.push_back("host");
@@ -172,42 +99,39 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
-int main( int ac, char **av, char **envp )
+int	RunServer(Server &server)
 {
-	std::vector<Server> 		srvs(false);
-	std::string buffer;
-	char tmp[100] = {0};
+	std::string	buffer;
+	char tmp[6969] = {0};
 
-	(void)envp;
-	if (ac != 2)
-	{
-		std::cerr << "Invalid number of arguments" << std::endl;
-		std::cerr << "./Webserv file_name.conf" << std::endl;
-		return (1);
-	}
-	srvs = GetFullServers( av[1] );
-	if (srvs.empty())
-		return (1);
 	while (true)
 	{
-		for (int i = 0; i < (int)srvs.size(); i++)
+		server.Setfd_endpoint(accept(server.Getfd(), NULL,NULL));
+		usleep(1000);
+		if (server.Getfd_endpoint() != -1)
 		{
-			srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
-			if (srvs[i].Getfd_endpoint() != -1)
-			{
-				fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-				std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-				usleep(100);
-				while ( (recv(srvs[i].Getfd_endpoint(), &tmp, 1, 0)) > 0)
-				{
-					buffer += tmp;
-					memset(tmp, 0, sizeof(tmp));
-				}
-				std::cout << buffer;
-				buffer.clear();
-				srvs[i].CloseFd();
-			}
+			fcntl(server.Getfd_endpoint(), F_SETFL, O_NONBLOCK);
+			std::cout << "new client " << server.Getfd_endpoint() << " connected\n";
+			while (recv(server.Getfd_endpoint(), &tmp, sizeof(tmp), 0) > 0)
+				buffer += tmp;
+			std::cout << buffer;
+			buffer.clear();
+			memset(tmp, 0, sizeof(tmp));
+			close(server.Getfd_endpoint());
 		}
 	}
+}
+
+int main( int ac, char **av, char **envp )
+{
+	(void)envp;
+	if (ac == 2)
+	{
+		Server server(av[1]);
+		server.PrintData();
+		RunServer(server);
+	}
+	else
+		return (std::cerr << "Wrong number of arguments\n", 1);
 	return (0);
 }
