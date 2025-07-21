@@ -1,2 +1,1 @@
 . the server doesnt get the packets from the clients (need to implement multiplexer)
-. the objects get constructed even they arent part of the servers list
