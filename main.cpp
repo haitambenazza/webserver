@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/22 03:06:49 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 03:20:27 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,21 +99,20 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
-bool EventRoutine(Server &server)
+bool EventRoutine(Server &server, Multiplexer &multiplexer)
 {
-	Multiplexer multiplexer(server);
 	char	tmp[1024] = {0};
 	std::string buffer;
 
 	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
 	if (multiplexer.GetNumFd() == -1)
     {
-        perror("Epoll_wait");
+		perror("Epoll_wait");
         return (false);
     }
     for (int i = 0; i < multiplexer.GetNumFd(); i++)
     {
-        if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
         {
 			multiplexer.SetClientFd(accept(server.Getfd(), NULL, NULL));
             if (multiplexer.GetClientFd() == -1)
@@ -125,17 +124,17 @@ bool EventRoutine(Server &server)
 			usleep(1000);
 			std::cout << "NEW CLIENT "<< multiplexer.GetClientFd() << "FDS[" << multiplexer.GetNumFd() << "]\n";
 			while (recv(multiplexer.GetClientFd(), &tmp, 10, 0) > 0)
-				buffer += tmp;
+			buffer += tmp;
 			std::cout << buffer;
 			memset(&tmp, 0, sizeof(tmp));
 			buffer.clear();
         }
         else
         {
-            //else if (client is already connected)
-                //HandleRequest;
+			//else if (client is already connected)
+			//HandleRequest;
             //else
-                //Handle cgi
+			//Handle cgi
             std::cout << "Still working on it \n";
             break ;
         }
@@ -147,10 +146,11 @@ int	RunServer(Server &server)
 {
 	// std::string	buffer;
 	// char 		tmp[6969] = {0};
+	Multiplexer multiplexer(server);
 
 	while ( true)
 	{
-		EventRoutine(server);
+		EventRoutine(server, multiplexer);
 	}
 }
 
