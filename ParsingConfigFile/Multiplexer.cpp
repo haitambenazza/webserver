@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/18 23:16:31 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 02:53:31 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 03:12:41 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ Multiplexer::Multiplexer(const Server &server)
 
 Multiplexer::~Multiplexer()
 {
+    std::cout << "CLIENT IS DEAD\n";
     close(NewConnection);
     close(EpollFd);
 }
