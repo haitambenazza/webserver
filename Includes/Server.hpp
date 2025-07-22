@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/21 00:25:19 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 00:25:43 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Server
 		std::string                                             root;
 		std::string                                             index;
 		u_int64_t	                                            max_body_size;
+        struct sockaddr_in                                      addr;
 		// std::map<u_int16_t , std::string>                       error_map;
 		std::string	                                            port;
 		std::string	                                            ip;
@@ -56,4 +57,5 @@ class Server
             std::string                                             GetIp() const;
             std::string                                             GetPort() const;
             void                                                    SetDefaultValues();
+            struct sockaddr_in                                      GetServerSockAddr();
 };

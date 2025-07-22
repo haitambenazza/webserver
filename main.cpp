@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/21 00:58:09 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 01:31:05 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ bool Check_if_valid(const std::vector<std::string> str)
 int	RunServer(Server &server)
 {
 	std::string	buffer;
-	char tmp[6969] = {0};
+	char 		tmp[6969] = {0};
 
 	while (true)
 	{
@@ -114,7 +114,9 @@ int	RunServer(Server &server)
 			std::cout << "new client " << server.Getfd_endpoint() << " connected\n";
 			while (recv(server.Getfd_endpoint(), &tmp, sizeof(tmp), 0) > 0)
 				buffer += tmp;
-			std::cout << buffer;
+			// 
+			//parsing;
+			//ececution;
 			buffer.clear();
 			memset(tmp, 0, sizeof(tmp));
 			close(server.Getfd_endpoint());
@@ -125,6 +127,7 @@ int	RunServer(Server &server)
 int main( int ac, char **av, char **envp )
 {
 	(void)envp;
+	
 	if (ac == 2)
 	{
 		Server server(av[1]);
