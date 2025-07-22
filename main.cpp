@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/21 01:31:05 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/22 03:06:49 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,35 +99,65 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
+bool EventRoutine(Server &server)
+{
+	Multiplexer multiplexer(server);
+	char	tmp[1024] = {0};
+	std::string buffer;
+
+	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
+	if (multiplexer.GetNumFd() == -1)
+    {
+        perror("Epoll_wait");
+        return (false);
+    }
+    for (int i = 0; i < multiplexer.GetNumFd(); i++)
+    {
+        if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+        {
+			multiplexer.SetClientFd(accept(server.Getfd(), NULL, NULL));
+            if (multiplexer.GetClientFd() == -1)
+            {
+				perror("Accept");
+                return (false);
+            }
+			fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK);
+			usleep(1000);
+			std::cout << "NEW CLIENT "<< multiplexer.GetClientFd() << "FDS[" << multiplexer.GetNumFd() << "]\n";
+			while (recv(multiplexer.GetClientFd(), &tmp, 10, 0) > 0)
+				buffer += tmp;
+			std::cout << buffer;
+			memset(&tmp, 0, sizeof(tmp));
+			buffer.clear();
+        }
+        else
+        {
+            //else if (client is already connected)
+                //HandleRequest;
+            //else
+                //Handle cgi
+            std::cout << "Still working on it \n";
+            break ;
+        }
+    }
+	return (true);
+}
+
 int	RunServer(Server &server)
 {
-	std::string	buffer;
-	char 		tmp[6969] = {0};
+	// std::string	buffer;
+	// char 		tmp[6969] = {0};
 
-	while (true)
+	while ( true)
 	{
-		server.Setfd_endpoint(accept(server.Getfd(), NULL,NULL));
-		usleep(1000);
-		if (server.Getfd_endpoint() != -1)
-		{
-			fcntl(server.Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-			std::cout << "new client " << server.Getfd_endpoint() << " connected\n";
-			while (recv(server.Getfd_endpoint(), &tmp, sizeof(tmp), 0) > 0)
-				buffer += tmp;
-			// 
-			//parsing;
-			//ececution;
-			buffer.clear();
-			memset(tmp, 0, sizeof(tmp));
-			close(server.Getfd_endpoint());
-		}
+		EventRoutine(server);
 	}
 }
 
 int main( int ac, char **av, char **envp )
 {
 	(void)envp;
-	
+
 	if (ac == 2)
 	{
 		Server server(av[1]);
