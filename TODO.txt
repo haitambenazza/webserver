@@ -5,7 +5,5 @@
 	- specify redirection key
 
 2- establish the server with multiplexing and Non-blocking I/O (concurrency)
-	- enable multiplexing (using epoll())
 	=> for multiplexer
-		. add every Fd using epoll() to notify the thread when a event occur in that Fd
-		. use it with accpet() send() recv() and other Read/Write operation
+		. to close the client we can set a timeout or when epoll returns an error or the data has been served (GET => POST)
