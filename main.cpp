@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/22 03:20:27 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 21:46:45 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,8 +101,8 @@ bool Check_if_valid(const std::vector<std::string> str)
 
 bool EventRoutine(Server &server, Multiplexer &multiplexer)
 {
-	char	tmp[1024] = {0};
 	std::string buffer;
+	char	tmp[1024] = {0};
 
 	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
 	if (multiplexer.GetNumFd() == -1)
@@ -120,14 +120,14 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 				perror("Accept");
                 return (false);
             }
-			fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK);
-			usleep(1000);
+			fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK | O_CLOEXEC);
+			multiplexer.SetEvent(EPOLLIN, multiplexer.GetClientFd());
+			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), multiplexer.GetEvent()))
+			{
+				perror("epoll_ctl");
+				return false;
+			}
 			std::cout << "NEW CLIENT "<< multiplexer.GetClientFd() << "FDS[" << multiplexer.GetNumFd() << "]\n";
-			while (recv(multiplexer.GetClientFd(), &tmp, 10, 0) > 0)
-			buffer += tmp;
-			std::cout << buffer;
-			memset(&tmp, 0, sizeof(tmp));
-			buffer.clear();
         }
         else
         {
@@ -135,17 +135,21 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 			//HandleRequest;
             //else
 			//Handle cgi
-            std::cout << "Still working on it \n";
+			while (recv(multiplexer.GetClientFd(), &tmp, 1, 0) > 0)
+				buffer += tmp;
+			std::cout << buffer;
+			memset(&tmp, 0, sizeof(tmp));
+			buffer.clear();
+			std::cout << write(multiplexer.GetClientFd(), "WELCOME\n", 8) << '\n';
+			close(multiplexer.GetClientFd());
             break ;
         }
-    }
+	}
 	return (true);
 }
 
 int	RunServer(Server &server)
 {
-	// std::string	buffer;
-	// char 		tmp[6969] = {0};
 	Multiplexer multiplexer(server);
 
 	while ( true)
