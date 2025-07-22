@@ -6,7 +6,7 @@
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/21 00:20:00 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 03:11:59 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ void    Server::SetDefaultValues()
 
 bool    Server::SetServer()
 {
-    struct sockaddr_in addr;
     int opt;
 
     opt = 1;
@@ -81,6 +80,11 @@ std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& 
         return (values[0]);
     }
     return "";
+}
+
+struct sockaddr_in                                Server::GetServerSockAddr()
+{
+    return (addr);
 }
 
 void    Server::InitializeServerSettings()
@@ -139,7 +143,7 @@ Server::Server( const Server& copy )
     SetDefaultValues();
 }
 
-Server::Server(const char *filename)
+Server::Server( const char *filename )
 {
     Block 	                    NewBlock;
 	std::string              	data;
