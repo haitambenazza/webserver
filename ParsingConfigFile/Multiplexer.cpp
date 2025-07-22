@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Multiplexer.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/18 23:16:31 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 01:10:20 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/22 02:53:31 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,45 +25,70 @@ bool        Multiplexer::InitMultiplexer( const Server& server )
     }
     Event.events = EPOLLIN ;
     Event.data.fd = server.Getfd();
-    if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event))
+    if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
     {
         perror("Epoll_ctl");
         return (false);
     }
-    while (true)
-    {
-        NumFds = epoll_wait(EpollFd, Events, MAX_EVENT, -1);
-        if (NumFds == -1)
-        {
-            perror("Epoll_wait");
-            return (false);
-        }
-        while (i < NumFds)
-        {
-            if (Events[i].data.fd == server.Getfd())
-            {
-                NewConnection = accept(server.Getfd(), NULL, NULL);
-                if (NewConnection == -1)
-                {
-                    perror("Accept");
-                    return (false);
-                }
-            }
-            else
-            {
-                //else if (client is already connected)
-                    //HandleRequest;
-                //else
-                    //Handle cgi
-                std::cout << "Still working on it \n";
-                break ;
-            }
-            i++;
-        }
-    }
+
+    return (true);
 }
 
-// Multiplexer::Multiplexer()
-// {
+Multiplexer::Multiplexer()
+{
+    EpollFd = -1;
+    NumFds = -1;
+    NewConnection = -1;
+}
 
-// }
+
+Multiplexer::Multiplexer(const Server &server)
+{
+    EpollFd = -1;
+    NumFds = -1;
+    NewConnection = -1;
+    InitMultiplexer(server);
+
+}
+
+Multiplexer::~Multiplexer()
+{
+    close(NewConnection);
+    close(EpollFd);
+}
+
+int Multiplexer::GetClientFd() const
+{
+    return (NewConnection);
+}
+
+int Multiplexer::GetEpollFd() const
+{
+    return (EpollFd);
+}
+
+int Multiplexer::GetNumFd() const
+{
+    return (NumFds);
+}
+
+void         Multiplexer::SetEpollFd(int epollFd)
+{
+    EpollFd = epollFd;
+}
+void         Multiplexer::SetNumFd(int numfd)
+{
+    NumFds = numfd;
+}
+void         Multiplexer::SetClientFd(int clientfd)
+{
+    NewConnection = clientfd;
+}
+struct epoll_event      Multiplexer::GetEvent()
+{
+    return (Event);
+}
+struct epoll_event*      Multiplexer::GetEvents()
+{
+    return (Events);
+}
