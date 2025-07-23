@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/21 00:58:09 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/23 01:37:39 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,32 +99,76 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
+bool EventRoutine(Server &server, Multiplexer &multiplexer)
+{
+	char tmp[1024] = {0};
+	std::string buffer;
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
+
+	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
+	if (multiplexer.GetNumFd() == -1)
+	{
+		perror("epoll_wait()");
+		return false;
+	}
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	{
+		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+		{
+			multiplexer.SetClientFd(accept(server.Getfd(), NULL, NULL));
+			server.Setfd_endpoint(multiplexer.GetClientFd());
+			if (multiplexer.GetClientFd() == -1)
+			{
+				perror("accept()");
+				return false;
+			}
+			if (-1 == fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK ))
+			{
+				perror("fcntl()");
+				return (false);
+			}
+			struct epoll_event epoll_client;
+
+			epoll_client.data.fd = multiplexer.GetClientFd();
+			epoll_client.events = EPOLLIN ;
+			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), &epoll_client))
+			{
+				perror("epoll_ctl()");
+				return (false);
+			}
+			std::cout << "New client connected to " << multiplexer.GetClientFd() << '\n';
+		}
+		else
+		{
+			if (read(multiplexer.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+			{
+				buffer += tmp;
+				send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+			}
+			std::cout << buffer;
+			memset(&tmp, 0, sizeof(tmp));
+			buffer.clear();
+			close(multiplexer.GetEvents()->data.fd);
+		}
+
+	}
+	return (true);
+}
+
 int	RunServer(Server &server)
 {
-	std::string	buffer;
-	char tmp[6969] = {0};
+	Multiplexer multiplexer(server);
 
-	while (true)
+	while ( true)
 	{
-		server.Setfd_endpoint(accept(server.Getfd(), NULL,NULL));
-		usleep(1000);
-		if (server.Getfd_endpoint() != -1)
-		{
-			fcntl(server.Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-			std::cout << "new client " << server.Getfd_endpoint() << " connected\n";
-			while (recv(server.Getfd_endpoint(), &tmp, sizeof(tmp), 0) > 0)
-				buffer += tmp;
-			std::cout << buffer;
-			buffer.clear();
-			memset(tmp, 0, sizeof(tmp));
-			close(server.Getfd_endpoint());
-		}
+		EventRoutine(server, multiplexer);
 	}
 }
 
 int main( int ac, char **av, char **envp )
 {
 	(void)envp;
+
 	if (ac == 2)
 	{
 		Server server(av[1]);
