@@ -1,4 +1,5 @@
 1- parsing config file
+	- exit gracfully when the config file is misconfigured
 	- getaddrinfo to parse the IP:PORT
 	- create a map of HTTP errors (404)
 	- specify the location for POST method
