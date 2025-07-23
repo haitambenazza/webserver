@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/23 06:09:37 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/23 06:16:20 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,13 +136,10 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 				buffer += tmp;
 			send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
 			}
-			std::cout << buffer;
-			std::cout << "NEW CLIENT 0 -> " << multiplexer.GetClientFd() << '\n';
 			memset(&tmp, 0, sizeof(tmp));
 			if (buffer.empty())
 				close(multiplexer.GetClientFd());
 			buffer.clear();
-			std::cout << write(multiplexer.GetClientFd(), "WELCOME\n", 8) << '\n';
 			close(multiplexer.GetClientFd());
             break ;
         }
