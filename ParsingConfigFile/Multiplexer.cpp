@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/18 23:16:31 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 03:12:41 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 21:36:56 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ bool        Multiplexer::InitMultiplexer( const Server& server )
         perror("Epoll_ctl");
         return (false);
     }
-
     return (true);
 }
 
@@ -85,11 +84,17 @@ void         Multiplexer::SetClientFd(int clientfd)
 {
     NewConnection = clientfd;
 }
-struct epoll_event      Multiplexer::GetEvent()
+struct epoll_event*      Multiplexer::GetEvent()
 {
-    return (Event);
+    return (&Event);
 }
 struct epoll_event*      Multiplexer::GetEvents()
 {
     return (Events);
+}
+
+void Multiplexer::SetEvent(int event, int fd)
+{
+    Event.data.fd = fd;
+    Event.events = event;
 }

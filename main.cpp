@@ -6,7 +6,7 @@
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/22 23:58:21 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/23 06:06:01 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,75 +101,62 @@ bool Check_if_valid(const std::vector<std::string> str)
 
 bool EventRoutine(Server &server, Multiplexer &multiplexer)
 {
-	char	tmp[1024] = {0};
+	char tmp[1024] = {0};
 	std::string buffer;
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
 
 	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
 	if (multiplexer.GetNumFd() == -1)
-    {
-		perror("Epoll_wait");
-        return (false);
-    }
-    for (int i = 0; i < multiplexer.GetNumFd(); i++)
-    {
+	{
+		perror("epoll_wait()");
+		return false;
+	}
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	{
 		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
-        {
+		{
 			multiplexer.SetClientFd(accept(server.Getfd(), NULL, NULL));
-            if (multiplexer.GetClientFd() == -1)
-            {
-				perror("Accept");
-                return (false);
-            }
-			// fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK);
-			// usleep(1000);
-			// std::cout << "NEW CLIENT "<< multiplexer.GetClientFd() << "FDS[" << multiplexer.GetNumFd() << "]\n";
-			// while (recv(multiplexer.GetClientFd(), &tmp, 10, 0) > 0)
-			// 	buffer += tmp;
-			fcntl(multiplexer.GetClientFd() , F_SETFL , O_NONBLOCK);
-			struct epoll_event client_event;
-			client_event.events = EPOLLIN;
-			client_event.data.fd = multiplexer.GetClientFd();
-			if (epoll_ctl(multiplexer.GetEpollFd() , EPOLL_CTL_ADD , multiplexer.GetClientFd() , &client_event) == -1)
+			server.Setfd_endpoint(multiplexer.GetClientFd());
+			if (multiplexer.GetClientFd() == -1)
 			{
-				perror("epoll_ctl: client add");
-                close(multiplexer.GetClientFd());
-                continue;
+				perror("accept()");
+				return false;
 			}
-			std::cout << "NEW CLIENT " << multiplexer.GetClientFd() << " ADDED TO EPOLL\n";
+			if (-1 == fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK ))
+			{
+				perror("fcntl()");
+				return (false);
+			}
+			struct epoll_event epoll_client;
 
-			memset(&tmp, 0, sizeof(tmp));
-			//
-        }
-        else
-        {
-			int client_fd = multiplexer.GetEvents()->data.fd;
-			
-			int bytes_received = recv(client_fd , tmp , sizeof(tmp) - 1 , 0);
-			if (bytes_received > 0)
+			epoll_client.data.fd = multiplexer.GetClientFd();
+			epoll_client.events = EPOLLIN ;
+			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), &epoll_client))
+			{
+				perror("epoll_ctl()");
+				return (false);
+			}
+			std::cout << "New client connected to " << multiplexer.GetClientFd() << '\n';
+		}
+		else
+		{
+			if (read(multiplexer.GetEvents()[i].data.fd, &tmp, 1024) > 0)
 			{
 				buffer += tmp;
-				std::cout << "Received from client " << client_fd << ": \n" << buffer << std::endl;
-				
-				std::string response = "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!";
-        		send(client_fd, response.c_str(), response.length(), 0);
+				send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
 			}
+			std::cout << buffer;
+			memset(&tmp, 0, sizeof(tmp));
 			buffer.clear();
-			close(client_fd);
-        }
-		//else if (client is already connected)
-			//HandleRequest;
-		//else
-			//Handle cgi
-		// std::cout << "Still working on it \n";
-		// break ;	
-    }
+			close(multiplexer.GetEvents()->data.fd);
+		}
+
+	}
 	return (true);
 }
 
 int	RunServer(Server &server)
 {
-	// std::string	buffer;
-	// char 		tmp[6969] = {0};
 	Multiplexer multiplexer(server);
 
 	while ( true)
