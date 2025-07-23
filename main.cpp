@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/22 21:46:45 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/23 01:37:39 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,49 +101,56 @@ bool Check_if_valid(const std::vector<std::string> str)
 
 bool EventRoutine(Server &server, Multiplexer &multiplexer)
 {
+	char tmp[1024] = {0};
 	std::string buffer;
-	char	tmp[1024] = {0};
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
 
 	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
 	if (multiplexer.GetNumFd() == -1)
-    {
-		perror("Epoll_wait");
-        return (false);
-    }
-    for (int i = 0; i < multiplexer.GetNumFd(); i++)
-    {
+	{
+		perror("epoll_wait()");
+		return false;
+	}
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	{
 		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
-        {
+		{
 			multiplexer.SetClientFd(accept(server.Getfd(), NULL, NULL));
-            if (multiplexer.GetClientFd() == -1)
-            {
-				perror("Accept");
-                return (false);
-            }
-			fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK | O_CLOEXEC);
-			multiplexer.SetEvent(EPOLLIN, multiplexer.GetClientFd());
-			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), multiplexer.GetEvent()))
+			server.Setfd_endpoint(multiplexer.GetClientFd());
+			if (multiplexer.GetClientFd() == -1)
 			{
-				perror("epoll_ctl");
+				perror("accept()");
 				return false;
 			}
-			std::cout << "NEW CLIENT "<< multiplexer.GetClientFd() << "FDS[" << multiplexer.GetNumFd() << "]\n";
-        }
-        else
-        {
-			//else if (client is already connected)
-			//HandleRequest;
-            //else
-			//Handle cgi
-			while (recv(multiplexer.GetClientFd(), &tmp, 1, 0) > 0)
+			if (-1 == fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK ))
+			{
+				perror("fcntl()");
+				return (false);
+			}
+			struct epoll_event epoll_client;
+
+			epoll_client.data.fd = multiplexer.GetClientFd();
+			epoll_client.events = EPOLLIN ;
+			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), &epoll_client))
+			{
+				perror("epoll_ctl()");
+				return (false);
+			}
+			std::cout << "New client connected to " << multiplexer.GetClientFd() << '\n';
+		}
+		else
+		{
+			if (read(multiplexer.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+			{
 				buffer += tmp;
+				send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+			}
 			std::cout << buffer;
 			memset(&tmp, 0, sizeof(tmp));
 			buffer.clear();
-			std::cout << write(multiplexer.GetClientFd(), "WELCOME\n", 8) << '\n';
-			close(multiplexer.GetClientFd());
-            break ;
-        }
+			close(multiplexer.GetEvents()->data.fd);
+		}
+
 	}
 	return (true);
 }
