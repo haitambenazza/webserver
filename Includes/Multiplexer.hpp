@@ -6,7 +6,7 @@
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/18 23:08:58 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/23 01:01:40 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/23 06:06:30 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ class Multiplexer
         void         SetEpollFd(int epollFd);
         void         SetNumFd(int numfd);
         void         SetClientFd(int clientfd);
-        struct epoll_event      GetEvent();
+        struct epoll_event*      GetEvent();
         struct epoll_event*      GetEvents();
+        void SetEvent(int event, int fd);
 };
