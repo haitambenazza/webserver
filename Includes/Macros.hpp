@@ -6,14 +6,19 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/14 21:53:32 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 20:08:50 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/22 19:12:00 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+
+/*-------Server_parameter-------*/
 #define MAX_CLIENT_BODY 2147483647
 #define IP_ADDRESS "0.0.0.0"
 #define PORT "8000"
+
+/*---------Multiplexer---------*/
+#define MAX_EVENT 1024
 
 

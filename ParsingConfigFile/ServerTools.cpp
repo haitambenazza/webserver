@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerTools.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:26:43 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/20 22:46:37 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/21 01:19:57 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ std::string GetServers( std::string& s )
 	if (s.empty())
 		return ("");
 	i = 0;
-	while (s[i])
+	while (i < s.size())
 	{
 		pos = s.find("server", i);
 		if ( pos == std::string::npos )
@@ -43,10 +43,7 @@ std::string GetServers( std::string& s )
 		if ( pos0 != std::string::npos && s.substr(pos0, 11) != "server_name")
 		{
 			if (!CheckBrackets(s.substr(pos0, pos0 - pos)))
-			{
-				std::cout << s.substr(pos, pos0 - pos) << '\n';
 				std::cerr << "Nested Server detected" << '\n';
-			}
 			else
 				std::cerr << "Virtual host is not available\n";
 			return ("");
@@ -55,7 +52,6 @@ std::string GetServers( std::string& s )
 			pos0 = s.find("server", pos0 + 6);
 		i = pos0;
 	}
-
 	return ( s.substr(pos, pos0 - pos) );
 }
 
