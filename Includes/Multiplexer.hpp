@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Multiplexer.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/18 23:08:58 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 01:55:24 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/23 01:01:40 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,5 +38,4 @@ class Multiplexer
         void         SetClientFd(int clientfd);
         struct epoll_event      GetEvent();
         struct epoll_event*      GetEvents();
-
 };
