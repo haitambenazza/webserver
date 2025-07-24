@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/18 23:55:36 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 03:54:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,8 @@ class Server
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
         int16_t	fd;
-        int16_t	fd_endpoint;
 		std::string	server_name;
-		u_int16_t	port;
+		std::string	port;
 		std::string	ip;
 		std::string root;
 		std::string index;
@@ -44,10 +43,9 @@ class Server
         std::vector<std::string>                                GetKeys();
         bool SetServer();
         int Getfd() const;
-		void	Setfd_endpoint(int16_t fd);
-		int16_t	Getfd_endpoint() const;
         std::string GetServerName()const;
-        int     CloseFd();
         void    InitializeServerSettings();
-        void PrintData();
+        void    PrintData();
+        void    SetDefaultValue();
+        void	SetAddrServer(struct sockaddr_in *addr);
 };
