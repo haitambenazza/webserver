@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 01:51:06 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/24 03:57:26 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,19 +58,20 @@ std::vector<std::string> GetServers( std::string& s )
 	if (s.empty())
 		return (ServersData);
 	i = 0;
-	while (s[i])
+	while (i < s.size())
 	{
-		pos = s.find(server, i);
+		pos = s.find("server", i);
 		if ( pos == std::string::npos )
 			break ;
-		pos0 = s.find(server, i + server.length());
-		if (pos0 == std::string::npos)
-			pos0 = s.length();
-		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
+		pos0 = s.find("server", i + 6);
+		if ( pos0 != std::string::npos && s.substr(pos0, 11) == "server_name")
 		{
-			std::cerr << "Nested server detected" << std::endl;
-			return ( ServersData);
+			std::cerr << "virtual host not supported \n";
+			ServersData.clear();
+			return (ServersData);
 		}
+		else
+			pos0 = s.find("server", pos0 + 6);
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -84,7 +85,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 	int 						i;
 	int 						x;
 	int 						y;
-	Block 						NewBlock;
+
 	File hey( FileName );
 	hey.SetExtention();
 	hey.OpenFile();
@@ -94,6 +95,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 	i = 0;
 	while ( i < (int)lst.size() )
 	{
+		Block 						NewBlock;
 		Server NewServer;
 		x = 0;
 		y = 0;
@@ -154,13 +156,110 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
+bool	InitServers(std::vector<Server> &servers, char *filename)
+{
+	servers = GetFullServers(filename);
+	if (servers.empty())
+		return (false);
+	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
+	{
+		servers[serv].InitializeServerSettings();
+		servers[serv].PrintData();
+		std::cout << "------------------------\n";
+	}
+	return true;
+}
+
+bool	SetEventEpoll(Multiplexer &multi)
+{
+	multi.SetNumFd(epoll_wait(multi.GetEpollFd(), multi.GetEvents(), MAX_EVENT, -1));
+	if (multi.GetNumFd() == -1)
+	{
+		perror("epoll_wait()");
+		return false;
+	}
+	return (true);
+}
+
+bool	AcceptNewClient(Multiplexer &m, Server &server)
+{
+	struct epoll_event epoll_client;
+
+	m.SetClientFd(accept(server.Getfd(), NULL, NULL));
+	if (m.GetClientFd() == -1)
+	{
+		perror("accept()");
+		return false;
+	}
+	if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
+	{
+		perror("fcntl()");
+		return (false);
+	}
+	epoll_client.data.fd = m.GetClientFd();
+	epoll_client.events = EPOLLIN ;
+	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
+	{
+		perror("epoll_ctl()");
+		return (false);
+	}
+	std::cout << "New client connected to " << m.GetClientFd() << '\n';
+	return true;
+}
+
+void	ReadData(Multiplexer &m, int &i)
+{
+	char tmp[1024] = {0};
+	std::string buffer;
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
+	if (read(m.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+	{
+		buffer += tmp;
+		send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+	}
+	std::cout << buffer;
+	memset(&tmp, 0, sizeof(tmp));
+	buffer.clear();
+}
+
+bool EventRoutine(Server &server, Multiplexer &multiplexer)
+{
+	if (SetEventEpoll(multiplexer) == false)
+		return (false);
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	{
+		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+		{
+			if (AcceptNewClient(multiplexer, server) == false)
+				return (false);
+		}
+		else
+		{
+			if (multiplexer.GetEvents()[i].events & EPOLLIN)
+				ReadData(multiplexer, i);
+			// close(multiplexer.GetEvents()->data.fd);
+		}
+	}
+	return (true);
+}
+
+bool RunServers(std::vector<Server> &servers)
+{
+	Multiplexer multiplexer(servers);
+
+	while (true)
+	{
+		for(int i = 0; i < (int)servers.size(); i++)
+		{
+			EventRoutine(servers[i], multiplexer);
+		}
+	}
+	return true;
+}
 
 int main( int ac, char **av, char **envp )
 {
-	std::vector<Server> 		srvs;
-	std::string buffer;
-	// char tmp[100] = {0};
-	// int read;
+	std::vector<Server> 		servers;
 
 	(void)envp;
 	if (ac != 2)
@@ -170,35 +269,9 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	//init data
-	srvs = GetFullServers( av[1] );
-	// for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
-	// {
-	// 	srvs[serv].InitializeServerSettings();
-	// 	srvs[serv].PrintData();
-	// }
-
-	// for (int i = 0; i <(int)srvs.size(); i++)
-	// 	srvs[i].PrintData();
-
-	// std::vector<std::string> vct  = srvs[0].GetKeys();
-	// for(int j = 0 ; j < (int)srvs.size(); j++)
-	// 	std::cout << vct[j] << std::endl;
-	// while (true)
-	// {
-	// 	for (int i = 0; i < (int)srvs.size(); i++)
-	// 	{
-	// 		srvs[i].Setfd_endpoint(accept(srvs[i].Getfd(), NULL, NULL));
-	// 		if (srvs[i].Getfd_endpoint() != -1)
-	// 		{
-	// 			fcntl(srvs[i].Getfd_endpoint(), F_SETFL, O_NONBLOCK);
-	// 			std::cout << "a new client is connected to " << srvs[i].Getfd_endpoint() << '\n';
-	// 			while ( (read = recv(srvs[i].Getfd_endpoint(), &tmp, 10, 0)) > 0)
-	// 				buffer += tmp;
-	// 			std::cout << buffer << '\n';
-	// 			buffer.clear();
-	// 			srvs[i].CloseFd();
-	// 		}
-	// 	}
-	// }
+	if (InitServers(servers, av[1]) == false)
+		return (std::cerr << "failed to init servers\n", 1);
+	if (RunServers(servers) == false)
+		return (1);
 	return (0);
 }
