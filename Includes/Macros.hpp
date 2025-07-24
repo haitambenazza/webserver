@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/14 21:53:32 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/24 02:24:13 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 03:34:04 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,4 +18,4 @@
 #define ROOT "/"
 #define SERVER_NAME ""
 #define INDEX "/index.html"
-
+#define MAX_EVENT 1024
