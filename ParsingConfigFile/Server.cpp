@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/24 21:42:34 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:50:10 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ bool    Server::SetServer()
 
 void Server::PrintData()
 {
+    std::cout << "NAME : " << this->server_name << "\n";
     std::cout << "IP : " << this->ip << "\n";
     std::cout << "PORT : " << this->port << "\n";
     std::cout << "INDEX : " << this->index << "\n";
@@ -130,7 +131,8 @@ void Server::SetServer( Block& block)
 	{
 		if ( children[i].GetLvl() == 1 )
         {
-			StringToMap(children[i].GetArg(), Commands, 1);
+            std::cout << children[i].GetArg() << '\n';
+            StringToMap(children[i].GetArg(), Commands, 1);
         }
 		else if ( children[i].GetLvl() == 2 )
 		{
@@ -166,6 +168,7 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
+        // std::cout << "  hey   "<<tmp[i] << '\n';
         if (key == "server")
         {
             std::cerr << " Nested server" << std::endl;

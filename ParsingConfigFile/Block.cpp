@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Block.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/16 22:42:58 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:47:23 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ void        Block::ArgEpur(std::string &s, Block& blk )
     while ( c < (int)blk.Names.size() )
     {
         Pos = blk.Arg.find(blk.Names[c]);
-        if ( Pos != std::string::npos )
+        if ( Pos != std::string::npos && !s.find("server_name", Pos) )
             blk.Arg.erase(Pos, blk.Names[c].length());
         c++;
     }
