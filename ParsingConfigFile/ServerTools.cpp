@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:26:43 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 22:42:32 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 02:19:44 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,4 +23,19 @@ u_int32_t StrToIp(std::string ip)
 		result = (result << 8) | number;
 	}
 	return (result);
+}
+
+std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& map, std::string key)
+{
+    std::map<std::string, std::vector<std::string> >::iterator  it;
+    std::vector< std::string>                                   values;
+
+    it = map.find(key);
+    if (it != map.end())
+    {
+        values = it->second;
+        return (values[0]);
+    }
+    else
+        return "";
 }
