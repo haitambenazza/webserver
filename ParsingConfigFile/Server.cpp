@@ -6,9 +6,10 @@
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/07/24 04:05:16 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:57:44 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 
 #include "../headers/webserver.hpp"
@@ -19,7 +20,7 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
 	addr->sin_addr.s_addr = htonl(StrToIp(ip));
-	addr->sin_port = htons(atoi(port.c_str()));
+	addr->sin_port = htons((uint16_t)atoi(port.c_str()));
 }
 
 void    Server::SetDefaultValue()
@@ -38,6 +39,7 @@ bool    Server::SetServer()
     int opt;
 
     SetDefaultValue();
+    InitializeServerSettings();
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == -1)
     return (perror("Socket"), false);
@@ -54,13 +56,12 @@ bool    Server::SetServer()
 
 void Server::PrintData()
 {
-    std::cout << "FD : " << fd << "\n";
-    std::cout << "IP : " << ip << "\n";
-    std::cout << "PORT : " << port << "\n";
-    std::cout << "INDEX : " << index << "\n";
-    std::cout << "ROOT : " << root << "\n";
-    std::cout << "MAX_BODY_SIZE : " << max_body_size << "\n";
-    std::cout << "server_name : " << server_name << "\n";
+    std::cout << "NAME : " << this->server_name << "\n";
+    std::cout << "IP : " << this->ip << "\n";
+    std::cout << "PORT : " << this->port << "\n";
+    std::cout << "INDEX : " << this->index << "\n";
+    std::cout << "ROOT : " << this->root << "\n";
+    std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";
 }
 
 std::string Server::GetServerName()const
@@ -145,7 +146,8 @@ void Server::SetServer( Block& block)
 	{
 		if ( children[i].GetLvl() == 1 )
         {
-			StringToMap(children[i].GetArg(), Commands, 1);
+            std::cout << children[i].GetArg() << '\n';
+            StringToMap(children[i].GetArg(), Commands, 1);
         }
 		else if ( children[i].GetLvl() == 2 )
 		{
@@ -181,6 +183,12 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
+        // std::cout << "  hey   "<<tmp[i] << '\n';
+        if (key == "server")
+        {
+            std::cerr << " Nested server" << std::endl;
+            exit(1);
+        }
         if (flag)
             keys.push_back(key);
 		values = FillVector( split(tmp[i], " ") );
