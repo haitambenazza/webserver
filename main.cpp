@@ -6,9 +6,10 @@
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/07/24 04:05:25 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:58:07 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 
 #include "headers/webserver.hpp"
@@ -66,13 +67,15 @@ std::vector<std::string> GetServers( std::string& s )
 			break ;
 		pos0 = s.find("server", i + 6);
 		if ( pos0 != std::string::npos && s.substr(pos0, 11) == "server_name")
+			pos0 = s.find("server", pos0 + 11);
+		if (pos0 == std::string::npos)
+			break;
+		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
 		{
-			std::cerr << "virtual host not supported \n";
+			std::cerr << "Nested sserver detected\n";
 			ServersData.clear();
 			return (ServersData);
 		}
-		else
-			pos0 = s.find("server", pos0 + 6);
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -100,7 +103,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 		Server NewServer;
 		x = 0;
 		y = 0;
-		NewBlock.FillBlock(lst[i], NewBlock, x, y);
+		NewBlock.FillBlock( lst[i], NewBlock, x, y );
 		srvs.push_back( NewServer );
 		srvs.back().SetServer( NewBlock );
 		i++;
@@ -201,7 +204,7 @@ bool	AcceptNewClient(Multiplexer &m, Server &server)
 		return (false);
 	}
 	epoll_client.data.fd = m.GetClientFd();
-	epoll_client.events = EPOLLIN ;
+	epoll_client.events = EPOLLIN | EPOLLET;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
 	{
 		perror("epoll_ctl()");
@@ -241,7 +244,7 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 				ReadData(multiplexer, i);
-			// close(multiplexer.GetEvents()->data.fd);
+			close(multiplexer.GetEvents()->data.fd);
 		}
 	}
 	return (true);
@@ -254,9 +257,7 @@ bool RunServers(std::vector<Server> &servers)
 	while (true)
 	{
 		for(int i = 0; i < (int)servers.size(); i++)
-		{
 			EventRoutine(servers[i], multiplexer);
-		}
 	}
 	return true;
 }
