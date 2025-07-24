@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/25 00:16:28 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/25 00:52:20 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,14 +65,15 @@ std::vector<std::string> GetServers( std::string& s )
 			break ;
 		pos0 = s.find("server", i + 6);
 		if ( pos0 != std::string::npos && s.substr(pos0, 11) == "server_name")
+			pos0 = s.find("server", pos0 + 11);
+		if (pos0 == std::string::npos)
+			break;
+		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
 		{
-			std::cerr << "virtual host not supported \n";
+			std::cerr << "Nested sserver detected\n";
 			ServersData.clear();
 			return (ServersData);
 		}
-		if (pos0 == std::string::npos)
-			break;
-		//std::cout << s.substr(pos, pos0 - pos) << '\n';
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -100,7 +101,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 		Server NewServer;
 		x = 0;
 		y = 0;
-		NewBlock.FillBlock(lst[i], NewBlock, x, y);
+		NewBlock.FillBlock( lst[i], NewBlock, x, y );
 		srvs.push_back( NewServer );
 		srvs.back().SetServer( NewBlock );
 		i++;
@@ -251,9 +252,7 @@ bool RunServers(std::vector<Server> &servers)
 	while (true)
 	{
 		for(int i = 0; i < (int)servers.size(); i++)
-		{
 			EventRoutine(servers[i], multiplexer);
-		}
 	}
 	return true;
 }
