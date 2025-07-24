@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/24 02:50:21 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 03:33:27 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,13 +156,91 @@ bool Check_if_valid(const std::vector<std::string> str)
 	return true;
 }
 
+bool	InitServers(std::vector<Server> &servers, char *filename)
+{
+	servers = GetFullServers(filename);
+	if (servers.empty())
+		return (false);
+	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
+	{
+		servers[serv].InitializeServerSettings();
+		servers[serv].PrintData();
+		std::cout << "------------------------\n";
+	}
+	return true;
+}
+bool EventRoutine(Server &server, Multiplexer &multiplexer)
+{
+	char tmp[1024] = {0};
+	std::string buffer;
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
+
+	multiplexer.SetNumFd(epoll_wait(multiplexer.GetEpollFd(), multiplexer.GetEvents(), MAX_EVENT, -1));
+	if (multiplexer.GetNumFd() == -1)
+	{
+		perror("epoll_wait()");
+		return false;
+	}
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	{
+		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+		{
+			multiplexer.SetClientFd(accept(server.Getfd(), NULL, NULL));
+			if (multiplexer.GetClientFd() == -1)
+			{
+				perror("accept()");
+				return false;
+			}
+			if (-1 == fcntl(multiplexer.GetClientFd(), F_SETFL, O_NONBLOCK ))
+			{
+				perror("fcntl()");
+				return (false);
+			}
+			struct epoll_event epoll_client;
+
+			epoll_client.data.fd = multiplexer.GetClientFd();
+			epoll_client.events = EPOLLIN | EPOLLET | EPOLLOUT;
+			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), &epoll_client))
+			{
+				perror("epoll_ctl()");
+				return (false);
+			}
+			std::cout << "New client connected to " << multiplexer.GetClientFd() << '\n';
+		}
+		else
+		{
+			if (read(multiplexer.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+			{
+				buffer += tmp;
+				send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+			}
+			std::cout << buffer;
+			memset(&tmp, 0, sizeof(tmp));
+			buffer.clear();
+			close(multiplexer.GetEvents()->data.fd);
+		}
+
+	}
+	return (true);
+}
+
+bool RunServers(std::vector<Server> &servers)
+{
+	Multiplexer multiplexer(servers);
+
+	while (true)
+	{
+		for(int i = 0; i < (int)servers.size(); i++)
+		{
+			EventRoutine(servers[i], multiplexer);
+		}
+	}
+	return true;
+}
 
 int main( int ac, char **av, char **envp )
 {
-	std::vector<Server> 		srvs;
-	std::string buffer;
-	// char tmp[100] = {0};
-	// int read;
+	std::vector<Server> 		servers;
 
 	(void)envp;
 	if (ac != 2)
@@ -172,14 +250,9 @@ int main( int ac, char **av, char **envp )
 		return (1);
 	}
 	//init data
-	srvs = GetFullServers( av[1] );
-	if (srvs.empty())
-		return (2);
-	for(int serv = 0 ; serv < (int)srvs.size() ; serv++)
-	{
-		srvs[serv].InitializeServerSettings();
-		srvs[serv].PrintData();
-		std::cout << "------------------------\n";
-	}
+	if (InitServers(servers, av[1]) == false)
+		return (std::cerr << "failed to init servers\n", 1);
+	if (RunServers(servers) == false)
+		return (1);
 	return (0);
 }
