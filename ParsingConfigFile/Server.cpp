@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/24 03:55:47 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 21:42:34 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
 	addr->sin_addr.s_addr = htonl(StrToIp(ip));
-	addr->sin_port = htons(atoi(port.c_str()));
+	addr->sin_port = htons((uint16_t)atoi(port.c_str()));
 }
 
 void    Server::SetDefaultValue()
@@ -37,6 +37,7 @@ bool    Server::SetServer()
     int opt = 1;
 
     SetDefaultValue();
+    InitializeServerSettings();
     fd = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)

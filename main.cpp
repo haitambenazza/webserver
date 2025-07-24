@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/24 03:57:26 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:04:15 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ std::vector<std::string> GetServers( std::string& s )
 		}
 		else
 			pos0 = s.find("server", pos0 + 6);
+		std::cout << s.substr(pos, pos0 - pos) << '\n';
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -197,7 +198,7 @@ bool	AcceptNewClient(Multiplexer &m, Server &server)
 		return (false);
 	}
 	epoll_client.data.fd = m.GetClientFd();
-	epoll_client.events = EPOLLIN ;
+	epoll_client.events = EPOLLIN | EPOLLET;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
 	{
 		perror("epoll_ctl()");
@@ -237,7 +238,7 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 				ReadData(multiplexer, i);
-			// close(multiplexer.GetEvents()->data.fd);
+			close(multiplexer.GetEvents()->data.fd);
 		}
 	}
 	return (true);
