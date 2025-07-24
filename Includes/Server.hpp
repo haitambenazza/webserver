@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/24 02:26:42 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 03:54:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,4 +47,5 @@ class Server
         void    InitializeServerSettings();
         void    PrintData();
         void    SetDefaultValue();
+        void	SetAddrServer(struct sockaddr_in *addr);
 };
