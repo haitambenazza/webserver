@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/25 00:04:15 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:16:28 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,9 @@ std::vector<std::string> GetServers( std::string& s )
 			ServersData.clear();
 			return (ServersData);
 		}
-		else
-			pos0 = s.find("server", pos0 + 6);
-		std::cout << s.substr(pos, pos0 - pos) << '\n';
+		if (pos0 == std::string::npos)
+			break;
+		//std::cout << s.substr(pos, pos0 - pos) << '\n';
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
