@@ -5,50 +5,39 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 03:11:59 by hbenazza         ###   ########.fr       */
+/*   Created: Invalid date        by                   #+#    #+#             */
+/*   Updated: 2025/07/24 04:05:16 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
 #include "../headers/webserver.hpp"
 
-
-std::string Server::GetIp() const
-{
-    return (ip);
-}
-std::string Server::GetPort() const
-{
-    return (port);
-}
-
-void	SetAddrServer(struct sockaddr_in *addr, const Server &serv)
+void	Server::SetAddrServer(struct sockaddr_in *addr)
 {
     (void)serv;
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
-	addr->sin_addr.s_addr = htonl(StrToIp(serv.GetIp().c_str()));
-	addr->sin_port = htons(atoi(serv.GetPort().c_str()));
+	addr->sin_addr.s_addr = htonl(StrToIp(ip));
+	addr->sin_port = htons(atoi(port.c_str()));
 }
 
-void    Server::SetDefaultValues()
+void    Server::SetDefaultValue()
 {
-    ip = IP_ADDRESS;
     port = PORT;
-    max_body_size = MAX_CLIENT_BODY;
-    server_name = "";
+    ip = IP;
+    root = ROOT;
     fd = -1;
-    fd_endpoint = -1;
-    root = "/";
-    index = "/index.html";
+    index = INDEX;
+    server_name = SERVER_NAME;
+    max_body_size = MAX_CLIENT_BODY;
 }
 
 bool    Server::SetServer()
 {
     int opt;
 
-    opt = 1;
-    this->SetDefaultValues();
+    SetDefaultValue();
     fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == -1)
     return (perror("Socket"), false);
@@ -63,44 +52,6 @@ bool    Server::SetServer()
     return true;
 }
 
-void Server::Setfd_endpoint(int16_t fd)
-{
-    fd_endpoint = fd;
-}
-
-std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& map, std::string key)
-{
-    std::map<std::string, std::vector<std::string> >::iterator  it;
-    std::vector< std::string>                                   values;
-
-    it = map.find(key);
-    if (it != map.end())
-    {
-        values = it->second;
-        return (values[0]);
-    }
-    return "";
-}
-
-struct sockaddr_in                                Server::GetServerSockAddr()
-{
-    return (addr);
-}
-
-void    Server::InitializeServerSettings()
-{
-    if (GetValuesFromKeys(Commands, "listen").size())
-        port = GetValuesFromKeys(Commands, "listen");
-    if (GetValuesFromKeys(Commands, "server_name").size())
-        server_name = GetValuesFromKeys(Commands, "server_name");
-    if (GetValuesFromKeys(Commands, "host").size())
-        ip = GetValuesFromKeys(Commands, "host");
-    if (GetValuesFromKeys(Commands, "root").size())
-        root = GetValuesFromKeys(Commands, "root");
-    if (GetValuesFromKeys(Commands, "index").size())
-        index = GetValuesFromKeys(Commands, "index");
-}
-
 void Server::PrintData()
 {
     std::cout << "FD : " << fd << "\n";
@@ -110,12 +61,6 @@ void Server::PrintData()
     std::cout << "ROOT : " << root << "\n";
     std::cout << "MAX_BODY_SIZE : " << max_body_size << "\n";
     std::cout << "server_name : " << server_name << "\n";
-}
-
-
-int16_t	Server::Getfd_endpoint() const
-{
-    return (fd_endpoint);
 }
 
 std::string Server::GetServerName()const
@@ -248,15 +193,24 @@ int Server::Getfd() const{
     return (fd);
 }
 
+void    Server::InitializeServerSettings()
+{
+    if (GetValuesFromKeys(Commands, "listen") != "")
+        port = GetValuesFromKeys(Commands, "listen");
+    if (GetValuesFromKeys(Commands, "server_name") != "")
+        server_name = GetValuesFromKeys(Commands, "server_name");
+    if (GetValuesFromKeys(Commands, "host") != "")
+        ip = GetValuesFromKeys(Commands, "host");
+    if (GetValuesFromKeys(Commands, "root") != "")
+        root = GetValuesFromKeys(Commands, "root");
+    if (GetValuesFromKeys(Commands, "index") != "")
+        index = GetValuesFromKeys(Commands, "index");
+}
+
 
 std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 {
     return (Commands);
-}
-
-int Server::CloseFd()
-{
-    return (close(fd_endpoint));
 }
 
 Server::~Server()

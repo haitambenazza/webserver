@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerTools.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:26:43 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/21 01:19:57 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/24 04:05:53 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,33 +25,17 @@ u_int32_t StrToIp(std::string ip)
 	return (result);
 }
 
-std::string GetServers( std::string& s )
+std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& map, std::string key)
 {
-	size_t	i;
-	size_t	pos;
-	size_t	pos0;
+    std::map<std::string, std::vector<std::string> >::iterator  it;
+    std::vector< std::string>                                   values;
 
-	if (s.empty())
-		return ("");
-	i = 0;
-	while (i < s.size())
-	{
-		pos = s.find("server", i);
-		if ( pos == std::string::npos )
-			break ;
-		pos0 = s.find("server", i + 6);
-		if ( pos0 != std::string::npos && s.substr(pos0, 11) != "server_name")
-		{
-			if (!CheckBrackets(s.substr(pos0, pos0 - pos)))
-				std::cerr << "Nested Server detected" << '\n';
-			else
-				std::cerr << "Virtual host is not available\n";
-			return ("");
-		}
-		else
-			pos0 = s.find("server", pos0 + 6);
-		i = pos0;
-	}
-	return ( s.substr(pos, pos0 - pos) );
+    it = map.find(key);
+    if (it != map.end())
+    {
+        values = it->second;
+        return (values[0]);
+    }
+    else
+        return "";
 }
-
