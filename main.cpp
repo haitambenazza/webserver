@@ -6,7 +6,7 @@
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/23 06:06:01 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/23 23:12:32 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,7 +130,7 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 			struct epoll_event epoll_client;
 
 			epoll_client.data.fd = multiplexer.GetClientFd();
-			epoll_client.events = EPOLLIN ;
+			epoll_client.events = EPOLLIN | EPOLLOUT;
 			if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_ADD, multiplexer.GetClientFd(), &epoll_client))
 			{
 				perror("epoll_ctl()");
@@ -140,17 +140,32 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 		}
 		else
 		{
-			if (read(multiplexer.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+			if (multiplexer.GetEvents()[i].data.fd & EPOLLIN)
 			{
-				buffer += tmp;
-				send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+				int bytes_read = read(multiplexer.GetEvents()[i].data.fd, &tmp, 1024);
+				if (bytes_read > 0)
+				{
+					buffer += tmp;
+					std::cout << "Client " << multiplexer.GetEvents()[i].data.fd << " sent : "<< buffer;
+					// send(multiplexer.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+				}
+				else if (bytes_read == 0)
+				{
+					// Client closed connection
+					std::cout << "Client " << multiplexer.GetEvents()[i].data.fd  << " disconnected\n";
+					close(multiplexer.GetEvents()[i].data.fd);
+				}
+				memset(tmp, 0, sizeof(tmp));
+				buffer.clear();
 			}
-			std::cout << buffer;
-			memset(&tmp, 0, sizeof(tmp));
-			buffer.clear();
-			close(multiplexer.GetEvents()->data.fd);
+			else
+			{
+				if (send(multiplexer.GetEvents()[i].data.fd , response.c_str() , response.size() , 0) == -1)
+				{
+					std::cerr << "send failed" << std::endl;
+				}
+			}
 		}
-
 	}
 	return (true);
 }
