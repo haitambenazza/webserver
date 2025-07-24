@@ -6,18 +6,18 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/24 02:57:15 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/24 03:55:47 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/webserver.hpp"
 
-void	SetAddrServer(struct sockaddr_in *addr)
+void	Server::SetAddrServer(struct sockaddr_in *addr)
 {
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
-	addr->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	addr->sin_port = htons(8080);
+	addr->sin_addr.s_addr = htonl(StrToIp(ip));
+	addr->sin_port = htons(atoi(port.c_str()));
 }
 
 void    Server::SetDefaultValue()
