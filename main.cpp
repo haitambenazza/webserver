@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/25 00:52:20 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/25 22:34:50 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,11 +183,11 @@ bool	SetEventEpoll(Multiplexer &multi)
 	return (true);
 }
 
-bool	AcceptNewClient(Multiplexer &m, Server &server)
+bool	AcceptNewClient(Multiplexer &m, int fd)
 {
 	struct epoll_event epoll_client;
 
-	m.SetClientFd(accept(server.Getfd(), NULL, NULL));
+	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
 	if (m.GetClientFd() == -1)
 	{
 		perror("accept()");
@@ -224,22 +224,31 @@ void	ReadData(Multiplexer &m, int &i)
 	buffer.clear();
 }
 
-bool EventRoutine(Server &server, Multiplexer &multiplexer)
+bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
+{
+	for (int i = 0; i < (int)server.size(); i++)
+	{
+		if (m.GetEvents()[j].data.fd == server[i].Getfd())
+			return (true);
+	}
+	return false;
+}
+
+bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
-		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+		if (IsServerSocket(multiplexer, server, i))
 		{
-			if (AcceptNewClient(multiplexer, server) == false)
+			if (AcceptNewClient(multiplexer, i) == false)
 				return (false);
 		}
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 				ReadData(multiplexer, i);
-			close(multiplexer.GetEvents()->data.fd);
 		}
 	}
 	return (true);
@@ -251,8 +260,7 @@ bool RunServers(std::vector<Server> &servers)
 
 	while (true)
 	{
-		for(int i = 0; i < (int)servers.size(); i++)
-			EventRoutine(servers[i], multiplexer);
+			EventRoutine(servers, multiplexer);
 	}
 	return true;
 }
