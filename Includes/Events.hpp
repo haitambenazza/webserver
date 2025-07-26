@@ -7,6 +7,6 @@ bool	RunServers(std::vector<Server> &servers);
 bool	SendData(Multiplexer &m, int i);
 bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j);
 void	ReadData(Multiplexer &m, int &i);
-bool	AcceptNewClient(Multiplexer &m, int fd);
+bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s);
 bool	SetEventEpoll(Multiplexer &multi);
 bool	InitServers(std::vector<Server> &servers, char *filename);

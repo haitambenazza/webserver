@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/25 00:50:10 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/26 04:29:01 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,6 +202,15 @@ void    Server::InitializeServerSettings()
         index = GetValuesFromKeys(Commands, "index");
 }
 
+std::string Server::GetIp() const
+{
+    return (ip);
+}
+
+std::string Server::GetPort() const
+{
+    return (port);
+}
 
 std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 {

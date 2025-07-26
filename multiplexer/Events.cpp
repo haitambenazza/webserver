@@ -26,7 +26,19 @@ bool	SetEventEpoll(Multiplexer &multi)
 	return (true);
 }
 
-bool	AcceptNewClient(Multiplexer &m, int fd)
+
+std::string GetAddrServer(Multiplexer &m, std::vector<Server> &s, int fd)
+{
+	for (int i = 0; i < (int)s.size(); i++)
+	{
+		if (m.GetEvents()[fd].data.fd == s[i].Getfd())
+			return (s[i].GetIp() + ":" + s[i].GetPort());
+	}
+	return ("");
+}
+
+
+bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	struct epoll_event epoll_client;
 
@@ -48,7 +60,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd)
 		perror("epoll_ctl()");
 		return (false);
 	}
-	std::cout << "New client connected to " << m.GetClientFd() << '\n';
+	std::cout << "New client [" << m.GetClientFd() << "] connected to " << GetAddrServer(m,s,fd) << '\n';
 	return true;
 }
 
@@ -96,10 +108,15 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 
 bool SendData(Multiplexer &m, int i)
 {
-	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n");
+	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
+	std::ifstream file("/home/hbenazza/Desktop/webserver/site/text.html");
+	std::stringstream html;
 
-
+	if (!file.is_open())
+		std::cout << "FAILED\n";
+	html << file.rdbuf();
 	send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+	send(m.GetEvents()[i].data.fd, html.str().c_str(), html.str().size(), 0);
 	m.GetEvents()[i].events = EPOLLIN | EPOLLET;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
@@ -118,7 +135,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	{
 		if (IsServerSocket(multiplexer, server, i))
 		{
-			if (AcceptNewClient(multiplexer, i) == false)
+			if (AcceptNewClient(multiplexer, i, server) == false)
 				return (false);
 		}
 		else
