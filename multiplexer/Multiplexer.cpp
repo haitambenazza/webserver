@@ -50,6 +50,12 @@ int Multiplexer::GetClientFd() const
     return (NewConnection);
 }
 
+Multiplexer& Multiplexer::operator=( const Multiplexer& copy )
+{
+    (void)copy;
+    return (*this);
+}
+
 int Multiplexer::GetEpollFd() const
 {
     return (EpollFd);

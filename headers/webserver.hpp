@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 01:32:24 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/26 04:17:01 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
@@ -31,6 +32,7 @@
 #include "../Includes/Client.hpp"
 #include "../Includes/Multiplexer.hpp"
 #include "../Includes/ServerTools.hpp"
+#include "../Includes/Events.hpp"
 
 
 #endif
