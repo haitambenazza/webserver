@@ -1,17 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: Invalid date        by                   #+#    #+#             */
-/*   Updated: 2025/07/25 00:58:07 by amoubine         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-
-
 #include "headers/webserver.hpp"
 
 void	PrintServer( Server& Serv )
@@ -188,11 +174,11 @@ bool	SetEventEpoll(Multiplexer &multi)
 	return (true);
 }
 
-bool	AcceptNewClient(Multiplexer &m, Server &server)
+bool	AcceptNewClient(Multiplexer &m, int fd)
 {
 	struct epoll_event epoll_client;
 
-	m.SetClientFd(accept(server.Getfd(), NULL, NULL));
+	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
 	if (m.GetClientFd() == -1)
 	{
 		perror("accept()");
@@ -218,33 +204,79 @@ void	ReadData(Multiplexer &m, int &i)
 {
 	char tmp[1024] = {0};
 	std::string buffer;
-	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
-	if (read(m.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+
+	int bytes_read = read(m.GetEvents()[i].data.fd, &tmp, 1024);
+	if (bytes_read > 0)
 	{
 		buffer += tmp;
-		send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+		std::cout << buffer;
+		memset(&tmp, 0, sizeof(tmp));
+		buffer.clear();
+		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
+		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+		{
+			perror("epoll_ctl()");
+			return ;
+		}
 	}
-	std::cout << buffer;
-	memset(&tmp, 0, sizeof(tmp));
-	buffer.clear();
+	else if (bytes_read == 0)
+	{
+		std::cout << "Client disconnected from " << m.GetEvents()[i].data.fd << '\n';
+		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+		{
+			perror("epoll_ctl()");
+			close(m.GetEvents()[i].data.fd);
+			return ;
+		}
+		close(m.GetEvents()[i].data.fd);
+	}
 }
 
-bool EventRoutine(Server &server, Multiplexer &multiplexer)
+bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 {
+	for (int i = 0; i < (int)server.size(); i++)
+	{
+		if (m.GetEvents()[j].data.fd == server[i].Getfd())
+		return (true);
+	}
+	return false;
+}
+
+bool SendData(Multiplexer &m, int i)
+{
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
+	send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+	m.GetEvents()[i].events = EPOLLIN | EPOLLET;
+	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+	{
+		perror("epoll_ctl()");
+		return false;
+	}
+	return true;
+}
+
+bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
+{
+
 	if (SetEventEpoll(multiplexer) == false)
-		return (false);
+	return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
-		if (multiplexer.GetEvents()[i].data.fd == server.Getfd())
+		if (IsServerSocket(multiplexer, server, i))
 		{
-			if (AcceptNewClient(multiplexer, server) == false)
+			if (AcceptNewClient(multiplexer, i) == false)
 				return (false);
 		}
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i);
-			close(multiplexer.GetEvents()->data.fd);
+				ReadData(multiplexer, i);// need to add EPOLLOUT after reading the data
+			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
+				SendData(multiplexer, i);
+			// else
+			// {
+			// 	std::cout << "Client disconnected from " << multiplexer.GetEvents()[i].data.fd << '\n';
+			// }
 		}
 	}
 	return (true);
@@ -256,8 +288,7 @@ bool RunServers(std::vector<Server> &servers)
 
 	while (true)
 	{
-		for(int i = 0; i < (int)servers.size(); i++)
-			EventRoutine(servers[i], multiplexer);
+			EventRoutine(servers, multiplexer);
 	}
 	return true;
 }
