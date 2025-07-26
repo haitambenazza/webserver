@@ -1,2 +1,0 @@
-. the multiplexer is implemented BUT the clients share the same Fd and the Events have only one
-. when only one client can send a msg when multiple clients are connected
