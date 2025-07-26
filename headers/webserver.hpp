@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 01:32:24 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/26 03:14:45 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <string>
 #include <cstring>
 #include <fcntl.h>
+#include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -31,6 +32,7 @@
 #include "../Includes/Client.hpp"
 #include "../Includes/Multiplexer.hpp"
 #include "../Includes/ServerTools.hpp"
+#include "../Includes/Request.hpp"
 
 
 #endif

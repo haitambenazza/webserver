@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/26 02:16:42 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/26 03:17:39 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,12 +213,15 @@ void	ReadData(Multiplexer &m, int &i)
 {
 	char tmp[1024] = {0};
 	std::string buffer;
+	Request req;
 
 	int bytes_read = read(m.GetEvents()[i].data.fd, &tmp, 1024);
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
-		std::cout << buffer;
+		// std::cout << buffer;
+		req.parse(buffer);
+		req.printRequestData();
 		memset(&tmp, 0, sizeof(tmp));
 		buffer.clear();
 		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
@@ -282,10 +285,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				ReadData(multiplexer, i);// need to add EPOLLOUT after reading the data
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 				SendData(multiplexer, i);
-			// else
-			// {
-			// 	std::cout << "Client disconnected from " << multiplexer.GetEvents()[i].data.fd << '\n';
-			// }
 		}
 	}
 	return (true);
