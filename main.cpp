@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/25 00:52:20 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/25 05:21:23 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 	int 						i;
 	int 						x;
 	int 						y;
-
+	
 	File hey( FileName );
 	hey.SetExtention();
 	hey.OpenFile();
@@ -239,7 +239,8 @@ bool EventRoutine(Server &server, Multiplexer &multiplexer)
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 				ReadData(multiplexer, i);
-			close(multiplexer.GetEvents()->data.fd);
+			std::cout << multiplexer.GetEvents()->data.fd << '\n';
+			// close(multiplexer.GetEvents()->data.fd);
 		}
 	}
 	return (true);

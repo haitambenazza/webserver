@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/24 03:54:50 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/25 05:26:12 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class Server
         bool SetServer();
         int Getfd() const;
         std::string GetServerName()const;
-        void    InitializeServerSettings();
+        int    InitializeServerSettings();
         void    PrintData();
         void    SetDefaultValue();
         void	SetAddrServer(struct sockaddr_in *addr);

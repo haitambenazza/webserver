@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/25 00:50:10 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/25 05:57:40 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ bool    Server::SetServer()
     int opt = 1;
 
     SetDefaultValue();
-    InitializeServerSettings();
+    if (InitializeServerSettings() == 2)
+        return false;
     fd = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
@@ -63,6 +64,7 @@ bool    Server::SetServer()
 void Server::PrintData()
 {
     std::cout << "NAME : " << this->server_name << "\n";
+    std::cout << "FD : " << this->fd << '\n';
     std::cout << "IP : " << this->ip << "\n";
     std::cout << "PORT : " << this->port << "\n";
     std::cout << "INDEX : " << this->index << "\n";
@@ -130,10 +132,7 @@ void Server::SetServer( Block& block)
     while ( i < children.size() )
 	{
 		if ( children[i].GetLvl() == 1 )
-        {
-            std::cout << children[i].GetArg() << '\n';
             StringToMap(children[i].GetArg(), Commands, 1);
-        }
 		else if ( children[i].GetLvl() == 2 )
 		{
             std::vector<std::string> lst;
@@ -168,16 +167,13 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
-        // std::cout << "  hey   "<<tmp[i] << '\n';
         if (key == "server")
         {
             std::cerr << " Nested server" << std::endl;
             exit(1);
         }
         if (flag)
-        {
             keys.push_back(key);
-        }
 		values = FillVector( split(tmp[i], " ") );
 		Mp.insert(std::make_pair(key, values));
 		i++;
@@ -188,18 +184,24 @@ int Server::Getfd() const{
     return (fd);
 }
 
-void    Server::InitializeServerSettings()
+int    Server::InitializeServerSettings()
 {
+    int count = 0;
     if (GetValuesFromKeys(Commands, "listen") != "")
         port = GetValuesFromKeys(Commands, "listen");
+    else
+        count++;
     if (GetValuesFromKeys(Commands, "server_name") != "")
         server_name = GetValuesFromKeys(Commands, "server_name");
     if (GetValuesFromKeys(Commands, "host") != "")
         ip = GetValuesFromKeys(Commands, "host");
+    else
+        count++;
     if (GetValuesFromKeys(Commands, "root") != "")
         root = GetValuesFromKeys(Commands, "root");
     if (GetValuesFromKeys(Commands, "index") != "")
         index = GetValuesFromKeys(Commands, "index");
+    return (count);
 }
 
 
