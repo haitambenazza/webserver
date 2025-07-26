@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/25 22:34:50 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/26 02:16:42 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,15 +213,32 @@ void	ReadData(Multiplexer &m, int &i)
 {
 	char tmp[1024] = {0};
 	std::string buffer;
-	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
-	if (read(m.GetEvents()[i].data.fd, &tmp, 1024) > 0)
+
+	int bytes_read = read(m.GetEvents()[i].data.fd, &tmp, 1024);
+	if (bytes_read > 0)
 	{
 		buffer += tmp;
-		send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+		std::cout << buffer;
+		memset(&tmp, 0, sizeof(tmp));
+		buffer.clear();
+		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
+		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+		{
+			perror("epoll_ctl()");
+			return ;
+		}
 	}
-	std::cout << buffer;
-	memset(&tmp, 0, sizeof(tmp));
-	buffer.clear();
+	else if (bytes_read == 0)
+	{
+		std::cout << "Client disconnected from " << m.GetEvents()[i].data.fd << '\n';
+		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+		{
+			perror("epoll_ctl()");
+			close(m.GetEvents()[i].data.fd);
+			return ;
+		}
+		close(m.GetEvents()[i].data.fd);
+	}
 }
 
 bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
@@ -229,15 +246,29 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		if (m.GetEvents()[j].data.fd == server[i].Getfd())
-			return (true);
+		return (true);
 	}
 	return false;
 }
 
+bool SendData(Multiplexer &m, int i)
+{
+	std::string response("HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\n HELLO THERE\n");
+	send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
+	m.GetEvents()[i].events = EPOLLIN | EPOLLET;
+	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+	{
+		perror("epoll_ctl()");
+		return false;
+	}
+	return true;
+}
+
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
+
 	if (SetEventEpoll(multiplexer) == false)
-		return (false);
+	return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
 		if (IsServerSocket(multiplexer, server, i))
@@ -248,7 +279,13 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i);
+				ReadData(multiplexer, i);// need to add EPOLLOUT after reading the data
+			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
+				SendData(multiplexer, i);
+			// else
+			// {
+			// 	std::cout << "Client disconnected from " << multiplexer.GetEvents()[i].data.fd << '\n';
+			// }
 		}
 	}
 	return (true);
