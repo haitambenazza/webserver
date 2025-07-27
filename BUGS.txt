@@ -1,0 +1,2 @@
+use firefox to send a custom request header and in the body send some data whiel a client is connected , the data in the boyd doesnt print
+until a new msg arrive 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/26 03:14:45 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/27 00:20:22 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,16 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <cstring>
 #include <fcntl.h>
 #include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <netdb.h>
+
 
 #include "../Includes/Block.hpp"
 #include "../Includes/File.hpp"
@@ -32,7 +36,7 @@
 #include "../Includes/Client.hpp"
 #include "../Includes/Multiplexer.hpp"
 #include "../Includes/ServerTools.hpp"
-#include "../Includes/Request.hpp"
+#include "../Includes/Events.hpp"
 
 
 #endif
