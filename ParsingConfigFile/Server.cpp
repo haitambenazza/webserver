@@ -3,119 +3,71 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 03:11:59 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/25 00:50:10 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/webserver.hpp"
 
-
-std::string Server::GetIp() const
+void	Server::SetAddrServer(struct sockaddr_in *addr)
 {
-    return (ip);
-}
-std::string Server::GetPort() const
-{
-    return (port);
-}
-
-void	SetAddrServer(struct sockaddr_in *addr, const Server &serv)
-{
-    (void)serv;
 	memset(addr, 0, sizeof(struct sockaddr_in));
 	addr->sin_family = AF_INET;
-	addr->sin_addr.s_addr = htonl(StrToIp(serv.GetIp().c_str()));
-	addr->sin_port = htons(atoi(serv.GetPort().c_str()));
+	addr->sin_addr.s_addr = htonl(StrToIp(ip));
+	addr->sin_port = htons((uint16_t)atoi(port.c_str()));
 }
 
-void    Server::SetDefaultValues()
+void    Server::SetDefaultValue()
 {
-    ip = IP_ADDRESS;
     port = PORT;
-    max_body_size = MAX_CLIENT_BODY;
-    server_name = "";
+    ip = IP;
+    root = ROOT;
     fd = -1;
-    fd_endpoint = -1;
-    root = "/";
-    index = "/index.html";
+    index = INDEX;
+    server_name = SERVER_NAME;
+    max_body_size = MAX_CLIENT_BODY;
 }
 
 bool    Server::SetServer()
 {
-    int opt;
+    struct sockaddr_in addr;
+    int opt = 1;
 
-    opt = 1;
-    this->SetDefaultValues();
+    SetDefaultValue();
+    InitializeServerSettings();
     fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd == -1)
-    return (perror("Socket"), false);
     fcntl(fd, F_SETFL, O_NONBLOCK);
-    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT | SO_LINGER, &opt, sizeof(opt));
-	this->InitializeServerSettings();
-    SetAddrServer(&addr, *this);
-	if (!server_name.empty() && (bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
-        return (perror("Bind"), false);
-    if (!server_name.empty() && (listen(fd, SOMAXCONN)) == -1)
-        return (perror("Listen"), false);
-    return true;
-}
-
-void Server::Setfd_endpoint(int16_t fd)
-{
-    fd_endpoint = fd;
-}
-
-std::string GetValuesFromKeys(std::map<std::string, std::vector<std::string> >& map, std::string key)
-{
-    std::map<std::string, std::vector<std::string> >::iterator  it;
-    std::vector< std::string>                                   values;
-
-    it = map.find(key);
-    if (it != map.end())
+    if (fd == -1)
     {
-        values = it->second;
-        return (values[0]);
+        perror("Socket");
+        return false;
     }
-    return "";
-}
-
-struct sockaddr_in                                Server::GetServerSockAddr()
-{
-    return (addr);
-}
-
-void    Server::InitializeServerSettings()
-{
-    if (GetValuesFromKeys(Commands, "listen").size())
-        port = GetValuesFromKeys(Commands, "listen");
-    if (GetValuesFromKeys(Commands, "server_name").size())
-        server_name = GetValuesFromKeys(Commands, "server_name");
-    if (GetValuesFromKeys(Commands, "host").size())
-        ip = GetValuesFromKeys(Commands, "host");
-    if (GetValuesFromKeys(Commands, "root").size())
-        root = GetValuesFromKeys(Commands, "root");
-    if (GetValuesFromKeys(Commands, "index").size())
-        index = GetValuesFromKeys(Commands, "index");
+    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+	SetAddrServer(&addr);
+	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
+    {
+        perror("Bind");
+        return false;
+    }
+    if ((listen(fd, SOMAXCONN)) == -1)
+    {
+        perror("Listen");
+        return false;
+    }
+    return true;
 }
 
 void Server::PrintData()
 {
-    std::cout << "FD : " << fd << "\n";
-    std::cout << "IP : " << ip << "\n";
-    std::cout << "PORT : " << port << "\n";
-    std::cout << "INDEX : " << index << "\n";
-    std::cout << "ROOT : " << root << "\n";
-    std::cout << "MAX_BODY_SIZE : " << max_body_size << "\n";
-    std::cout << "server_name : " << server_name << "\n";
-}
-
-
-int16_t	Server::Getfd_endpoint() const
-{
-    return (fd_endpoint);
+    std::cout << "NAME : " << this->server_name << "\n";
+    std::cout << "IP : " << this->ip << "\n";
+    std::cout << "PORT : " << this->port << "\n";
+    std::cout << "INDEX : " << this->index << "\n";
+    std::cout << "ROOT : " << this->root << "\n";
+    std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";
 }
 
 std::string Server::GetServerName()const
@@ -125,13 +77,11 @@ std::string Server::GetServerName()const
 
 Server::Server()
 {
-    SetDefaultValues();
-}
-
-Server::Server( bool flag )
-{
-    (void)flag;
-    SetDefaultValues();
+    if (this->SetServer() == false)
+    {
+        std::cerr << server_name <<" encountered an error\n";
+        return ;
+    }
 }
 
 Server::Server( const Server& copy )
@@ -140,30 +90,11 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
-    SetDefaultValues();
-}
-
-Server::Server( const char *filename )
-{
-    Block 	                    NewBlock;
-	std::string              	data;
-	int 						x;
-	int 						y;
-	File                        file( filename );
-
-	if (file.SetExtention() == 1)
-		return ;
-	file.OpenFile();
-	file.ReadLines();
-	data = GetServers( file.GetRawString() );
-	if (data.empty())
+    if (!SetServer())
+    {
+        std::cerr << server_name <<" encountered an error\n";
         return ;
-    x = 0;
-    y = 0;
-    if (data.size())
-        NewBlock.FillBlock(data, NewBlock, x, y);
-    SetServer(NewBlock);
-    SetServer();
+    }
 }
 
 Server& Server::operator=( const Server& copy )
@@ -200,7 +131,8 @@ void Server::SetServer( Block& block)
 	{
 		if ( children[i].GetLvl() == 1 )
         {
-			StringToMap(children[i].GetArg(), Commands, 1);
+            std::cout << children[i].GetArg() << '\n';
+            StringToMap(children[i].GetArg(), Commands, 1);
         }
 		else if ( children[i].GetLvl() == 2 )
 		{
@@ -236,8 +168,16 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
+        // std::cout << "  hey   "<<tmp[i] << '\n';
+        if (key == "server")
+        {
+            std::cerr << " Nested server" << std::endl;
+            exit(1);
+        }
         if (flag)
+        {
             keys.push_back(key);
+        }
 		values = FillVector( split(tmp[i], " ") );
 		Mp.insert(std::make_pair(key, values));
 		i++;
@@ -248,19 +188,27 @@ int Server::Getfd() const{
     return (fd);
 }
 
+void    Server::InitializeServerSettings()
+{
+    if (GetValuesFromKeys(Commands, "listen") != "")
+        port = GetValuesFromKeys(Commands, "listen");
+    if (GetValuesFromKeys(Commands, "server_name") != "")
+        server_name = GetValuesFromKeys(Commands, "server_name");
+    if (GetValuesFromKeys(Commands, "host") != "")
+        ip = GetValuesFromKeys(Commands, "host");
+    if (GetValuesFromKeys(Commands, "root") != "")
+        root = GetValuesFromKeys(Commands, "root");
+    if (GetValuesFromKeys(Commands, "index") != "")
+        index = GetValuesFromKeys(Commands, "index");
+}
+
 
 std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 {
     return (Commands);
 }
 
-int Server::CloseFd()
-{
-    return (close(fd_endpoint));
-}
-
 Server::~Server()
 {
-    if (fd != -1)
-        close(fd);
+    close(fd);
 }
