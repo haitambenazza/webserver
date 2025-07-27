@@ -2,7 +2,7 @@
 
 bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 {
-    EpollFd = epoll_create1(0);
+    EpollFd = epoll_create1(EPOLL_CLOEXEC);
     if ( EpollFd == -1 )
     {
 		perror("Epoll_create");
@@ -11,7 +11,7 @@ bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		struct epoll_event Event;
-		Event.events = EPOLLIN ;
+		Event.events = EPOLLIN | EPOLLET;
 		Event.data.fd = server[i].Getfd();
     	if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
     	{
@@ -48,6 +48,12 @@ Multiplexer::~Multiplexer()
 int Multiplexer::GetClientFd() const
 {
     return (NewConnection);
+}
+
+Multiplexer& Multiplexer::operator=( const Multiplexer& copy )
+{
+    (void)copy;
+    return (*this);
 }
 
 int Multiplexer::GetEpollFd() const
