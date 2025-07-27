@@ -73,7 +73,7 @@ void	ReadData(Multiplexer &m, int &i)
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
-		std::cout << buffer;
+		std::cout << buffer << std::endl;
 		memset(&tmp, 0, sizeof(tmp));
 		buffer.clear();
 		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
