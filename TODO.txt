@@ -1,14 +1,7 @@
 1- parsing config file
-	- fill the data for the server and location
 	- check for server_name (IP:port can be the same but not the name)
 	- create a map of HTTP errors (404)
 	- specify the location for POST method
 	- specify redirection key
 
 2- establish the server with multiplexing and Non-blocking I/O (concurrency)
-	- enable multiplexing (using epoll())
-	=> for multiplexer
-		. add every Fd using epoll() to notify the thread when a event occur in that Fd
-		. use it with accpet() send() recv() and other Read/Write operation
-	- handle the clients (accpet the connection)
-	- read/write to the socket

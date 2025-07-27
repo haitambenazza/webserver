@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/24 03:54:50 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/27 03:21:39 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ class Server
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
         int16_t	fd;
+
 		std::string	server_name;
 		std::string	port;
 		std::string	ip;
@@ -30,6 +31,7 @@ class Server
 		std::string index;
 		u_int64_t	max_body_size;
 		std::map<u_int16_t , std::string>error_map;
+
     public :
         Server();
         Server( const Server& copy );
@@ -48,4 +50,6 @@ class Server
         void    PrintData();
         void    SetDefaultValue();
         void	SetAddrServer(struct sockaddr_in *addr);
+        std::string GetIp() const;
+        std::string GetPort() const;
 };
