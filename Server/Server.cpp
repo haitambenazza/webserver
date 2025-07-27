@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/26 04:29:01 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/27 20:02:06 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,10 +130,7 @@ void Server::SetServer( Block& block)
     while ( i < children.size() )
 	{
 		if ( children[i].GetLvl() == 1 )
-        {
-            std::cout << children[i].GetArg() << '\n';
             StringToMap(children[i].GetArg(), Commands, 1);
-        }
 		else if ( children[i].GetLvl() == 2 )
 		{
             std::vector<std::string> lst;

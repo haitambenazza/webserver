@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:42:47 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/16 22:42:52 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/27 20:01:18 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void    File::ReadLines()
                 }
                 else
                 {
-                    std::cout<< "Error at line " << i  << " " << tmp << std::endl;
+                    std::cerr << "Error at line " << i  << " " << tmp << std::endl;
                     RawString.clear();
                     file.close();
                     return ;
@@ -134,7 +134,7 @@ int         File::OpenFile()
     file.open(name.c_str(), std::fstream::in);
     if (!file.is_open())
     {
-        std::cout << "Error opening file" << std::endl;
+        std::cerr << "Error opening file" << std::endl;
         return (1);
     }
     return (0);

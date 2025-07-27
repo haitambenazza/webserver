@@ -5,3 +5,5 @@
 	- specify redirection key
 
 2- establish the server with multiplexing and Non-blocking I/O (concurrency)
+	- need to test it with firefox by modifying the request header and the payload
+	
