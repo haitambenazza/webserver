@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/26 04:29:01 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/27 04:04:54 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,21 @@
 
 void	Server::SetAddrServer(struct sockaddr_in *addr)
 {
+    struct addrinfo hints;
+    struct addrinfo *res;
+    int status = 0;
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    status = getaddrinfo(ip.c_str(), port.c_str(), &hints, &res);
+    if (status)
+    {
+        perror("IP:Port");
+        return ;
+    }
 	memset(addr, 0, sizeof(struct sockaddr_in));
-	addr->sin_family = AF_INET;
-	addr->sin_addr.s_addr = htonl(StrToIp(ip));
-	addr->sin_port = htons((uint16_t)atoi(port.c_str()));
+    memcpy(addr, res->ai_addr, sizeof(sockaddr_in));
 }
 
 void    Server::SetDefaultValue()
@@ -130,10 +141,7 @@ void Server::SetServer( Block& block)
     while ( i < children.size() )
 	{
 		if ( children[i].GetLvl() == 1 )
-        {
-            std::cout << children[i].GetArg() << '\n';
             StringToMap(children[i].GetArg(), Commands, 1);
-        }
 		else if ( children[i].GetLvl() == 2 )
 		{
             std::vector<std::string> lst;
@@ -168,7 +176,6 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
-        // std::cout << "  hey   "<<tmp[i] << '\n';
         if (key == "server")
         {
             std::cerr << " Nested server" << std::endl;
