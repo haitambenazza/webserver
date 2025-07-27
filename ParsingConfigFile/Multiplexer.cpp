@@ -1,35 +1,24 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Multiplexer.cpp                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/18 23:16:31 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/22 21:36:56 by hbenazza         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../headers/webserver.hpp"
 
-bool        Multiplexer::InitMultiplexer( const Server& server )
+bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 {
-    int i;
-
-    i = 0;
     EpollFd = epoll_create1(0);
     if ( EpollFd == -1 )
     {
-        perror("Epoll_create");
+		perror("Epoll_create");
         return (false);
     }
-    Event.events = EPOLLIN ;
-    Event.data.fd = server.Getfd();
-    if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
-    {
-        perror("Epoll_ctl");
-        return (false);
-    }
+	for (int i = 0; i < (int)server.size(); i++)
+	{
+		struct epoll_event Event;
+		Event.events = EPOLLIN ;
+		Event.data.fd = server[i].Getfd();
+    	if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
+    	{
+    	    perror("Epoll_ctl");
+    	    return (false);
+    	}
+	}
     return (true);
 }
 
@@ -41,13 +30,12 @@ Multiplexer::Multiplexer()
 }
 
 
-Multiplexer::Multiplexer(const Server &server)
+Multiplexer::Multiplexer(std::vector<Server> &server)
 {
     EpollFd = -1;
     NumFds = -1;
     NewConnection = -1;
     InitMultiplexer(server);
-
 }
 
 Multiplexer::~Multiplexer()
@@ -84,17 +72,9 @@ void         Multiplexer::SetClientFd(int clientfd)
 {
     NewConnection = clientfd;
 }
-struct epoll_event*      Multiplexer::GetEvent()
-{
-    return (&Event);
-}
+
 struct epoll_event*      Multiplexer::GetEvents()
 {
     return (Events);
 }
 
-void Multiplexer::SetEvent(int event, int fd)
-{
-    Event.data.fd = fd;
-    Event.events = event;
-}

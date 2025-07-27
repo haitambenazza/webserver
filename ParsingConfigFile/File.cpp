@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   File.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/16 22:42:47 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/19 02:28:32 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/16 22:42:52 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,24 +43,23 @@ std::string File::GetExtention()const
     return (extention);
 }
 
-int         File::SetExtention()
+void         File::SetExtention()
 {
     int i;
 
     i = name.length();
-    while (i != 0)
+    while (i >= 0)
     {
         if (name[i] == '.')
             break ;
         i--;
     }
     extention = name.substr(i, name.length() - i);
-    if (extention != ".conf" || i == 0)
+    if (extention != ".conf")
     {
         std::cerr << "wrong extention, webserver takes only .conf\n";
-        return (1);
+        return ;
     }
-    return (0);
 }
 
 std::string&         File::GetRawString()
