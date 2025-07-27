@@ -109,7 +109,7 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 bool SendData(Multiplexer &m, int i)
 {
 	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
-	std::ifstream file("/home/hbenazza/Desktop/webserver/site/text.html");
+	std::ifstream file("/home/amoubine/Desktop/webserver/site/text.html");
 	std::stringstream html;
 
 	if (!file.is_open())
