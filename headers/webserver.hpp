@@ -3,10 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
+<<<<<<< HEAD
 /*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
 /*   Updated: 2025/07/29 15:10:17 by amoubine         ###   ########.fr       */
+=======
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
+/*   Updated: 2025/07/29 15:03:31 by kbassim          ###   ########.fr       */
+>>>>>>> origin/khalil
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +25,6 @@
 #include <sstream>
 #include <cstring>
 #include <fcntl.h>
-#include <sstream>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>

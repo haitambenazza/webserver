@@ -78,11 +78,18 @@ void	ReadData(Multiplexer &m, int &i)
 	std::string buffer;
 	Request req;
 
+<<<<<<< HEAD
 	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024 , 0);
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
 		// std::cout << buffer << std::endl;
+=======
+	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024, 0);
+	if (bytes_read > 0)
+	{
+		buffer += tmp;
+>>>>>>> origin/khalil
 		if (!buffer.empty())
 		{
 			req.parse(buffer);
@@ -123,7 +130,11 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 bool SendData(Multiplexer &m, int i)
 {
 	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
+<<<<<<< HEAD
 	std::ifstream file("/home/hbenazza/Desktop/webserver/site/text.html");
+=======
+	std::ifstream file("/home/kbassim/Desktop/webserv/site/text.html");
+>>>>>>> origin/khalil
 	std::stringstream html;
 
 	if (!file.is_open())
