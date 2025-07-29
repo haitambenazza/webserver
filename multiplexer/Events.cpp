@@ -68,12 +68,18 @@ void	ReadData(Multiplexer &m, int &i)
 {
 	char tmp[1024] = {0};
 	std::string buffer;
+	Request req;
 
-	int bytes_read = read(m.GetEvents()[i].data.fd, &tmp, 1024);
+	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024 , 0);
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
-		std::cout << buffer << std::endl;
+		// std::cout << buffer << std::endl;
+		if (!buffer.empty())
+		{
+			req.parse(buffer);
+			req.printRequestData();
+		}
 		memset(&tmp, 0, sizeof(tmp));
 		buffer.clear();
 		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
