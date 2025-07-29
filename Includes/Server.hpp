@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/26 17:39:04 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/29 20:26:30 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Server
 		std::string index;
 		u_int64_t	max_body_size;
 		std::map<u_int16_t , std::string>error_map;
+        bool        status;
     public :
         Server();
         Server( const Server& copy );
@@ -50,4 +51,6 @@ class Server
         void	SetAddrServer(struct sockaddr_in *addr);
         std::string GetIp() const;
         std::string GetPort() const;
+        bool GetStatus() const;
+        void SetStatus(bool stat);
 };
