@@ -66,14 +66,14 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 
 void	ReadData(Multiplexer &m, int &i)
 {
-	char tmp[1024] = {0};
+	char tmp[4096] = {0};
 	std::string buffer;
 
-	int bytes_read = read(m.GetEvents()[i].data.fd, &tmp, 1024);
+	int bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp));
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
-		std::cout << buffer;
+		std::cout << buffer << '\n';
 		memset(&tmp, 0, sizeof(tmp));
 		buffer.clear();
 		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
