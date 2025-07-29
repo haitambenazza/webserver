@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:33:31 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/13 16:45:52 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/29 20:48:42 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Block
         std::vector<Block>          Blocks;
         std::vector<std::string>    Names;
         Block*                      Parent;
+        bool                        Status;
     public:
         Block();
         Block( const Block& copy );
@@ -40,6 +41,7 @@ class Block
         std::string&                GetArg();
         int                         GetLvl();
         void                        ArgEpur(std::string &s, Block& blk );
+        bool                        GetStatus() const;
 };  
 
 #endif

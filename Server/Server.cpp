@@ -82,6 +82,7 @@ Server::Server( const Server& copy )
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
+    status = copy.status;
     if (!SetServer())
     {
         status = false;
@@ -113,7 +114,7 @@ std::vector<std::string>    Server::GetKeys()
     return (keys);
 }
 
-void Server::SetServer( Block& block)
+void Server::SetServer( Block& block )
 {
 	std::vector<Block>& children = block.GetBlocks();
 	size_t 	i;
@@ -136,7 +137,7 @@ void Server::SetServer( Block& block)
             else
             {
                 std::cerr << "Location has no path " << std::endl;
-                return ;
+                status = false;
             }
 			Locations.push_back( NewLocation );
 		}
@@ -160,12 +161,10 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
         if (key == "server")
         {
             std::cerr << " Nested server" << std::endl;
-            exit(1);
+            status = false;
         }
         if (flag)
-        {
             keys.push_back(key);
-        }
 		values = FillVector( split(tmp[i], " ") );
 		Mp.insert(std::make_pair(key, values));
 		i++;

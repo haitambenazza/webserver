@@ -1,24 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Block.cpp                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/25 00:47:23 by kbassim          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../headers/webserver.hpp"
 
-Block::Block() : Lvl(0), ArgStart(0), Parent(NULL)
+Block::Block() : Lvl(0), ArgStart(0), Parent(NULL), Status(true)
 {
 }
 
 Block::Block( const Block& copy )
 {
     Lvl = copy.Lvl;
+    Status = copy.Status;
     BlockName = copy.BlockName;
     Arg = copy.Arg;
     Blocks = copy.Blocks;
@@ -28,6 +17,7 @@ Block& Block::operator=( const Block& copy )
 {
     if (this != &copy)
     {
+        Status = copy.Status;
         Lvl = copy.Lvl;
         BlockName = copy.BlockName;
         Arg = copy.Arg;
@@ -106,6 +96,7 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
     if (blk.Lvl > 2)
     {
         std::cerr << "Nested Location detected" << std::endl;
+        Status = false;
         return ;
     }
     ArgEpur( s, blk );
@@ -120,6 +111,12 @@ int     Block::GetLvl()
 {
     return (Lvl);
 }
+
+bool         Block::GetStatus() const
+{
+    return (Status);
+}
+
 void    Block::SetBlockName( std::string& s, Block& block, size_t pos )
 {
     int         j;
@@ -190,7 +187,9 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
                 i++;
                 j--;
                 if (j <= 0)
+                {
                     return ;
+                }
             }
         }
         else
