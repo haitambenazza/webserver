@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amoubine <amoubine@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/30 20:33:58 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/27 00:20:22 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/29 15:10:17 by amoubine         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@
 #include "../Includes/Multiplexer.hpp"
 #include "../Includes/ServerTools.hpp"
 #include "../Includes/Events.hpp"
+#include "../Includes/Request.hpp"
 
 
 #endif

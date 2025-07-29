@@ -68,34 +68,56 @@ void Request::parse(const std::string& request_string)
     std::stringstream str(request_string);
     std::string line;
 
-    std::getline(str , line);
-
+    std::getline(str, line);
     std::stringstream request_line(line);
 
-    request_line >> method >> uri >> version;
+    // Try to parse as HTTP request
+    std::string temp_method, temp_uri, temp_version;
+    request_line >> temp_method >> temp_uri >> temp_version;
 
-    while (std::getline(str , line) && !line.empty() && line != "\r")
+    // Check if this looks like a valid HTTP request
+    // Valid HTTP methods: GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH, etc.
+    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE")
+        && !temp_uri.empty() && 
+         (temp_version.find("HTTP/") == 0))
     {
-        size_t double_dots = line.find(':');
-        if (double_dots != std::string::npos)
-        {
-            std::string key = line.substr(0 , double_dots);
-            std::string value = line.substr(double_dots + 2);
+        // This is a valid HTTP request - parse normally
+        method = temp_method;
+        uri = temp_uri;
+        version = temp_version;
 
-            if (!value.empty() && value[value.size() - 1] == '\r')
+        // Parse headers
+        while (std::getline(str, line) && !line.empty() && line != "\r")
+        {
+            size_t double_dots = line.find(':');
+            if (double_dots != std::string::npos)
             {
-                value.erase(value.size() - 1);
+                std::string key = line.substr(0, double_dots);
+                std::string value = line.substr(double_dots + 2);
+
+                if (!value.empty() && value[value.size() - 1] == '\r')
+                {
+                    value.erase(value.size() - 1);
+                }
+                headers.insert(std::make_pair(key, value));
             }
-            headers.insert(std::make_pair(key , value));
         }
         
+        // Parse body
+        if (str)
+        {
+            std::stringstream body_string;
+            body_string << str.rdbuf();
+            this->body = body_string.str();
+        }
     }
-
-    if (str)
+    else
     {
-        std::stringstream   body_string;
-        body_string << str.rdbuf();
-        this->body = body_string.str();
+        // This is NOT a valid HTTP request - treat entire input as raw data
+        // Put the entire request_string as body
+        this->body = request_string;
+        
+        std::cout << "[INFO] Non-HTTP request detected, treating as raw data" << std::endl;
     }
 }
 
