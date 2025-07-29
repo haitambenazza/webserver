@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
 /*   Updated: 2025/07/26 04:16:35 by hbenazza         ###   ########.fr       */
@@ -165,9 +165,9 @@ int main( int ac, char **av, char **envp )
 	(void)envp;
 	if (ac != 2)
 	{
-		Server server(av[1]);
-		server.PrintData();
-		RunServer(server);
+		std::cerr << "Invalid number of arguments" << std::endl;
+		std::cerr << "./Webserv file_name.conf" << std::endl;
+		return (1);
 	}
 	if (InitServers(servers, av[1]) == false)
 		return (std::cerr << "failed to init servers\n", 1);
