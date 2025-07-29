@@ -6,7 +6,7 @@
 /*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/29 20:30:55 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/29 20:46:58 by hbenazza         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,22 +41,13 @@ bool    Server::SetServer()
     fd = socket(AF_INET, SOCK_STREAM, 0);
     fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
-    {
-        perror("Socket");
         return false;
-    }
     setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
 	SetAddrServer(&addr);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
-    {
-        perror("Bind");
         return false;
-    }
     if ((listen(fd, SOMAXCONN)) == -1)
-    {
-        perror("Listen");
         return false;
-    }
     return true;
 }
 
@@ -75,8 +66,9 @@ std::string Server::GetServerName()const
     return (server_name);
 }
 
-Server::Server(): status(true)
+Server::Server()
 {
+    status = true;
     if (!SetServer())
     {
         std::cerr << server_name <<" encountered an error\n";
@@ -85,8 +77,9 @@ Server::Server(): status(true)
     }
 }
 
-Server::Server( const Server& copy ):status(true)
+Server::Server( const Server& copy )
 {
+    status = true;
     Data = copy.Data;
     keys = copy.keys;
     Locations = copy.Locations;

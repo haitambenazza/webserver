@@ -6,6 +6,11 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	servers = GetFullServers(filename);
 	if (servers.empty())
 		return (false);
+	for (int i = 0; i < (int)servers.size(); i++)
+	{
+		if (servers[i].GetStatus() == false)
+			servers.erase(servers.begin() + i);
+	}
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
 		servers[serv].InitializeServerSettings();
