@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/27 06:02:31 by amoubine         ###   ########.fr       */
+/*   Updated: 2025/07/29 14:43:05 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ bool	CheckBrackets( std::string s )
 std::vector<std::string> GetServers( std::string& s )
 {
 	std::vector<std::string> ServersData;
+	std::string	server("server");
+	std::string	server_name("server_name");
 	size_t i = 0;
 	size_t pos;
 	size_t pos0;
@@ -59,31 +61,23 @@ std::vector<std::string> GetServers( std::string& s )
 
 	while (i < s.size())
 	{
-		pos = s.find("server", i);
+		pos = s.find(server, i);
 		if (pos == std::string::npos)
 			break;
-
-		pos0 = s.find("server", pos + 6);
-		if (pos0 != std::string::npos && s.substr(pos0, 11) == "server_name")
-			pos0 = s.find("server", pos0 + 11);
-
+		pos0 = s.find(server, pos + server.length());
+		if (pos0 != std::string::npos && s.substr(pos0, server_name.length()) == server_name)
+			pos0 = s.find(server, pos0 + server_name.length());
 		if (pos0 == std::string::npos)
-		{
-			// Handle the last server block
 			pos0 = s.size();
-		}
-
 		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
 		{
 			std::cerr << "Nested server detected\n";
 			ServersData.clear();
 			return ServersData;
 		}
-
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
-
 	return ServersData;
 }
 

@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/25 00:47:23 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/29 20:38:47 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,7 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
     if (blk.Lvl > 2)
     {
         std::cerr << "Nested Location detected" << std::endl;
+        Status = false;
         return ;
     }
     ArgEpur( s, blk );
@@ -190,7 +191,10 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
                 i++;
                 j--;
                 if (j <= 0)
+                {
+                    Status = false;
                     return ;
+                }
             }
         }
         else
