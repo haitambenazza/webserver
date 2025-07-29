@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 14:16:20 by hbenazza          #+#    #+#             */
-/*   Updated: 2025/07/29 14:43:05 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/29 21:44:01 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,6 @@ std::vector<std::string> GetServers( std::string& s )
 			pos0 = s.find(server, pos0 + server_name.length());
 		if (pos0 == std::string::npos)
 			pos0 = s.size();
-		if (!CheckBrackets(s.substr(pos, pos0 - pos)))
-		{
-			std::cerr << "Nested server detected\n";
-			ServersData.clear();
-			return ServersData;
-		}
 		ServersData.push_back(s.substr(pos, pos0 - pos));
 		i = pos0;
 	}
@@ -105,6 +99,10 @@ std::vector<Server>   GetFullServers( char* FileName )
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
 		srvs.push_back( NewServer );
 		srvs.back().SetServer( NewBlock );
+		if (NewBlock.GetStatus() == false)
+		srvs.back().SetStatus(NewBlock.GetStatus());
+		if (!CheckBrackets(lst[i]))
+			srvs.back().SetStatus(false);
 		i++;
 	}
 	return (srvs);

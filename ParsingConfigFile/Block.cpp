@@ -6,19 +6,20 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/29 20:38:47 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/29 21:36:41 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../headers/webserver.hpp"
 
-Block::Block() : Lvl(0), ArgStart(0), Parent(NULL)
+Block::Block() : Lvl(0), ArgStart(0), Parent(NULL), Status(true)
 {
 }
 
 Block::Block( const Block& copy )
 {
     Lvl = copy.Lvl;
+    Status = copy.Status;
     BlockName = copy.BlockName;
     Arg = copy.Arg;
     Blocks = copy.Blocks;
@@ -28,6 +29,7 @@ Block& Block::operator=( const Block& copy )
 {
     if (this != &copy)
     {
+        Status = copy.Status;
         Lvl = copy.Lvl;
         BlockName = copy.BlockName;
         Arg = copy.Arg;
@@ -121,6 +123,12 @@ int     Block::GetLvl()
 {
     return (Lvl);
 }
+
+bool         Block::GetStatus() const
+{
+    return (Status);
+}
+
 void    Block::SetBlockName( std::string& s, Block& block, size_t pos )
 {
     int         j;
@@ -192,7 +200,6 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
                 j--;
                 if (j <= 0)
                 {
-                    Status = false;
                     return ;
                 }
             }

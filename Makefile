@@ -6,7 +6,7 @@
 #    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/18 13:58:47 by hbenazza         ###   ########.fr        #
+#    Updated: 2025/07/27 22:55:24 by hbenazza         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,11 +25,11 @@ CC = c++
 CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
 
 %.o: %.cpp
-	echo $(SRC)
-	$(CC) $(CXXFLAGS) -c $^ -o $@
+	@$(CC) $(CXXFLAGS) -c $^ -o $@
 
 $(NAME): $(SRC) $(OBJ)
-	$(CC) $(CXXFLAGS) $(OBJ) -o $(NAME)
+	@$(CC) $(CXXFLAGS) $(OBJ) -o $(NAME)
+	@echo "the executable is ready"
 
 clean:
 	@rm -rf $(OBJ)

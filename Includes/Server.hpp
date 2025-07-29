@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/27 03:21:39 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/29 21:24:14 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,34 +22,36 @@ class Server
         std::vector <std::string>                               keys;
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
-        int16_t	fd;
+        int16_t	                                                fd;
 
-		std::string	server_name;
-		std::string	port;
-		std::string	ip;
-		std::string root;
-		std::string index;
-		u_int64_t	max_body_size;
-		std::map<u_int16_t , std::string>error_map;
-
+		std::string	                                            server_name;
+		std::string	                                            port;
+		std::string	                                            ip;
+		std::string                                             root;
+		std::string                                             index;
+		u_int64_t	                                            max_body_size;
+		std::map<u_int16_t , std::string>                       error_map;
+        bool                                                    status;
     public :
         Server();
         Server( const Server& copy );
         Server& operator=( const Server& copy );
         ~Server();
 
-        void            SetServer( Block& block);
+        void                                                    SetServer( Block& block);
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::vector < Location >&                               GetLocations();
-        void	        StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
+        void	                                                StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
         std::vector<std::string>                                GetKeys();
-        bool SetServer();
-        int Getfd() const;
-        std::string GetServerName()const;
+        bool                                                    SetServer();
+        int                                                     Getfd() const;
+        std::string                                             GetServerName()const;
         void    InitializeServerSettings();
         void    PrintData();
         void    SetDefaultValue();
         void	SetAddrServer(struct sockaddr_in *addr);
         std::string GetIp() const;
         std::string GetPort() const;
+        bool GetStatus() const;
+        void SetStatus(bool stat);
 };
