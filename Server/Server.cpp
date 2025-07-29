@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/27 20:02:06 by hbenazza         ###   ########.fr       */
+/*   Updated: 2025/07/29 21:28:04 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,24 +86,27 @@ std::string Server::GetServerName()const
     return (server_name);
 }
 
-Server::Server()
+Server::Server(): status(true)
 {
-    if (this->SetServer() == false)
+    if (!SetServer())
     {
         std::cerr << server_name <<" encountered an error\n";
+        status = false;
         return ;
     }
 }
 
-Server::Server( const Server& copy )
+Server::Server( const Server& copy ):status(true)
 {
     Data = copy.Data;
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
+    status = copy.status;
     if (!SetServer())
     {
         std::cerr << server_name <<" encountered an error\n";
+        status = false;
         return ;
     }
 }
@@ -132,7 +135,7 @@ std::vector<std::string>    Server::GetKeys()
     return (keys);
 }
 
-void Server::SetServer( Block& block)
+void Server::SetServer( Block& block )
 {
 	std::vector<Block>& children = block.GetBlocks();
 	size_t 	i;
@@ -155,7 +158,7 @@ void Server::SetServer( Block& block)
             else
             {
                 std::cerr << "Location has no path " << std::endl;
-                return ;
+                status = false;
             }
 			Locations.push_back( NewLocation );
 		}
@@ -179,12 +182,10 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
         if (key == "server")
         {
             std::cerr << " Nested server" << std::endl;
-            exit(1);
+            status = false;
         }
         if (flag)
-        {
             keys.push_back(key);
-        }
 		values = FillVector( split(tmp[i], " ") );
 		Mp.insert(std::make_pair(key, values));
 		i++;
@@ -227,4 +228,14 @@ std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 Server::~Server()
 {
     close(fd);
+}
+
+bool Server::GetStatus() const
+{
+    return (status);
+}
+
+void Server::SetStatus(bool stat)
+{
+    status = stat;
 }

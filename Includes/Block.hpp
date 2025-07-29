@@ -6,7 +6,7 @@
 /*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 22:33:31 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/29 20:37:26 by kbassim          ###   ########.fr       */
+/*   Updated: 2025/07/29 20:48:42 by kbassim          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Block
         std::string&                GetArg();
         int                         GetLvl();
         void                        ArgEpur(std::string &s, Block& blk );
+        bool                        GetStatus() const;
 };  
 
 #endif

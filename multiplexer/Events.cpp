@@ -66,7 +66,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 
 void	ReadData(Multiplexer &m, int &i)
 {
-	char tmp[1024] = {0};
+	char tmp[4096] = {0};
 	std::string buffer;
 	Request req;
 
