@@ -78,7 +78,7 @@ void	ReadData(Multiplexer &m, int &i)
 	std::string buffer;
 	Request req;
 
-	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024, 0);
+	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0);
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
