@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/29 20:26:30 by hbenazza         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #pragma once
 #include "Includes.hpp"
 #include "../Includes/Block.hpp"
@@ -23,6 +11,7 @@ class Server
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
         int16_t	fd;
+
 		std::string	server_name;
 		std::string	port;
 		std::string	ip;

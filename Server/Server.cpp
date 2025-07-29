@@ -1,23 +1,22 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/12 05:28:16 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/29 20:46:58 by hbenazza         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../headers/webserver.hpp"
 
 void	Server::SetAddrServer(struct sockaddr_in *addr)
 {
+    struct addrinfo hints;
+    struct addrinfo *res;
+    int status = 0;
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    status = getaddrinfo(ip.c_str(), port.c_str(), &hints, &res);
+    if (status)
+    {
+        perror("IP:Port");
+        return ;
+    }
 	memset(addr, 0, sizeof(struct sockaddr_in));
-	addr->sin_family = AF_INET;
-	addr->sin_addr.s_addr = htonl(StrToIp(ip));
-	addr->sin_port = htons((uint16_t)atoi(port.c_str()));
+    memcpy(addr, res->ai_addr, sizeof(sockaddr_in));
 }
 
 void    Server::SetDefaultValue()
@@ -71,7 +70,6 @@ Server::Server()
     status = true;
     if (!SetServer())
     {
-        std::cerr << server_name <<" encountered an error\n";
         status = false;
         return ;
     }
@@ -86,7 +84,6 @@ Server::Server( const Server& copy )
     Commands = copy.Commands;
     if (!SetServer())
     {
-        std::cerr << server_name <<" encountered an error\n";
         status = false;
         return ;
     }
@@ -160,7 +157,6 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	while ( i < (int)tmp.size() )
 	{
 		key = split( tmp[i], " " )[0];
-        // std::cout << "  hey   "<<tmp[i] << '\n';
         if (key == "server")
         {
             std::cerr << " Nested server" << std::endl;
