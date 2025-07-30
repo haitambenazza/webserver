@@ -6,6 +6,14 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	servers = GetFullServers(filename);
 	if (servers.empty())
 		return (false);
+	for (int i = 0; i < (int)servers.size(); i++)
+	{
+		if (servers[i].GetStatus() == false || Check_if_valid(servers[i].GetKeys()) == false)
+		{
+			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
+			servers.erase(servers.begin() + i);
+		}
+	}
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
 		servers[serv].InitializeServerSettings();
@@ -60,7 +68,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("epoll_ctl()");
 		return (false);
 	}
-	std::cout << "New client [" << m.GetClientFd() << "] connected to " << GetAddrServer(m,s,fd) << '\n';
+	std::cout << "\033[32mNew client [" << m.GetClientFd() << "] connected to " << GetAddrServer(m,s,fd) << "\033[0m\n";
 	return true;
 }
 
@@ -70,10 +78,11 @@ void	ReadData(Multiplexer &m, int &i)
 	std::string buffer;
 	Request req;
 
-	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024, 0);
+	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024 , 0);
 	if (bytes_read > 0)
 	{
 		buffer += tmp;
+		// std::cout << buffer << std::endl;
 		if (!buffer.empty())
 		{
 			req.parse(buffer);
