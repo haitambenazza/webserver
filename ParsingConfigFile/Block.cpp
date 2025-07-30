@@ -1,4 +1,3 @@
-
 #include "../headers/webserver.hpp"
 
 Block::Block() : Lvl(0), ArgStart(0), Parent(NULL), Status(true)
@@ -66,8 +65,10 @@ void        Block::ArgEpur(std::string &s, Block& blk )
     GetNames( s,  blk );
     while ( c < (int)blk.Names.size() )
     {
+        if (blk.Names[c].find("server") == std::string::npos && blk.Names[c].find("location") == std::string::npos)
+            Status = false;
         Pos = blk.Arg.find(blk.Names[c]);
-        if ( Pos != std::string::npos && !s.find("server_name", Pos) )
+        if ( Pos != std::string::npos && s.find("server_name", Pos) == std::string::npos )
             blk.Arg.erase(Pos, blk.Names[c].length());
         c++;
     }
@@ -94,13 +95,13 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
         pos++;
     }
     blk.Arg = NewString;
+    ArgEpur( s, blk );
     if (blk.Lvl > 2)
     {
         std::cerr << "Nested Location detected" << std::endl;
         Status = false;
         return ;
     }
-    ArgEpur( s, blk );
 }
 
 const std::string&   Block::GetName( ) const
@@ -188,9 +189,7 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
                 i++;
                 j--;
                 if (j <= 0)
-                {
                     return ;
-                }
             }
         }
         else
