@@ -8,7 +8,7 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		return (false);
 	for (int i = 0; i < (int)servers.size(); i++)
 	{
-		if (servers[i].GetStatus() == false)
+		if (servers[i].GetStatus() == false || Check_if_valid(servers[i].GetKeys()) == false)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
 			servers.erase(servers.begin() + i);

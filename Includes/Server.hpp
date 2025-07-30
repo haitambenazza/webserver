@@ -6,7 +6,6 @@
 class Server
 {
     private :
-        std::vector <std::string>                               Data;
         std::vector <std::string>                               keys;
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
@@ -25,7 +24,7 @@ class Server
         Server& operator=( const Server& copy );
         ~Server();
 
-        void                                                    SetServer( Block& block);
+        void                                                    SetServers( Block& block);
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::vector < Location >&                               GetLocations();
         void	                                                StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
@@ -33,12 +32,22 @@ class Server
         bool                                                    SetServer();
         int                                                     Getfd() const;
         std::string                                             GetServerName()const;
-        void    InitializeServerSettings();
-        void    PrintData();
-        void    SetDefaultValue();
-        void	SetAddrServer(struct sockaddr_in *addr);
-        std::string GetIp() const;
-        std::string GetPort() const;
-        bool GetStatus() const;
-        void SetStatus(bool stat);
+        void                                                    InitializeServerSettings();
+        void                                                    PrintData();
+        void                                                    SetDefaultValue();
+        void	                                                SetAddrServer(struct sockaddr_in *addr);
+        std::string                                             GetIp() const;
+        std::string                                             GetPort() const;
+        bool                                                    GetStatus() const;
+        void                                                    SetStatus(bool stat);
 };
+
+std::vector<std::string>	FillVector( std::vector<std::string> Src );
+void	                    PrintMap(std::map<std::string , std::vector <std::string> > Commands);
+bool                        CheckBrackets( std::string s );
+void	                    PrintServer( Server& Serv );
+bool	                    CheckBrackets( std::string s );
+std::vector<std::string>    GetServers( std::string& s );
+std::vector<Server>         GetFullServers( char* FileName );
+bool	                    IsPresent(const std::vector<std::string>& vctr, std::string s);
+bool                        Check_if_valid(const std::vector<std::string> str);
