@@ -77,9 +77,9 @@ void	ReadData(Multiplexer &m, int &i)
 	char tmp[4096] = {0};
 	std::string buffer;
 	Request req;
+	int bytes_read;
 
-	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0);
-	if (bytes_read > 0)
+	while ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		buffer += tmp;
 		if (!buffer.empty())
@@ -96,7 +96,7 @@ void	ReadData(Multiplexer &m, int &i)
 			return ;
 		}
 	}
-	else if (bytes_read == 0)
+	if (bytes_read == 0)
 	{
 		std::cout << "Client disconnected from " << m.GetEvents()[i].data.fd << '\n';
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
