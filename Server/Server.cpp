@@ -52,6 +52,8 @@ bool    Server::SetServer()
 
 void Server::PrintData()
 {
+    if (status == false)
+        std::cout << "STATUS" << status << "\n";
     std::cout << "NAME : " << this->server_name << "\n";
     std::cout << "IP : " << this->ip << "\n";
     std::cout << "PORT : " << this->port << "\n";
@@ -78,7 +80,6 @@ Server::Server()
 Server::Server( const Server& copy )
 {
     status = true;
-    Data = copy.Data;
     keys = copy.keys;
     Locations = copy.Locations;
     Commands = copy.Commands;
@@ -95,7 +96,6 @@ Server& Server::operator=( const Server& copy )
     if (this != & copy)
     {
         keys = copy.keys;
-        Data = copy.Data;
         Locations = copy.Locations;
         Commands = copy.Commands;
         close(fd);
@@ -114,20 +114,20 @@ std::vector<std::string>    Server::GetKeys()
     return (keys);
 }
 
-void Server::SetServer( Block& block )
+void Server::SetServers( Block& block )
 {
 	std::vector<Block>& children = block.GetBlocks();
-	size_t 	i;
+	int 	i;
 
-	i = 0;
-    while ( i < children.size() )
+	i = -1;
+    while ( ++i < (int)children.size() )
 	{
 		if ( children[i].GetLvl() == 1 )
             StringToMap(children[i].GetArg(), Commands, 1);
 		else if ( children[i].GetLvl() == 2 )
 		{
             std::vector<std::string> lst;
-            lst = split(children[i].GetName(), " ");
+            lst = split( children[i].GetName(), " " );
 			std::map < std::string, std::vector< std::string > >  Com;
 			Location NewLocation;
 			StringToMap( children[i].GetArg(), Com, 0 );
@@ -136,13 +136,13 @@ void Server::SetServer( Block& block )
                 NewLocation.SetPath( lst[1] );
             else
             {
-                std::cerr << "Location has no path " << std::endl;
                 status = false;
+                if (lst[0] == "location")
+                    std::cerr << "Location has no path " << std::endl;
             }
 			Locations.push_back( NewLocation );
 		}
-        SetServer( children[i] );
-		i++;
+        SetServers( children[i] );
     }
 }
 
@@ -157,12 +157,7 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	i = 0;
 	while ( i < (int)tmp.size() )
 	{
-		key = split( tmp[i], " " )[0];
-        if (key == "server")
-        {
-            std::cerr << " Nested server" << std::endl;
-            status = false;
-        }
+        key = split( tmp[i], " " )[0];
         if (flag)
             keys.push_back(key);
 		values = FillVector( split(tmp[i], " ") );

@@ -18,9 +18,7 @@ std::vector<std::string>    split(std::string s, std::string delimiter);
 void                        MaskInsideBrace( std::string& s );
 void                        RemoveNewLine( std::string& s );
 void                        TrimSpaces( std::string& s );
-std::vector<std::string>	FillVector( std::vector<std::string> Src );
-void	                    PrintMap(std::map<std::string , std::vector <std::string> > Commands);
-bool                        CheckBrackets( std::string s );
+
 
 #endif
 

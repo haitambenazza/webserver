@@ -1,5 +1,4 @@
-#ifndef WEBSERVER_HPP
-#define WEBSERVER_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -27,4 +26,3 @@
 #include "../Includes/Request.hpp"
 
 
-#endif
