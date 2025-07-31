@@ -1,6 +1,16 @@
 #include "../headers/webserver.hpp"
 
 
+bool	CheckLocationParams( Server &server )
+{
+	for (int i = 0; i < (int)server.GetLocations().size(); i++)
+	{
+		if (server.GetLocations()[i].GetPath().empty())
+			return (false);
+	}
+	return (true);
+}
+
 bool	InitServers(std::vector<Server> &servers, char *filename)
 {
 	servers = GetFullServers(filename);
@@ -8,14 +18,18 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		return (false);
 	for (int i = 0; i < (int)servers.size(); i++)
 	{
-		if (servers[i].GetStatus() == false || Check_if_valid(servers[i].GetKeys()) == false)
+		if (servers[i].GetStatus() == false)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
 			servers.erase(servers.begin() + i);
+			i--;
 		}
+		if (servers.size() == 0)
+			return (false);
 	}
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
+		//std::cout << "["<<servers[serv].GetServerName()<<"]" << "\n";
 		servers[serv].InitializeServerSettings();
 		servers[serv].PrintData();
 		std::cout << "------------------------\n";

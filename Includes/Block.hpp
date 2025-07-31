@@ -31,6 +31,7 @@ class Block
         int                         GetLvl();
         void                        ArgEpur(std::string &s, Block& blk );
         bool                        GetStatus() const;
+        void                        SetStatus( bool status );
 };  
 
 #endif
