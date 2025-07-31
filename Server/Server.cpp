@@ -53,8 +53,6 @@ bool    Server::SetServer()
 
 void Server::PrintData()
 {
-    if (status == false)
-        std::cout << "STATUS" << status << "\n";
     std::cout << "NAME : " << this->server_name << "\n";
     std::cout << "IP : " << this->ip << "\n";
     std::cout << "PORT : " << this->port << "\n";
@@ -119,7 +117,6 @@ void Server::SetServers( Block& block )
 {
 	std::vector<Block>& children = block.GetBlocks();
 	int 	i;
-
 	i = -1;
     while ( ++i < (int)children.size() )
 	{
@@ -136,11 +133,7 @@ void Server::SetServers( Block& block )
             if ( lst.size() != 1 )
                 NewLocation.SetPath( lst[1] );
             else
-            {
                 status = false;
-                if (lst[0] == "location")
-                    std::cerr << "Location has no path " << std::endl;
-            }
 			Locations.push_back( NewLocation );
 		}
         SetServers( children[i] );
