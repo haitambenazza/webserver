@@ -7,7 +7,7 @@ Request::Request(const std::string& request_string) {
     this->parse(request_string);
 }
 
-Request::Request(const Request& other) 
+Request::Request(const Request& other)
     : method(other.method), uri(other.uri), version(other.version), headers(other.headers), body(other.body) {}
 
 Request& Request::operator=(const Request& other) {
@@ -46,14 +46,14 @@ std::string Request::getMethod() const
 std::string Request::getHeaderValue(const std::string& header_name) const
 {
     std::map<std::string , std::string >::const_iterator it;
-    
+
     it = this->headers.find(header_name);
 
     if (it != this->headers.end())
     {
         return it->second;
     }
-    
+
     return "";
 }
 
@@ -78,7 +78,7 @@ void Request::parse(const std::string& request_string)
     // Check if this looks like a valid HTTP request
     // Valid HTTP methods: GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH, etc.
     if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE")
-        && !temp_uri.empty() && 
+        && !temp_uri.empty() &&
          (temp_version.find("HTTP/") == 0))
     {
         // This is a valid HTTP request - parse normally
@@ -102,7 +102,7 @@ void Request::parse(const std::string& request_string)
                 headers.insert(std::make_pair(key, value));
             }
         }
-        
+
         // Parse body
         if (str)
         {
@@ -116,7 +116,7 @@ void Request::parse(const std::string& request_string)
         // This is NOT a valid HTTP request - treat entire input as raw data
         // Put the entire request_string as body
         this->body = request_string;
-        
+
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data" << std::endl;
     }
 }
@@ -128,7 +128,7 @@ void Request::printRequestData() const
     std::cout << "Version: " << this->version << std::endl;
 
     std::cout << "--- Headers ---" << std::endl;
-    
+
     std::map<std::string, std::string>::const_iterator it;
     for (it = this->headers.begin(); it != this->headers.end(); ++it)
     {
