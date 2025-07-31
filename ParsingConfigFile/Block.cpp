@@ -98,7 +98,7 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
     ArgEpur( s, blk );
     if (blk.Lvl > 2)
     {
-        std::cerr << "Nested Location detected" << std::endl;
+        std::cerr << "nested location detected" << std::endl;
         Status = false;
         return ;
     }
@@ -160,7 +160,10 @@ std::string&    Block::GetArg()
     return (Arg);
 }
 
-
+void    Block::SetStatus( bool status )
+{
+    Status = status;
+}
 void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
 {
     Block   Child;
@@ -182,6 +185,8 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
                 i++;
                 block.Blocks.back().Lvl = j;
                 InBrakects( s, Child.ArgStart, block.Blocks.back() );
+                if (block.Blocks.back().Status == false)
+                    return ;
                 FillBlock( s, block.Blocks.back(), i, j );
             }
             else if (s[i] == '}')

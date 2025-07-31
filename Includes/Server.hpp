@@ -24,7 +24,7 @@ class Server
         Server& operator=( const Server& copy );
         ~Server();
 
-        void                                                    SetServers( Block& block);
+        void                                                    SetServers( Block& block );
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::vector < Location >&                               GetLocations();
         void	                                                StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
@@ -50,4 +50,5 @@ bool	                    CheckBrackets( std::string s );
 std::vector<std::string>    GetServers( std::string& s );
 std::vector<Server>         GetFullServers( char* FileName );
 bool	                    IsPresent(const std::vector<std::string>& vctr, std::string s);
-bool                        Check_if_valid(const std::vector<std::string> str);
+bool                        CheckValidKeys(const std::vector<std::string> str);
+bool	                    CheckLocationParams( Server &server );

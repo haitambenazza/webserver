@@ -99,6 +99,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 	int 						i;
 	int 						x;
 	int 						y;
+	int							fl;
 
 	File hey( FileName );
 	hey.SetExtention();
@@ -106,6 +107,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 	hey.ReadLines();
 	lst = GetServers( hey.GetRawString() );
 	i = 0;
+	fl = 0;
 	while ( i < (int)lst.size() )
 	{
 		Block 						NewBlock;
@@ -115,13 +117,15 @@ std::vector<Server>   GetFullServers( char* FileName )
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
 		srvs.push_back( NewServer );
 		srvs.back().SetServers( NewBlock );
-		NewServer.SetStatus(NewBlock.GetStatus());
+		//NewServer.SetStatus(NewBlock.GetStatus());
 		srvs.back().SetStatus(NewBlock.GetStatus());
 		if (!CheckBrackets(lst[i]))
 		{
 			srvs.back().SetStatus(false);
 			i++;
 		}
+		if ( CheckLocationParams( srvs.back() ) == false  || CheckValidKeys(srvs.back().GetKeys()) == false )
+			srvs.back().SetStatus(false);
 		i++;
 	}
 	return (srvs);
@@ -143,7 +147,7 @@ bool	IsPresent(const std::vector<std::string>& vctr, std::string s)
 	return (count != 0);
 }
 
-bool Check_if_valid(const std::vector<std::string> str)
+bool CheckValidKeys(const std::vector<std::string> str)
 {
 	int j;
 
