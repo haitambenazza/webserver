@@ -72,6 +72,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
+
 void	ReadData(Multiplexer &m, int &i)
 {
 	char tmp[4096] = {0};
