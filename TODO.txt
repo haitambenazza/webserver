@@ -5,5 +5,12 @@
 	- specify redirection key
 
 2- establish the server with multiplexing and Non-blocking I/O (concurrency)
-	- need to test it with firefox by modifying the request header and the payload
-	
+	- implement timeout
+
+3- imeplemt HTTP Methods (GET, POST, DELETE)
+	- need to imeplemt GET method (handle dir/file )
+	- for the request we need to check if the body is large, in case it is large we need to create a tmp file to store the body
+	- to imeplement GET => 1. parse the HTTP request
+						   2. Map the path to the resource requested
+						   3. check if the file is existed(404 error)
+						   4. build HTTP response and send it with the file requested

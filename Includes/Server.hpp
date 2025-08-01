@@ -40,6 +40,7 @@ class Server
         std::string                                             GetPort() const;
         bool                                                    GetStatus() const;
         void                                                    SetStatus(bool stat);
+        std::string                                             GetRoot() const;
 };
 
 std::vector<std::string>	FillVector( std::vector<std::string> Src );

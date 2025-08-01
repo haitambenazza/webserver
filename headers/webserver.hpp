@@ -1,6 +1,4 @@
-
-#ifndef WEBSERVER_HPP
-#define WEBSERVER_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -26,6 +24,7 @@
 #include "../Includes/ServerTools.hpp"
 #include "../Includes/Events.hpp"
 #include "../Includes/Request.hpp"
+#include "../Includes/Methods.hpp"
 
 
-#endif
+
