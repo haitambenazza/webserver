@@ -38,12 +38,12 @@ std::string Request::getVersion() const
     return this->version;
 }
 
-std::string Request::getMethod() const
+std::string Request::getMethod()
 {
     return this->method;
 }
 
-std::string Request::getHeaderValue(const std::string& header_name) const
+std::string Request::getHeaderValue(const std::string& header_name)
 {
     std::map<std::string , std::string >::const_iterator it;
 
@@ -57,7 +57,7 @@ std::string Request::getHeaderValue(const std::string& header_name) const
     return "";
 }
 
-std::map<std::string , std::string> Request::getHeaders() const
+std::map<std::string , std::string> Request::getHeaders()
 {
     return this->headers;
 }

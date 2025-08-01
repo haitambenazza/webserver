@@ -206,3 +206,8 @@ void Server::SetStatus(bool stat)
 {
     status = stat;
 }
+
+std::string Server::GetRoot() const
+{
+    return (root);
+}

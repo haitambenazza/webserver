@@ -24,11 +24,11 @@ class Request
 
         void parse(const std::string& request_string);
 
-        std::string getMethod() const;
+        std::string getMethod() ;
         std::string getUri() const;
         std::string getVersion() const;
-        std::string getHeaderValue(const std::string& header_name) const;
-        std::map<std::string, std::string> getHeaders() const;
+        std::string getHeaderValue(const std::string& header_name);
+        std::map<std::string, std::string> getHeaders();
         std::string getBody() const;
 
         void printRequestData() const;
