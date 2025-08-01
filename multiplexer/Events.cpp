@@ -86,22 +86,18 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-void	ReadData(Multiplexer &m, int &i)
+void	ReadData(Multiplexer &m, int &i, Server &s)
 {
 	char tmp[4096] = {0};
 	std::string buffer;
 	Request req;
+	int bytes_read;
 
-	int bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, 1024 , 0);
-	if (bytes_read > 0)
+	while ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		buffer += tmp;
-		// std::cout << buffer << std::endl;
 		if (!buffer.empty())
-		{
-			req.parse(buffer);
-			req.printRequestData();
-		}
+			GetRequest(buffer, s);
 		memset(&tmp, 0, sizeof(tmp));
 		buffer.clear();
 		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
@@ -111,7 +107,7 @@ void	ReadData(Multiplexer &m, int &i)
 			return ;
 		}
 	}
-	else if (bytes_read == 0)
+	if (bytes_read == 0)
 	{
 		std::cout << "Client disconnected from " << m.GetEvents()[i].data.fd << '\n';
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
@@ -137,7 +133,7 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 bool SendData(Multiplexer &m, int i)
 {
 	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
-	std::ifstream file("/home/kbassim/Desktop/webserv/site/text.html");
+	std::ifstream file("www/text.html");
 	std::stringstream html;
 
 	if (!file.is_open())
@@ -169,7 +165,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i);
+				ReadData(multiplexer, i, server[i]);
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 				SendData(multiplexer, i);
 		}

@@ -1,4 +1,3 @@
-
 #include "../headers/webserver.hpp"
 
 void	Server::SetAddrServer(struct sockaddr_in *addr)
@@ -206,4 +205,9 @@ bool Server::GetStatus() const
 void Server::SetStatus(bool stat)
 {
     status = stat;
+}
+
+std::string Server::GetRoot() const
+{
+    return (root);
 }
