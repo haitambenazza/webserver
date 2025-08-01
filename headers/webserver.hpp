@@ -24,5 +24,7 @@
 #include "../Includes/ServerTools.hpp"
 #include "../Includes/Events.hpp"
 #include "../Includes/Request.hpp"
+#include "../Includes/Methods.hpp"
+
 
 
