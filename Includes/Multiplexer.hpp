@@ -8,6 +8,7 @@ class Multiplexer
         int                     NumFds;
         int                     NewConnection;
         struct epoll_event      Events[MAX_EVENT];
+        // std::map<int, Server &> map;
 
     public:
         Multiplexer();
@@ -25,3 +26,49 @@ class Multiplexer
         void         SetClientFd(int clientfd);
         struct epoll_event*      GetEvents();
 };
+
+
+/*
+    base class event handler -> constructor(fd) , read()  = 0 write()  = 0, acceptClient() = 0
+
+    serverHandler = accetClient. read , write {}
+
+    clientHandler = read, write, accept {}
+
+    multiplexer :
+    {
+        epoll fd
+        map<fd, event*> = [
+            {fd, event *}. server
+            {fd, event *}. server
+            {fd, event *}. server
+            {fd, event *}. server
+        ]
+    }
+
+    while (running)
+    {
+        loop through fd you get from epoll
+
+        if fd is a server  use dynamic casting.
+        if server:
+            clienthandler = castfrom event.accept() -> new instance of client handler(fd client)
+            {
+                add to epoll with flags : epollin and epollout
+                multiplexer map<fd, event> += fd, clientHandler
+            }
+        if client :
+            handle client() --> state;
+            state : {read, body, write, close}
+            if state is close:
+                remove from epoll
+                remove from map
+
+
+    }
+
+
+    handle new cl --- read request response close
+*/
+
+//hhh in in in in in read out out out
