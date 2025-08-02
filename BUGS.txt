@@ -1,1 +1,2 @@
+we might need to refactor how the multiplexer handle the server and client and how the server read from the buffer
 

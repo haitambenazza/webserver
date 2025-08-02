@@ -8,11 +8,12 @@ class Location
     private :
         std::string                                             Path;
         std::map < std::string, std::vector< std::string > >    Commands;
+        std::string                                             AutoIndex;
     public :
         Location();
         Location( const Location&  copy );
         Location&   operator=( const Location&  copy );
-        ~Location();   
+        ~Location();
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::string&                                            GetPath();
         void                                                    SetPath( std::string& s );
