@@ -15,6 +15,7 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
         perror("IP:Port");
         return ;
     }
+    result = res;
 	memset(addr, 0, sizeof(struct sockaddr_in));
     memcpy(addr, res->ai_addr, sizeof(sockaddr_in));
 }
@@ -194,6 +195,7 @@ std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 
 Server::~Server()
 {
+    freeaddrinfo(result);
     close(fd);
 }
 
@@ -210,4 +212,14 @@ void Server::SetStatus(bool stat)
 std::string Server::GetRoot() const
 {
     return (root);
+}
+
+void    Server::AddNewClient(int16_t fd)
+{
+    this->ClientFd.push_back(fd);
+}
+
+std::vector<int16_t>    Server::GetClients() const
+{
+    return (ClientFd);
 }
