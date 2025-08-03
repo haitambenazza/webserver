@@ -14,14 +14,15 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     return "";
 }
 
-bool	RunGet(Request &req, Server s)
+bool	RunGet(Request &req, Server &s)
 {
-	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root /
+    (void)s;
+	//std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
     req.printRequestData();
 	return (true);
 }
 
-bool	GetRequest(std::string buffer, Server server)
+bool	GetRequest(std::string buffer, Server &server)
 {
 	Request request(buffer);
 
