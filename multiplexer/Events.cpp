@@ -92,7 +92,6 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
-
 	while ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		buffer += tmp;
@@ -125,7 +124,9 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		if (m.GetEvents()[j].data.fd == server[i].Getfd())
-		return (true);
+		{
+			return (true);
+		}
 	}
 	return false;
 }
@@ -133,7 +134,7 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 bool SendData(Multiplexer &m, int i)
 {
 	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
-	std::ifstream file("www/text.html");
+	std::ifstream file("www/index.html");
 	std::stringstream html;
 
 	if (!file.is_open())
@@ -157,6 +158,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
+		
 		if (IsServerSocket(multiplexer, server, i))
 		{
 			if (AcceptNewClient(multiplexer, i, server) == false)
