@@ -137,7 +137,7 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 
 bool SendData(Multiplexer &m, int i)
 {
-	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 1\r\n\r\n");
+	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
 	std::ifstream file("www/index.html");
 	std::stringstream html;
 
