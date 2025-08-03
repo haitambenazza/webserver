@@ -30,7 +30,6 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	}
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
-		//std::cout << "["<<servers[serv].GetServerName()<<"]" << "\n";
 		servers[serv].InitializeServerSettings();
 		servers[serv].PrintData();
 		std::cout << "------------------------\n";
@@ -71,7 +70,6 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept()");
 		return false;
 	}
-	// s[fd].AddNewClient(m.GetClientFd());
 	if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
 	{
 		perror("fcntl()");
@@ -122,17 +120,14 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	}
 }
 
-bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
+int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 {
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		if (m.GetEvents()[j].data.fd == server[i].Getfd())
-		{
-			std::cout << "EVENTS =" << m.GetEvents()[j].data.fd << " SERVER=" << server[i].Getfd() << '\n';
-			return (true);
-		}
+			return (i);
 	}
-	return false;
+	return -1;
 }
 
 bool SendData(Multiplexer &m, int i)
@@ -160,10 +155,9 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
-	//std::cout << "getnumfd == "<< multiplexer.GetNumFd() << '\n';
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
-		if (IsServerSocket(multiplexer, server, i))
+		if (IsServerSocket(multiplexer, server, i) != -1)
 		{
 			if (AcceptNewClient(multiplexer, i, server) == false)
 				return (false);
@@ -171,7 +165,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i, server[i]);
+				ReadData(multiplexer, i, server[0]);// here's the problem we are passing the event as index of server
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 				SendData(multiplexer, i);
 		}
@@ -202,6 +196,5 @@ bool RunServers(std::vector<Server> &servers)
 	{
 		EventRoutine(servers, multiplexer);
 	}
-	std::cout << "progam stopped\n";
 	return true;
 }
