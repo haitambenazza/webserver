@@ -21,9 +21,9 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
 
 void    Server::SetDefaultValue()
 {
+    root = ROOT;
     port = PORT;
     ip = IP;
-    root = ROOT;
     fd = -1;
     index = INDEX;
     server_name = SERVER_NAME;
@@ -75,7 +75,7 @@ Server::Server()
     }
 }
 
-Server::Server( const Server& copy )
+Server::Server( const Server& copy ) : keys(copy.keys), Locations(copy.Locations)
 {
     status = true;
     keys = copy.keys;

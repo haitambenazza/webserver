@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
+#    By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/27 22:55:24 by hbenazza         ###   ########.fr        #
+#    Updated: 2025/08/02 22:38:07 by kbassim          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,7 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
+CXXFLAGS = -std=c++98 -g3 -Wall -Wextra -Werror 
 
 %.o: %.cpp
 	@$(CC) $(CXXFLAGS) -c $^ -o $@
