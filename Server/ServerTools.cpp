@@ -115,7 +115,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		srvs.push_back( NewServer );
+		srvs.push_back( NewServer ); // segfault
 		srvs.back().SetServers( NewBlock );
 		//NewServer.SetStatus(NewBlock.GetStatus());
 		srvs.back().SetStatus(NewBlock.GetStatus());

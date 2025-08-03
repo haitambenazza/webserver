@@ -11,7 +11,7 @@ bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		struct epoll_event Event;
-		Event.events = EPOLLIN | EPOLLET;
+		Event.events = EPOLLIN;
 		Event.data.fd = server[i].Getfd();
     	if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
     	{
@@ -40,8 +40,6 @@ Multiplexer::Multiplexer(std::vector<Server> &server)
 
 Multiplexer::~Multiplexer()
 {
-    std::cout << "CLIENT IS DEAD\n";
-    close(NewConnection);
     close(EpollFd);
 }
 
