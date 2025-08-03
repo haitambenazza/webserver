@@ -195,6 +195,8 @@ std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 
 Server::~Server()
 {
+    // for (int i = 0; i < (int)this->ClientFd.size(); i++)
+    //     close(this->ClientFd[i]);
     freeaddrinfo(result);
     close(fd);
 }
@@ -212,4 +214,14 @@ void Server::SetStatus(bool stat)
 std::string Server::GetRoot() const
 {
     return (root);
+}
+
+void    Server::AddNewClient(int16_t fd)
+{
+    this->ClientFd.push_back(fd);
+}
+
+std::vector<int16_t>    Server::GetClients() const
+{
+    return (ClientFd);
 }

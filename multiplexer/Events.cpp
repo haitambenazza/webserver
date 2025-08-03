@@ -71,6 +71,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept()");
 		return false;
 	}
+	// s[fd].AddNewClient(m.GetClientFd());
 	if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
 	{
 		perror("fcntl()");
@@ -94,7 +95,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	Request req;
 	int bytes_read;
 
-	while ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
+	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		buffer += tmp;
 		if (!buffer.empty())
@@ -126,14 +127,17 @@ bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		if (m.GetEvents()[j].data.fd == server[i].Getfd())
-		return (true);
+		{
+			std::cout << "EVENTS =" << m.GetEvents()[j].data.fd << " SERVER=" << server[i].Getfd() << '\n';
+			return (true);
+		}
 	}
 	return false;
 }
 
 bool SendData(Multiplexer &m, int i)
 {
-	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
+	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 1\r\n\r\n");
 	std::ifstream file("www/index.html");
 	std::stringstream html;
 
@@ -156,6 +160,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
+	//std::cout << "getnumfd == "<< multiplexer.GetNumFd() << '\n';
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
 		if (IsServerSocket(multiplexer, server, i))
@@ -179,9 +184,7 @@ void	ChangeServerStatus(int signal, siginfo_t * sig, void * context)
 	(void)sig;
 	(void)context;
 	if (signal == SIGINT)
-	{
 		running = false;
-	}
 }
 
 bool RunServers(std::vector<Server> &servers)
@@ -194,6 +197,7 @@ bool RunServers(std::vector<Server> &servers)
 	sign.sa_sigaction = &ChangeServerStatus;
 	if (sigaction(SIGINT, &sign, NULL) == -1)
 		perror("sigaction");
+
 	while (running)
 	{
 		EventRoutine(servers, multiplexer);

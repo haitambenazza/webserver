@@ -19,6 +19,7 @@ class Server
 		std::map<u_int16_t , std::string>                       error_map;
         bool                                                    status;
         struct addrinfo                                         *result;
+        std::vector<int16_t>                                    ClientFd;
     public :
         Server();
         Server( const Server& copy );
@@ -42,6 +43,8 @@ class Server
         bool                                                    GetStatus() const;
         void                                                    SetStatus(bool stat);
         std::string                                             GetRoot() const;
+        void                                                    AddNewClient(int16_t fd);
+        std::vector<int16_t>                                    GetClients() const;
 };
 
 std::vector<std::string>	FillVector( std::vector<std::string> Src );

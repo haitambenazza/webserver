@@ -40,8 +40,6 @@ Multiplexer::Multiplexer(std::vector<Server> &server)
 
 Multiplexer::~Multiplexer()
 {
-    std::cout << "CLIENT IS DEAD\n";
-    close(NewConnection);
     close(EpollFd);
 }
 
