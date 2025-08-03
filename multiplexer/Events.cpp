@@ -1,5 +1,6 @@
 #include "../headers/webserver.hpp"
 
+bool	running = true;
 
 bool	CheckLocationParams( Server &server )
 {
@@ -154,7 +155,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 
 	if (SetEventEpoll(multiplexer) == false)
-	return (false);
+		return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
 		if (IsServerSocket(multiplexer, server, i))
@@ -173,13 +174,30 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	return (true);
 }
 
+void	ChangeServerStatus(int signal, siginfo_t * sig, void * context)
+{
+	(void)sig;
+	(void)context;
+	if (signal == SIGINT)
+	{
+		running = false;
+	}
+}
+
 bool RunServers(std::vector<Server> &servers)
 {
 	Multiplexer multiplexer(servers);
+	struct sigaction sign ;
 
-	while (true)
+	memset(&sign, 0, sizeof(sign));
+	sign.sa_flags = SA_SIGINFO;
+	sign.sa_sigaction = &ChangeServerStatus;
+	if (sigaction(SIGINT, &sign, NULL) == -1)
+		perror("sigaction");
+	while (running)
 	{
-			EventRoutine(servers, multiplexer);
+		EventRoutine(servers, multiplexer);
 	}
+	std::cout << "progam stopped\n";
 	return true;
 }
