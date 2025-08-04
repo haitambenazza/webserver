@@ -118,6 +118,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		}
 		close(m.GetEvents()[i].data.fd);
 	}
+	usleep(250);
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
