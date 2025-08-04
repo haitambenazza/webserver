@@ -16,9 +16,10 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
 
 bool	RunGet(Request &req, Server &s)
 {
-    (void)s;
 	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
     std::cout << FullPath << '\n';
+    std::cout << "WAAAAA\n";
+    req.printRequestData();
     return (true);
 }
 
