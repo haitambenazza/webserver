@@ -2,7 +2,7 @@
 
 bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 {
-    EpollFd = epoll_create1(EPOLL_CLOEXEC);
+    EpollFd = epoll_create(1);
     if ( EpollFd == -1 )
     {
 		perror("Epoll_create");
