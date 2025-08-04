@@ -76,7 +76,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		return (false);
 	}
 	epoll_client.data.fd = m.GetClientFd();
-	epoll_client.events = EPOLLIN | EPOLLET;
+	epoll_client.events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
 	{
 		perror("epoll_ctl()");
@@ -86,10 +86,11 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-void	ReadData(Multiplexer &m, int &i, Server &s)
+void	ReadData(Multiplexer &m, int &i, std::vector<Server> &s)
 {
 	char tmp[4096];
 	std::string buffer;
+	// int 	targetServer;
 	Request req;
 	int bytes_read;
 
@@ -98,8 +99,8 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
 		if (!buffer.empty())
-			GetRequest(buffer, s);
-		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
+				GetRequest(buffer, s[0]);
+		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
 			perror("epoll_ctl()");
@@ -140,7 +141,7 @@ bool SendData(Multiplexer &m, int i)
 	html << file.rdbuf();
 	response << response.str() << html.str();
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
-	m.GetEvents()[i].events = EPOLLIN | EPOLLET;
+	m.GetEvents()[i].events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
 		perror("epoll_ctl()");
@@ -164,9 +165,14 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i, server[0]);// here's the problem we are passing the event as index of server
+				ReadData(multiplexer, i, server);// here's the problem we are passing the event as index of server
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 				SendData(multiplexer, i);
+			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))// still testing...not working for now
+			{
+				std::cout << "client disconnected\n";
+				close(multiplexer.GetEvents()[i].data.fd);
+			}
 		}
 	}
 	return (true);
