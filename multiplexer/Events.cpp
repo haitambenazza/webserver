@@ -1,5 +1,6 @@
 #include "../headers/webserver.hpp"
 
+bool	running = true;
 
 bool	CheckLocationParams( Server &server )
 {
@@ -29,7 +30,6 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	}
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
-		//std::cout << "["<<servers[serv].GetServerName()<<"]" << "\n";
 		servers[serv].InitializeServerSettings();
 		servers[serv].PrintData();
 		std::cout << "------------------------\n";
@@ -59,12 +59,31 @@ std::string GetAddrServer(Multiplexer &m, std::vector<Server> &s, int fd)
 	return ("");
 }
 
+int16_t		GetServerIndex(std::vector<Server> &s, int fd)
+{
+	int16_t i;
+
+	i = 0;
+	while (i < (int16_t)s.size())
+	{
+		if (s[i].Getfd() == fd)
+			break ;
+		i++; 
+	}
+	std::cout << "i == " << i << std::endl;
+	return (i);
+}
 
 bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	struct epoll_event epoll_client;
+	Client NewClient;
 
 	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
+	
+	NewClient.SetClient(m.GetClientFd());
+	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
+	m.AddClient(NewClient);
 	if (m.GetClientFd() == -1)
 	{
 		perror("accept()");
@@ -92,7 +111,8 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
-	while ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
+
+	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		buffer += tmp;
 		if (!buffer.empty())
@@ -119,16 +139,14 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	}
 }
 
-bool	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
+int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 {
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		if (m.GetEvents()[j].data.fd == server[i].Getfd())
-		{
-			return (true);
-		}
+			return (i);
 	}
-	return false;
+	return -1;
 }
 
 bool SendData(Multiplexer &m, int i)
@@ -155,11 +173,10 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 
 	if (SetEventEpoll(multiplexer) == false)
-	return (false);
+		return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
-		
-		if (IsServerSocket(multiplexer, server, i))
+		if (IsServerSocket(multiplexer, server, i) != -1)
 		{
 			if (AcceptNewClient(multiplexer, i, server) == false)
 				return (false);
@@ -167,7 +184,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i, server[i]);
+				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 				SendData(multiplexer, i);
 		}
@@ -175,13 +192,28 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	return (true);
 }
 
+void	ChangeServerStatus(int signal, siginfo_t * sig, void * context)
+{
+	(void)sig;
+	(void)context;
+	if (signal == SIGINT)
+		running = false;
+}
+
 bool RunServers(std::vector<Server> &servers)
 {
 	Multiplexer multiplexer(servers);
+	struct sigaction sign ;
 
-	while (true)
+	memset(&sign, 0, sizeof(sign));
+	sign.sa_flags = SA_SIGINFO;
+	sign.sa_sigaction = &ChangeServerStatus;
+	if (sigaction(SIGINT, &sign, NULL) == -1)
+		perror("sigaction");
+
+	while (running)
 	{
-			EventRoutine(servers, multiplexer);
+		EventRoutine(servers, multiplexer);
 	}
 	return true;
 }

@@ -16,6 +16,5 @@ class Method
         int DeleteMethod();
 };
 
-
 bool	GetRequest(std::string buffer, Server &server);
 std::string GetValuesFromKeysReq(std::map<std::string, std::string >& map, std::string key);
