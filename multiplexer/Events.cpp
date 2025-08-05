@@ -22,8 +22,9 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		if (servers[i].GetStatus() == false)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
-			servers.erase(servers.begin() + i);
-			i--;
+			running = false;
+			servers.clear();
+			return (false);
 		}
 		if (servers.size() == 0)
 			return (false);
@@ -111,12 +112,16 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
+	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		buffer += tmp;
 		if (!buffer.empty())
-			GetRequest(buffer, s);
+		{
+			std::cout << buffer << std::endl;
+			// GetRequest(buffer, s);
+		}
 		memset(&tmp, 0, sizeof(tmp));
 		buffer.clear();
 		m.GetEvents()[i].events = EPOLLOUT | EPOLLET;
@@ -151,15 +156,16 @@ int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 
 bool SendData(Multiplexer &m, int i)
 {
-	std::string response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
+	std::stringstream response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
 	std::ifstream file("www/index.html");
 	std::stringstream html;
 
 	if (!file.is_open())
 		std::cout << "FAILED\n";
 	html << file.rdbuf();
-	send(m.GetEvents()[i].data.fd, response.c_str(), response.size(), 0);
-	send(m.GetEvents()[i].data.fd, html.str().c_str(), html.str().size(), 0);
+	response << response.str() << html.str();
+	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
+	//send(m.GetEvents()[i].data.fd, html.str().c_str(), html.str().size(), 0);
 	m.GetEvents()[i].events = EPOLLIN | EPOLLET;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{

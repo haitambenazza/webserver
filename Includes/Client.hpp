@@ -6,6 +6,7 @@ class Client
     private :
         int16_t   fd;
         int16_t   ServerIndex;
+        
     public :
         Client();
         Client( const Client& copy );
