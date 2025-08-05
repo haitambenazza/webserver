@@ -40,11 +40,6 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 bool	SetEventEpoll(Multiplexer &multi)
 {
 	multi.SetNumFd(epoll_wait(multi.GetEpollFd(), multi.GetEvents(), MAX_EVENT, -1));
-	if (multi.GetNumFd() == -1)
-	{
-		perror("epoll_wait()");
-		return false;
-	}
 	return (true);
 }
 
@@ -73,16 +68,22 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 	return (i);
 }
 
-bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
+void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
-	struct epoll_event epoll_client;
 	Client NewClient;
 
 	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
-
 	NewClient.SetClient(m.GetClientFd());
 	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
 	m.AddClient(NewClient);
+}
+
+bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
+{
+	struct epoll_event epoll_client;
+
+
+	SetNewClient(m, fd, s);
 	if (m.GetClientFd() == -1)
 	{
 		perror("accept()");
@@ -216,8 +217,12 @@ bool RunServers(std::vector<Server> &servers)
 	while (running)
 	{
 		if (!EventRoutine(servers, multiplexer))
-			return false;
-		//
+			running = false;
+	}
+	for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
+	{
+		std::cout <<  multiplexer.GetClient()[i].GetClientFd() << '\n';
+		// close(multiplexer.GetClient()[i].GetClientFd());
 	}
 	return true;
 }
