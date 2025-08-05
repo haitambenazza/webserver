@@ -33,7 +33,7 @@ void	Client::SetServerIndex(int16_t val)
 {
     ServerIndex = val;
 }
-int16_t     Client::GetClient() const
+int16_t     Client::GetClientFd() const
 {
     return (fd);
 }

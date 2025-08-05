@@ -15,3 +15,6 @@ server
 }
 
 3- we need a Client class to store Fd of clients if the server quite while the clients are connected (fd leaks)
+
+4- if a client connected to the server and the server exit, the Fd of the client doesnt get close because the struct is empty
+
