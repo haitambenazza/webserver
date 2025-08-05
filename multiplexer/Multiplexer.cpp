@@ -29,7 +29,6 @@ Multiplexer::Multiplexer()
     NewConnection = -1;
 }
 
-
 Multiplexer::Multiplexer(std::vector<Server> &server)
 {
     EpollFd = -1;
@@ -82,3 +81,11 @@ struct epoll_event*      Multiplexer::GetEvents()
     return (Events);
 }
 
+void               Multiplexer::AddClient( Client& NewClient )
+{
+    Clients.push_back(NewClient);
+}
+std::vector<Client>         Multiplexer::GetClient() const
+{
+    return (Clients);
+}

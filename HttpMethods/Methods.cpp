@@ -14,11 +14,46 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     return "";
 }
 
+// Method::Method()
+// {
+
+// }
+// Method::Method( const Method& copy )
+// {
+
+// }
+// Method& Method::operator=( const Method& copy )
+// {
+
+// }
+// Method::~Method()
+// {
+
+// }
+// int Method::GetMethod()
+// {
+
+// }
+// int Method::PostMethod()
+// {
+
+// }
+// int Method::DeleteMethod()
+// {
+
+// }
+// bool	RunGet(Request &req, Server s)
+// {
+
+// 	//std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root /
+// 	return (true);
+// }
+
 bool	RunGet(Request &req, Server &s)
 {
 	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
     std::cout << FullPath << '\n';
-    std::cout << "WAAAAA\n";
+
     req.printRequestData();
     return (true);
 }

@@ -12,6 +12,7 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
     status = getaddrinfo(ip.c_str(), port.c_str(), &hints, &res);
     if (status)
     {
+        freeaddrinfo(res);
         perror("IP:Port");
         return ;
     }
@@ -22,9 +23,9 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
 
 void    Server::SetDefaultValue()
 {
+    root = ROOT;
     port = PORT;
     ip = IP;
-    root = ROOT;
     fd = -1;
     index = INDEX;
     server_name = SERVER_NAME;
@@ -46,7 +47,7 @@ bool    Server::SetServer()
 	SetAddrServer(&addr);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
         return false;
-    if ((listen(fd, SOMAXCONN)) == -1)
+    if ((listen(fd, SOMAXCONN)) == -1) 
         return false;
     return true;
 }
@@ -76,7 +77,7 @@ Server::Server()
     }
 }
 
-Server::Server( const Server& copy )
+Server::Server( const Server& copy ) : keys(copy.keys), Locations(copy.Locations)
 {
     status = true;
     keys = copy.keys;
