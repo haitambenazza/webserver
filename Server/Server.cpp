@@ -12,6 +12,7 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
     status = getaddrinfo(ip.c_str(), port.c_str(), &hints, &res);
     if (status)
     {
+        freeaddrinfo(res);
         perror("IP:Port");
         return ;
     }
@@ -46,7 +47,7 @@ bool    Server::SetServer()
 	SetAddrServer(&addr);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
         return false;
-    if ((listen(fd, SOMAXCONN)) == -1)
+    if ((listen(fd, SOMAXCONN)) == -1) 
         return false;
     return true;
 }

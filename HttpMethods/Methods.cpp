@@ -51,9 +51,10 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
 
 bool	RunGet(Request &req, Server &s)
 {
-    //(void)s;
 	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
-    std::cout << FullPath << '\n';
+    // std::cout << FullPath << '\n';
+
+    // req.printRequestData();
     return (true);
 }
 
@@ -61,8 +62,7 @@ bool	GetRequest(std::string buffer, Server &server)
 {
 	Request request(buffer);
 
-    (void)server;
 	if (request.getMethod() == "GET")
-		return (true);
+		return (RunGet(request, server));
 	return true;
 }
