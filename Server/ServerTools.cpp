@@ -173,6 +173,7 @@ bool CheckValidKeys(const std::vector<std::string> str)
 	size_t i = 0;
 	while (i < str.size())
 	{
+		//std::cout << "key -===== " << str[i] << "\n";
 		if (!IsPresent(valid_keys, str[i]))
 		{
 			std::cout << str[i] << " : is not valid. ";
