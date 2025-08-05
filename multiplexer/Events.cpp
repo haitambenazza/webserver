@@ -59,12 +59,30 @@ std::string GetAddrServer(Multiplexer &m, std::vector<Server> &s, int fd)
 	return ("");
 }
 
+int16_t		GetServerIndex(std::vector<Server> &s, int fd)
+{
+	int16_t i;
+
+	i = 0;
+	while (i < (int16_t)s.size())
+	{
+		if (s[i].Getfd() == fd)
+			break ;
+		i++;
+	}
+	return (i);
+}
 
 bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	struct epoll_event epoll_client;
+	Client NewClient;
 
 	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
+
+	NewClient.SetClient(m.GetClientFd());
+	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
+	m.AddClient(NewClient);
 	if (m.GetClientFd() == -1)
 	{
 		perror("accept()");
@@ -86,11 +104,10 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-void	ReadData(Multiplexer &m, int &i, std::vector<Server> &s)
+void	ReadData(Multiplexer &m, int &i, Server &s)
 {
 	char tmp[4096];
 	std::string buffer;
-	// int 	targetServer;
 	Request req;
 	int bytes_read;
 
@@ -99,7 +116,7 @@ void	ReadData(Multiplexer &m, int &i, std::vector<Server> &s)
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
 		if (!buffer.empty())
-				GetRequest(buffer, s[0]);
+				GetRequest(buffer, s);
 		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
@@ -152,7 +169,6 @@ bool SendData(Multiplexer &m, int i)
 
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
-
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
@@ -165,7 +181,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		else
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i, server);// here's the problem we are passing the event as index of server
+				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 				SendData(multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))// still testing...not working for now
@@ -201,6 +217,7 @@ bool RunServers(std::vector<Server> &servers)
 	{
 		if (!EventRoutine(servers, multiplexer))
 			return false;
+		//
 	}
 	return true;
 }

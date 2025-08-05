@@ -75,7 +75,6 @@ std::vector<std::string> GetServers( std::string& s )
 
 	if (s.empty())
 		return ServersData;
-
 	while (i < s.size())
 	{
 		pos = s.find(server, i);
@@ -83,7 +82,11 @@ std::vector<std::string> GetServers( std::string& s )
 			break;
 		pos0 = s.find(server, pos + server.length());
 		if (pos0 != std::string::npos && s.substr(pos0, server_name.length()) == server_name)
+		{
 			pos0 = s.find(server, pos0 + server_name.length());
+			if (pos0 != std::string::npos && s.substr(pos0, server.length()) == server && s[pos0 + server.length()] != '{')
+				pos0 = s.find(server, pos0 + server.length());
+		}
 		if (pos0 == std::string::npos)
 			pos0 = s.size();
 		ServersData.push_back(s.substr(pos, pos0 - pos));
@@ -94,7 +97,7 @@ std::vector<std::string> GetServers( std::string& s )
 
 std::vector<Server>   GetFullServers( char* FileName )
 {
-	std::vector<Server> 		srvs;
+	std::vector<Server > 		srvs;
 	std::vector<std::string> 	lst;
 	int 						i;
 	int 						x;
@@ -112,19 +115,19 @@ std::vector<Server>   GetFullServers( char* FileName )
 	{
 		Block 						NewBlock;
 		Server 						NewServer;
+
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		srvs.push_back( NewServer ); // segfault
+		srvs.push_back( NewServer );
 		srvs.back().SetServers( NewBlock );
-		//NewServer.SetStatus(NewBlock.GetStatus());
 		srvs.back().SetStatus(NewBlock.GetStatus());
 		if (!CheckBrackets(lst[i]))
 		{
 			srvs.back().SetStatus(false);
 			i++;
 		}
-		if ( CheckLocationParams( srvs.back() ) == false  || CheckValidKeys(srvs.back().GetKeys()) == false )
+		if ( CheckLocationParams( srvs.back() ) == false || CheckValidKeys(srvs.back().GetKeys()) == false )
 			srvs.back().SetStatus(false);
 		i++;
 	}
@@ -171,7 +174,6 @@ bool CheckValidKeys(const std::vector<std::string> str)
 	size_t i = 0;
 	while (i < str.size())
 	{
-        //std::cout << str[i] << "\n";
 		if (!IsPresent(valid_keys, str[i]))
 		{
 			std::cout << str[i] << " : is not valid. ";

@@ -1,19 +1,17 @@
 1- we might need to refactor how the multiplexer handle the server and client and how the server read from the buffer
 
-2- in parser when you pass server as server name it crashes
 
+2- the next test will create 2 servers which result in memroy leaks
 server
 {
     listen 8000;
     host 127.0.0.1;
     index index.html;
-    server_name server2;
+    server server2;
     root /var/www/example.com/html;
     location / {
         index index.html;
     }
 }
 
-3- the server crashes with s.GetRoot() in method.c
-4- we need a way to pass the exact server to the methods
-5- using stress test the server breaks down with SIGPIPE because the send tried to write to a closed Fd
+3- we need a Client class to store Fd of clients if the server quite while the clients are connected (fd leaks)
