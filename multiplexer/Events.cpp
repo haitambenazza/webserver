@@ -22,8 +22,9 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		if (servers[i].GetStatus() == false)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
-			servers.erase(servers.begin() + i);
-			i--;
+			running = false;
+			servers.clear();
+			return (false);
 		}
 		if (servers.size() == 0)
 			return (false);
@@ -71,8 +72,14 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	Client NewClient;
+	int val = accept(m.GetEvents()[fd].data.fd, NULL, NULL);
 
-	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
+	if (val == -1)
+	{
+		perror("accept");
+		close(m.GetClientFd());
+	}
+	m.SetClientFd(val);
 	NewClient.SetClient(m.GetClientFd());
 	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
 	m.AddClient(NewClient);
@@ -111,6 +118,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
+	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
 	{
@@ -221,8 +229,8 @@ bool RunServers(std::vector<Server> &servers)
 	}
 	for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
 	{
-		std::cout <<  multiplexer.GetClient()[i].GetClientFd() << '\n';
-		// close(multiplexer.GetClient()[i].GetClientFd());
+		//std::cout <<  multiplexer.GetClient()[i].GetClientFd() << '\n';
+		close(multiplexer.GetClient()[i].GetClientFd());
 	}
 	return true;
 }
