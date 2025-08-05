@@ -6,7 +6,7 @@ class Multiplexer
     private:
         int                         EpollFd;
         int                         NumFds;
-        int                         NewConnection;
+        int                         NewConnection;//remove
         struct epoll_event          Events[MAX_EVENT];
         std::vector<Client>         Clients;
 

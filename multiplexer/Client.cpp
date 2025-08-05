@@ -9,13 +9,14 @@ Client::Client()
 Client::Client( const Client& copy )
 {
     fd = copy.fd;
+    connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
 }
 
 Client& Client::operator=( const Client& copy )
 {
     if (this != &copy)
-    {
+    { 
         fd = copy.fd;
         ServerIndex = copy.ServerIndex;
     }
@@ -24,8 +25,7 @@ Client& Client::operator=( const Client& copy )
 
 Client::~Client()
 {
-    if (fd)
-        close (fd);
+    //close (fd);
 }
 
 void	Client::SetClient(int16_t val)
@@ -36,12 +36,22 @@ void	Client::SetServerIndex(int16_t val)
 {
     ServerIndex = val;
 }
-int16_t     Client::GetClient() const
+int16_t     Client::GetClientFd() const
 {
     return (fd);
 }
 
-int16_t	    Client::GetserverIndex() const 
+int16_t	    Client::GetserverIndex() const
 {
     return (ServerIndex);
+}
+
+uint64_t    Client::GetTime() const
+{
+    return (connectedTime);
+}
+
+void        Client::Settime(uint64_t time)
+{
+    connectedTime = time;
 }

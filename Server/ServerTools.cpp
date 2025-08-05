@@ -97,7 +97,7 @@ std::vector<std::string> GetServers( std::string& s )
 
 std::vector<Server>   GetFullServers( char* FileName )
 {
-	std::vector<Server> 		srvs;
+	std::vector<Server > 		srvs;
 	std::vector<std::string> 	lst;
 	int 						i;
 	int 						x;
@@ -115,6 +115,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 	{
 		Block 						NewBlock;
 		Server 						NewServer;
+
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
@@ -126,7 +127,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 			srvs.back().SetStatus(false);
 			i++;
 		}
-		if ( CheckLocationParams( srvs.back() ) == false  || CheckValidKeys(srvs.back().GetKeys()) == false )
+		if ( CheckLocationParams( srvs.back() ) == false || CheckValidKeys(srvs.back().GetKeys()) == false )
 			srvs.back().SetStatus(false);
 		i++;
 	}
@@ -173,7 +174,6 @@ bool CheckValidKeys(const std::vector<std::string> str)
 	size_t i = 0;
 	while (i < str.size())
 	{
-		//std::cout << "key -===== " << str[i] << "\n";
 		if (!IsPresent(valid_keys, str[i]))
 		{
 			std::cout << str[i] << " : is not valid. ";
