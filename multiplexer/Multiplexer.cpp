@@ -2,7 +2,7 @@
 
 bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 {
-    EpollFd = epoll_create1(EPOLL_CLOEXEC);
+    EpollFd = epoll_create(1);
     if ( EpollFd == -1 )
     {
 		perror("Epoll_create");
@@ -28,7 +28,6 @@ Multiplexer::Multiplexer()
     NumFds = -1;
     NewConnection = -1;
 }
-
 
 Multiplexer::Multiplexer(std::vector<Server> &server)
 {
@@ -82,3 +81,11 @@ struct epoll_event*      Multiplexer::GetEvents()
     return (Events);
 }
 
+void               Multiplexer::AddClient( Client& NewClient )
+{
+    Clients.push_back(NewClient);
+}
+std::vector<Client>         Multiplexer::GetClient() const
+{
+    return (Clients);
+}

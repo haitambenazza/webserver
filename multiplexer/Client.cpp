@@ -1,0 +1,54 @@
+#include "../headers/webserver.hpp"
+
+Client::Client()
+{
+
+}
+
+Client::Client( const Client& copy )
+{
+    connectedTime = copy.connectedTime;
+    ServerIndex = copy.ServerIndex;
+}
+
+Client& Client::operator=( const Client& copy )
+{
+    if (this != &copy)
+    {
+        ServerIndex = copy.ServerIndex;
+    }
+    return (*this);
+}
+
+Client::~Client()
+{
+
+}
+
+void	Client::SetClient(int16_t val)
+{
+    fd = val;
+}
+void	Client::SetServerIndex(int16_t val)
+{
+    ServerIndex = val;
+}
+int16_t     Client::GetClientFd() const
+{
+    return (fd);
+}
+
+int16_t	    Client::GetserverIndex() const
+{
+    return (ServerIndex);
+}
+
+uint64_t    Client::GetTime() const
+{
+    return (connectedTime);
+}
+
+void        Client::Settime(uint64_t time)
+{
+    connectedTime = time;
+}

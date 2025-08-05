@@ -1,18 +1,22 @@
 
 #pragma once
-#include "Includes.hpp"
-
 
 class Client
 {
     private :
         int16_t   fd;
-        // int16_t    endpoint_fd;
+        int16_t   ServerIndex;
+        uint64_t    connectedTime;
     public :
         Client();
         Client( const Client& copy );
         Client& operator=( const Client& copy );
-        bool	SetClient();
         ~Client();
 
+        void	SetClient(int16_t val);
+        void	SetServerIndex(int16_t val);
+        int16_t	GetClientFd() const;
+        int16_t	GetserverIndex() const ;
+        uint64_t    GetTime() const;
+        void        Settime(uint64_t time);
 };
