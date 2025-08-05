@@ -68,7 +68,7 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 	{
 		if (s[i].Getfd() == fd)
 			break ;
-		i++; 
+		i++;
 	}
 	std::cout << "i == " << i << std::endl;
 	return (i);
@@ -80,7 +80,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	Client NewClient;
 
 	m.SetClientFd(accept(m.GetEvents()[fd].data.fd, NULL, NULL));
-	
+
 	NewClient.SetClient(m.GetClientFd());
 	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
 	m.AddClient(NewClient);
@@ -171,7 +171,6 @@ bool SendData(Multiplexer &m, int i)
 
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
-
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
