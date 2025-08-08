@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <signal.h>
+#include <ctime>
+#include <sys/stat.h>
 
 
 #include "../Includes/Block.hpp"

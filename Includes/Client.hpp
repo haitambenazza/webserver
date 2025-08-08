@@ -6,7 +6,7 @@ class Client
     private :
         int16_t   fd;
         int16_t   ServerIndex;
-        uint64_t    connectedTime;
+        time_t      connectedTime;
     public :
         Client();
         Client( const Client& copy );
@@ -17,6 +17,6 @@ class Client
         void	SetServerIndex(int16_t val);
         int16_t	GetClientFd() const;
         int16_t	GetserverIndex() const ;
-        uint64_t    GetTime() const;
-        void        Settime(uint64_t time);
+        time_t    GetTime() const;
+        void      Settime(time_t time);
 };

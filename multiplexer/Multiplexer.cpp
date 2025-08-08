@@ -29,7 +29,7 @@ Multiplexer::Multiplexer()
     NewConnection = -1;
 }
 
-Multiplexer::Multiplexer(std::vector<Server> &server)
+Multiplexer::Multiplexer( std::vector<Server> &server )
 {
     EpollFd = -1;
     NumFds = -1;
@@ -88,4 +88,10 @@ void               Multiplexer::AddClient( Client& NewClient )
 std::vector<Client>         Multiplexer::GetClient() const
 {
     return (Clients);
+}
+
+
+void    Multiplexer::RemoveClient(int i)
+{
+    this->Clients.erase(this->Clients.begin() + i);
 }

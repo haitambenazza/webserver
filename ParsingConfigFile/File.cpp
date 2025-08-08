@@ -42,6 +42,8 @@ void         File::SetExtention()
             break ;
         i--;
     }
+    if (i <= 0)
+        return ;
     extention = name.substr(i, name.length() - i);
     if (extention != ".conf")
     {

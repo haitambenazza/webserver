@@ -4,11 +4,11 @@
 class Multiplexer
 {
     private:
-        int                         EpollFd;
-        int                         NumFds;
-        int                         NewConnection;//remove
-        struct epoll_event          Events[MAX_EVENT];
-        std::vector<Client>         Clients;
+        int                                             EpollFd;
+        int                                             NumFds;
+        int                                             NewConnection;//remove
+        struct epoll_event                              Events[MAX_EVENT];
+        std::vector<Client>                             Clients;
 
     public:
         Multiplexer();
@@ -27,6 +27,7 @@ class Multiplexer
         struct epoll_event*         GetEvents();
         void                        AddClient( Client& NewClient );
         std::vector<Client>         GetClient() const;
+        void                        RemoveClient(int i);
 };
 
 
