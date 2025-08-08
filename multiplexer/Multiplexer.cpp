@@ -29,7 +29,7 @@ Multiplexer::Multiplexer()
     NewConnection = -1;
 }
 
-Multiplexer::Multiplexer(std::vector<Server> &server)
+Multiplexer::Multiplexer( std::vector<Server> &server )
 {
     EpollFd = -1;
     NumFds = -1;
