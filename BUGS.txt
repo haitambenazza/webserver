@@ -18,3 +18,4 @@ server
 
 4- if a client connected to the server and the server exit, the Fd of the client doesnt get close because the struct is empty
 
+5- when a client timeout all the clients disconnect
