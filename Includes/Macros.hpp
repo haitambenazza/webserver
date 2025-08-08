@@ -8,3 +8,5 @@
 #define SERVER_NAME ""
 #define INDEX "/index.html"
 #define MAX_EVENT 10024
+#define EPOLL_TIMEOUT 500
+#define ALLOWED_CHAR_URI "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%"

@@ -43,11 +43,12 @@ bool    Server::SetServer()
     fcntl(fd, F_SETFL, O_NONBLOCK);
     if (fd == -1)
         return false;
-    setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+    if (setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+		return false;
 	SetAddrServer(&addr);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
         return false;
-    if ((listen(fd, SOMAXCONN)) == -1) 
+    if ((listen(fd, SOMAXCONN)) == -1)
         return false;
     return true;
 }

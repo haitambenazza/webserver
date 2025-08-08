@@ -7,9 +7,13 @@
 	- implement timeout
 	- create Client class
 
-3- imeplemt HTTP Methods (GET, POST, DELETE)
+4- implement HTTP Methods (GET, POST, DELETE)
 	- need to imeplemt GET method (handle dir/file )
 	- to imeplement GET => 1. parse the HTTP request
 						   2. Map the path to the resource requested
 						   3. check if the file is existed(404 error)
 						   4. build HTTP response and send it with the file requested
+
+3- parsing request
+	- check if the request is well formed
+		.
