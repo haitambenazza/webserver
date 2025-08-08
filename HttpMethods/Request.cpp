@@ -138,3 +138,17 @@ void Request::printRequestData() const
     std::cout << "--- Body ---" << std::endl;
     std::cout << this->body << std::endl;
 }
+
+std::string Request::GetContentType()
+{
+    std::map<std::string, std::string>::iterator it;
+
+    it = headers.begin();
+    while (it != headers.end())
+    {
+        if (it->first == "Content-Type")
+            return (split(it->second, "/")[1]);
+        it++;
+    }
+    return ("");
+}

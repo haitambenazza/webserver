@@ -130,7 +130,9 @@ void Server::SetServers( Block& block )
 			std::map < std::string, std::vector< std::string > >  Com;
 			Location NewLocation;
 			StringToMap( children[i].GetArg(), Com, 0 );
+            NewLocation.SetLocationStatus( Com );
 			NewLocation.SetCommands( Com );
+            std::cout << "CGI == " << NewLocation.GetCgiStatus() << " Upload == " << NewLocation.GetUploadStatus() << std::endl;
             if ( lst.size() != 1 )
                 NewLocation.SetPath( lst[1] );
             else

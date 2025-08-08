@@ -14,10 +14,7 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     return "";
 }
 
-// Method::Method()
-// {
-
-// }
+Method::Method(){}
 // Method::Method( const Method& copy )
 // {
 
@@ -26,25 +23,48 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
 // {
 
 // }
-// Method::~Method()
-// {
-
-// }
 // int Method::GetMethod()
 // {
-
+    
 // }
-// int Method::PostMethod()
-// {
 
-// }
-// int Method::DeleteMethod()
-// {
+int Method::PostMethod( std::string& path)
+{
+    struct stat     info;
+    std::ofstream   Target;
+    std::string     s;
+    std::ostringstream tm;
 
+
+    if (stat(path.c_str(), &info) == -1)
+        return (404);
+    s = ".pdf";
+    tm << time(NULL);
+    std::string name(tm.str() + s.c_str());
+    Target.open( name.c_str() );
+    if (!Target.is_open())
+    {
+        std::cout << "cannot open file\n";
+        return (1);
+    }
+    int i = 0;
+    while (i < 1000)
+    {
+        Target << "h\n";
+        i++;
+    }
+    return (0);
+}
+
+// int Method::DeleteMethod( std::string& target )
+// {
+//     if ( access(target.c_str(), ) == -1)
+//         return (404);
 // }
 // bool	RunGet(Request &req, Server s)
 // {
-
+    
+Method::~Method(){}
 // 	//std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root /
 // 	return (true);
 // }
