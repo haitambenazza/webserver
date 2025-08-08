@@ -89,3 +89,9 @@ std::vector<Client>         Multiplexer::GetClient() const
 {
     return (Clients);
 }
+
+
+void    Multiplexer::RemoveClient(int i)
+{
+    this->Clients.erase(this->Clients.begin() + i);
+}

@@ -204,11 +204,15 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	}
 	if (multiplexer.GetNumFd() == 0)
 	{
+		std::cout << "map size: " << multiplexer.GetClient().size() << "\n";
 		for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
 		{
+			std::cout << multiplexer.GetClient()[i].GetTime() << "\n";
 			if (time(NULL) - multiplexer.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
 			{
+				// std::cout << "TIME OUUTTT!!\n";
 				close(multiplexer.GetClient()[i].GetClientFd());
+				multiplexer.RemoveClient(i);
 			}
 		}
 	}
