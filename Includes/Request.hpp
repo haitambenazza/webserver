@@ -30,6 +30,6 @@ class Request
         std::string getHeaderValue(const std::string& header_name);
         std::map<std::string, std::string> getHeaders();
         std::string getBody() const;
-
+        std::string GetContentType();
         void printRequestData() const;
 };

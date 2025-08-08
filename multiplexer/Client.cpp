@@ -46,12 +46,12 @@ int16_t	    Client::GetserverIndex() const
     return (ServerIndex);
 }
 
-uint64_t    Client::GetTime() const
+time_t    Client::GetTime() const
 {
     return (connectedTime);
 }
 
-void        Client::Settime(uint64_t time)
+void        Client::Settime(time_t time)
 {
     connectedTime = time;
 }
