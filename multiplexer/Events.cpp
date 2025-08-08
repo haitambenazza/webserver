@@ -197,13 +197,7 @@ void	registerTime(Multiplexer &m, int i)
 	for (int j = 0; j < (int)m.GetClient().size(); j++)
 	{
 		if (m.GetClient()[j].GetClientFd() == m.GetEvents()[i].data.fd)
-		{
 			m.GetClient()[j].Settime(time(NULL));
-			std::cout << time(NULL) - m.GetClient()[j].GetTime() << " seconds " <<m.GetClient()[j].GetClientFd() << '\n';
-			sleep(5);
-			m.GetClient()[j].Settime(time(NULL));
-			std::cout << time(NULL) - m.GetClient()[j].GetTime()<< " after one sec" << '\n';
-		}
 	}
 }
 

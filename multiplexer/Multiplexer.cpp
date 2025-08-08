@@ -85,13 +85,13 @@ void               Multiplexer::AddClient( Client& NewClient )
 {
     Clients.push_back(NewClient);
 }
-std::vector<Client>         Multiplexer::GetClient() const
-{
-    return (Clients);
-}
-
 
 void    Multiplexer::RemoveClient(int i)
 {
     this->Clients.erase(this->Clients.begin() + i);
+}
+
+std::vector<Client>&	Multiplexer::GetClient()
+{
+	return Clients;
 }
