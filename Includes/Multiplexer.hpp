@@ -26,7 +26,7 @@ class Multiplexer
         void                        SetClientFd(int clientfd);
         struct epoll_event*         GetEvents();
         void                        AddClient( Client& NewClient );
-        std::vector<Client>         GetClient() const;
+        std::vector<Client>&        GetClient();
         void                        RemoveClient(int i);
 };
 

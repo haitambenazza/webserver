@@ -198,9 +198,9 @@ void	registerTime(Multiplexer &m, int i)
 	{
 		if (m.GetClient()[j].GetClientFd() == m.GetEvents()[i].data.fd)
 		{
+			std::cout << time(NULL) - m.GetClient()[j].GetTime() << " before updating client event time\n";
 			m.GetClient()[j].Settime(time(NULL));
-			std::cout << m.GetClient()[j].GetTime() << " RESET\n";
-			std::cout << time(NULL) - m.GetClient()[j].GetTime() << '\n';
+			std::cout << time(NULL) - m.GetClient()[j].GetTime() << " after updating client event time\n";
 		}
 	}
 }
