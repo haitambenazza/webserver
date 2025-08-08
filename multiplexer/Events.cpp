@@ -199,8 +199,10 @@ void	registerTime(Multiplexer &m, int i)
 		if (m.GetClient()[j].GetClientFd() == m.GetEvents()[i].data.fd)
 		{
 			m.GetClient()[j].Settime(time(NULL));
-			std::cout << m.GetClient()[j].GetTime() << " RESET\n";
-			std::cout << time(NULL) - m.GetClient()[j].GetTime() << '\n';
+			std::cout << time(NULL) - m.GetClient()[j].GetTime() << " seconds " <<m.GetClient()[j].GetClientFd() << '\n';
+			sleep(5);
+			m.GetClient()[j].Settime(time(NULL));
+			std::cout << time(NULL) - m.GetClient()[j].GetTime()<< " after one sec" << '\n';
 		}
 	}
 }
@@ -211,7 +213,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
-	for (int i = 0; i < multiplexer.GetNumFd(); i++)// if event > 0(server/ client) else if event == 0 (check for timeout)
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
 		isServer = IsServerSocket(multiplexer, server, i);
 		if (isServer != -1)

@@ -16,7 +16,7 @@ Client::Client( const Client& copy )
 Client& Client::operator=( const Client& copy )
 {
     if (this != &copy)
-    { 
+    {
         fd = copy.fd;
         ServerIndex = copy.ServerIndex;
     }
