@@ -40,7 +40,7 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 
 bool	SetEventEpoll(Multiplexer &multi)
 {
-	multi.SetNumFd(epoll_wait(multi.GetEpollFd(), multi.GetEvents(), MAX_EVENT, -1));
+	multi.SetNumFd(epoll_wait(multi.GetEpollFd(), multi.GetEvents(), MAX_EVENT, EPOLL_TIMEOUT));
 	return (true);
 }
 
@@ -118,7 +118,6 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
-	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
 	{
@@ -178,27 +177,35 @@ bool SendData(Multiplexer &m, int i)
 
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
+	int	isServer = 0;
+
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
 	for (int i = 0; i < multiplexer.GetNumFd(); i++)
 	{
-		if (IsServerSocket(multiplexer, server, i) != -1)
+		isServer = IsServerSocket(multiplexer, server, i);
+		if (isServer != -1)
 		{
 			if (AcceptNewClient(multiplexer, i, server) == false)
 				return (false);
 		}
-		else
+		else if (isServer == -1)
 		{
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
+			ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-				SendData(multiplexer, i);
+			SendData(multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))// still testing...not working for now
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
 			}
 		}
+	}
+	if (multiplexer.GetNumFd() == 0)
+	{
+		std::cout << "time\n";
+		//loop over clients to get thier timeout
 	}
 	return (true);
 }
@@ -225,12 +232,9 @@ bool RunServers(std::vector<Server> &servers)
 	while (running)
 	{
 		if (!EventRoutine(servers, multiplexer))
-			running = false;
+			break ;
 	}
 	for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
-	{
-		//std::cout <<  multiplexer.GetClient()[i].GetClientFd() << '\n';
 		close(multiplexer.GetClient()[i].GetClientFd());
-	}
 	return true;
 }
