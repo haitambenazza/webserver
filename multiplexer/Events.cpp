@@ -23,7 +23,7 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
 			running = false;
-			servers.clear();
+			//servers.clear();
 			return (false);
 		}
 		if (servers.size() == 0)
@@ -79,6 +79,7 @@ void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept");
 		close(m.GetClientFd());
 	}
+	NewClient.Settime(time(NULL));
 	m.SetClientFd(val);
 	NewClient.SetClient(m.GetClientFd());
 	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
@@ -181,7 +182,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
-	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)// if event > 0(server/ client) else if event == 0 (check for timeout)
 	{
 		isServer = IsServerSocket(multiplexer, server, i);
 		if (isServer != -1)
@@ -199,6 +200,21 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
+			}
+			multiplexer.GetClient().back().Settime(time(NULL));
+		}
+	}
+	if (multiplexer.GetNumFd() == 0)
+	{
+		std::cout << "map size: " << multiplexer.GetClient().size() << "\n";
+		for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
+		{
+			std::cout << multiplexer.GetClient()[i].GetTime() << "\n";
+			if (time(NULL) - multiplexer.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
+			{
+				// std::cout << "TIME OUUTTT!!\n";
+				close(multiplexer.GetClient()[i].GetClientFd());
+				multiplexer.RemoveClient(i);
 			}
 		}
 	}

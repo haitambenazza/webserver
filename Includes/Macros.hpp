@@ -10,3 +10,5 @@
 #define MAX_EVENT 10024
 #define EPOLL_TIMEOUT 500
 #define ALLOWED_CHAR_URI "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%"
+#define TIMEOUT_CLIENT 5
+
