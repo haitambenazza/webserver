@@ -23,7 +23,7 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
 			running = false;
-			servers.clear();
+			//servers.clear();
 			return (false);
 		}
 		if (servers.size() == 0)
@@ -40,7 +40,7 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 
 bool	SetEventEpoll(Multiplexer &multi)
 {
-	multi.SetNumFd(epoll_wait(multi.GetEpollFd(), multi.GetEvents(), MAX_EVENT, -1));
+	multi.SetNumFd(epoll_wait(multi.GetEpollFd(), multi.GetEvents(), MAX_EVENT, EPOLL_TIMEOUT));
 	return (true);
 }
 
@@ -79,6 +79,7 @@ void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept");
 		close(m.GetClientFd());
 	}
+	NewClient.Settime(time(NULL));
 	m.SetClientFd(val);
 	NewClient.SetClient(m.GetClientFd());
 	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
@@ -180,7 +181,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
-	for (int i = 0; i < multiplexer.GetNumFd(); i++)
+	for (int i = 0; i < multiplexer.GetNumFd(); i++)// if event > 0(server/ client) else if event == 0 (check for timeout)
 	{
 		if (IsServerSocket(multiplexer, server, i) != -1)
 		{
@@ -197,6 +198,17 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
+			}
+			multiplexer.GetClient().back().Settime(time(NULL));
+		}
+	}
+	if (multiplexer.GetNumFd() == 0)
+	{
+		for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
+		{
+			if (time(NULL) - multiplexer.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
+			{
+				close(multiplexer.GetClient()[i].GetClientFd());
 			}
 		}
 	}
@@ -229,7 +241,6 @@ bool RunServers(std::vector<Server> &servers)
 	}
 	for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
 	{
-		//std::cout <<  multiplexer.GetClient()[i].GetClientFd() << '\n';
 		close(multiplexer.GetClient()[i].GetClientFd());
 	}
 	return true;

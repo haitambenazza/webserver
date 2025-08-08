@@ -106,7 +106,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 
 	File hey( FileName );
 	hey.SetExtention();
-	hey.OpenFile();
+	if (hey.OpenFile() == 1)
+		return (srvs);
 	hey.ReadLines();
 	lst = GetServers( hey.GetRawString() );
 	i = 0;
