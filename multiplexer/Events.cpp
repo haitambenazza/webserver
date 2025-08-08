@@ -176,6 +176,35 @@ bool SendData(Multiplexer &m, int i)
 	return true;
 }
 
+void	CheckTimeout(Multiplexer &m)
+{
+	if (m.GetNumFd() == 0)
+	{
+		for (int i = 0; i < (int)m.GetClient().size(); i++)
+		{
+			if (time(NULL) - m.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
+			{
+				std::cout << "\033[33mClient timeout" << "\033[0m\n";
+				close(m.GetClient()[i].GetClientFd());
+				m.RemoveClient(i);
+			}
+		}
+	}
+}
+
+void	registerTime(Multiplexer &m, int i)
+{
+	for (int j = 0; j < (int)m.GetClient().size(); j++)
+	{
+		if (m.GetClient()[j].GetClientFd() == m.GetEvents()[i].data.fd)
+		{
+			m.GetClient()[j].Settime(time(NULL));
+			std::cout << m.GetClient()[j].GetTime() << " RESET\n";
+			std::cout << time(NULL) - m.GetClient()[j].GetTime() << '\n';
+		}
+	}
+}
+
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 	int	isServer = 0;
@@ -192,37 +221,19 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		}
 		else if (isServer == -1)
 		{
+			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
-			ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
+				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
 			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-			SendData(multiplexer, i);
+				SendData(multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))// still testing...not working for now
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
 			}
-			multiplexer.GetClient().back().Settime(time(NULL));
 		}
 	}
-	if (multiplexer.GetNumFd() == 0)
-	{
-		std::cout << "map size: " << multiplexer.GetClient().size() << "\n";
-		for (int i = 0; i < (int)multiplexer.GetClient().size(); i++)
-		{
-			std::cout << multiplexer.GetClient()[i].GetTime() << "\n";
-			if (time(NULL) - multiplexer.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
-			{
-				// std::cout << "TIME OUUTTT!!\n";
-				close(multiplexer.GetClient()[i].GetClientFd());
-				multiplexer.RemoveClient(i);
-			}
-		}
-	}
-	if (multiplexer.GetNumFd() == 0)
-	{
-		std::cout << "time\n";
-		//loop over clients to get thier timeout
-	}
+	CheckTimeout(multiplexer);
 	return (true);
 }
 
