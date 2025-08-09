@@ -17,6 +17,6 @@ class Client
         void	SetServerIndex(int16_t val);
         int16_t	GetClientFd() const;
         int16_t	GetserverIndex() const ;
-        time_t    GetTime() const;
+        const time_t    &GetTime() const;
         void      Settime(time_t time);
 };

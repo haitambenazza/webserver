@@ -25,7 +25,7 @@ Method::Method(){}
 // }
 // int Method::GetMethod()
 // {
-    
+
 // }
 
 int Method::PostMethod( std::string& path)
@@ -63,17 +63,32 @@ int Method::PostMethod( std::string& path)
 // }
 // bool	RunGet(Request &req, Server s)
 // {
-    
+
 Method::~Method(){}
 // 	//std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root /
 // 	return (true);
 // }
 
+int	GetRequestedLocation(std::vector<Location> &l, std::string &path)
+{
+	for (int i = 0; i < (int)l.size(); i++)
+	{
+		if (l[i].GetPath() == path)
+			return (i);
+	}
+	return (-1);
+}
+
 bool	RunGet(Request &req, Server &s)
 {
 	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
-    // std::cout << FullPath << '\n';
+	int	location = GetRequestedLocation(s.GetLocations(), FullPath);
 
+	if (location != -1)
+	{
+		std::cout << "location "<< location << " full path " ;
+		std::cout << s.GetLocations()[location].GetPath() << '\n';
+	}
     // req.printRequestData();
     return (true);
 }
