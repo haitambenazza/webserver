@@ -46,7 +46,7 @@ int16_t	    Client::GetserverIndex() const
     return (ServerIndex);
 }
 
-time_t    Client::GetTime() const
+const time_t    &Client::GetTime() const
 {
     return (connectedTime);
 }
