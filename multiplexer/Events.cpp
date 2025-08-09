@@ -126,11 +126,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
 		if (!buffer.empty())
-		{
-			req.parse(buffer);
-			req.printRequestData();
-		}
-			// GetRequest(buffer, s);
+			GetRequest(buffer, s);
 		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
