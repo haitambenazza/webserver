@@ -4,16 +4,22 @@
 #include "Includes.hpp"
 #include "Server.hpp"
 
-
+enum HttpStatus {
+    OK = 200,
+    BadRequest = 400,
+    NotImplemented = 501,
+    UriTooLong = 414,
+};
 
 class Request
 {
     private:
-        std::string method;
-        std::string uri;
-        std::string version;
-        std::map<std::string, std::string> headers;
-        std::string body;
+        std::string                         method;
+        std::string                         uri;
+        std::string                         version;
+        std::map<std::string, std::string>  headers;
+        std::string                         body;
+        HttpStatus                          status_code;
 
     public:
         Request();
@@ -31,5 +37,11 @@ class Request
         std::map<std::string, std::string> getHeaders();
         std::string getBody() const;
         std::string GetContentType();
-        void printRequestData() const;
+        int         getStatusCode();
+        void        printRequestData() const;
+
+        void stripCR(std::string &s);
+        bool parseRequestLine(const std::string &line);
+        void parseHeaders(std::stringstream &str);
+        void parseBody(std::stringstream &str);
 };

@@ -119,13 +119,18 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
+	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
 	{
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
 		if (!buffer.empty())
-				GetRequest(buffer, s);
+		{
+			req.parse(buffer);
+			req.printRequestData();
+		}
+			// GetRequest(buffer, s);
 		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
@@ -184,6 +189,7 @@ void	CheckTimeout(Multiplexer &m)
 		{
 			if (time(NULL) - m.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
 			{
+				std::cout << time(NULL) - m.GetClient()[i].GetTime() << ' ' << m.GetClient()[i].GetClientFd() << '\n';
 				std::cout << "\033[33mClient timeout" << "\033[0m\n";
 				close(m.GetClient()[i].GetClientFd());
 				m.RemoveClient(i);
@@ -198,9 +204,7 @@ void	registerTime(Multiplexer &m, int i)
 	{
 		if (m.GetClient()[j].GetClientFd() == m.GetEvents()[i].data.fd)
 		{
-			std::cout << time(NULL) - m.GetClient()[j].GetTime() << " before updating client event time\n";
 			m.GetClient()[j].Settime(time(NULL));
-			std::cout << time(NULL) - m.GetClient()[j].GetTime() << " after updating client event time\n";
 		}
 	}
 }
