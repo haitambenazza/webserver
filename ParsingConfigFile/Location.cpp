@@ -47,6 +47,20 @@ void               Location::SetCgiStatus( std::string s )
 {
     CgiEnabled = s;
 }
+
+std::vector< std::string>      Location::GetItemsFromServer( std::string& s, Server& Serv )
+{
+    std::map<std::string, std::vector<std::string > > map;
+    std::map<std::string, std::vector<std::string > >::iterator it;
+
+    map = Serv.GetCommands();
+    it = map.find(s);
+    if (it != map.end())
+        return (it->second);
+    return std::vector< std::string >();
+}
+
+
 void               Location::SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map )
 {
     std::map< std::string , std::vector< std::string> >::iterator it;

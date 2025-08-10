@@ -2,6 +2,9 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 #include "Includes.hpp"
+#include "../headers/webserver.hpp"
+
+class Server;
 
 class Location
 {
@@ -27,6 +30,7 @@ class Location
         void                                                    SetUploadStatus( std::string s );
         void                                                    SetCgiStatus( std::string s );
         void                                                    SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map );
+        std::vector< std::string>                               GetItemsFromServer( std::string& s, Server& Serv );
 };
 
 #endif

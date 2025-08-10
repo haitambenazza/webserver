@@ -3,6 +3,8 @@
 #include "../headers/webserver.hpp"
 #include "Includes.hpp"
 
+class Request;
+
 class Method
 {
     private:
@@ -13,8 +15,8 @@ class Method
         Method& operator=( const Method& copy );
         ~Method();
         int GetMethod();
-        int PostMethod( std::string& path );
-        int DeleteMethod( std::string& target );
+        int PostMethod( Request& Req );
+        int DeleteMethod(  Request& Req  );
 };
 
 bool	    GetRequest(std::string buffer, Server &server);
