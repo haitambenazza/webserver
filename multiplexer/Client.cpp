@@ -11,6 +11,7 @@ Client::Client( const Client& copy )
     fd = copy.fd;
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
+    connectedTime = copy.connectedTime;
 }
 
 Client& Client::operator=( const Client& copy )
@@ -19,6 +20,7 @@ Client& Client::operator=( const Client& copy )
     {
         fd = copy.fd;
         ServerIndex = copy.ServerIndex;
+        connectedTime = copy.connectedTime;
     }
     return (*this);
 }

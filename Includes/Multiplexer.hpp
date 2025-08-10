@@ -1,5 +1,6 @@
 #pragma once
 #include "Includes.hpp"
+#include"../headers/webserver.hpp"
 
 class Multiplexer
 {

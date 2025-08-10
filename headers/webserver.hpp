@@ -13,6 +13,7 @@
 #include <signal.h>
 #include <ctime>
 #include <sys/stat.h>
+#include <sys/epoll.h>
 
 
 #include "../Includes/Block.hpp"
