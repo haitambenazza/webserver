@@ -39,19 +39,17 @@ int Method::PostMethod( Request& Req )
 
     if (stat(Req.getUri().c_str(), &info) == -1)
         return (NotFound);
-    Req.printRequestData();
+    //Req.printRequestData();
     if (!Req.getHeaders().empty())
     {
-        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") == std::string::npos)
-            s = "lol";
-        else if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
+        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
             s = ".mp4";
         else
             s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
     }
     tm << time(NULL);
     std::string name(tm.str() + s.c_str());
-    Target.open( name.c_str(), std::ios::out | std::ios::binary );
+    //Target.open( name.c_str(), std::ios::out | std::ios::binary );
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
@@ -86,12 +84,13 @@ bool	RunGet(Request &req, Server &s)
 	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
 	int	location = GetRequestedLocation(s.GetLocations(), FullPath);
 
-    std::cout << FullPath << '\n';
+    //std::cout << "local ==== " << location << std::endl;
+    //location = 0;
 	if (location != -1)
 	{
-		std::cout << "location "<< s.GetLocations()[location].GetItemsFromServer("root", s)[0] << " full path " ;
-	}
-    // req.printRequestData();
+        //if (!s.GetLocations()[location].GetItemsFromServer("root", s).empty())
+		    std::cout << "location ======= "<< s.GetLocations()[location].GetItemsFromServer("root", s)[0] << std::endl;
+    }
     return (true);
 }
 
