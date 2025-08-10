@@ -148,7 +148,6 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	Request Req(buffer);
 	Method M;
 
-	// Req.parse()
 	M.PostMethod(Req);
 }
 
