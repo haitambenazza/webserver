@@ -50,14 +50,15 @@ int Method::PostMethod( Request& Req )
             s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
     }
     tm << time(NULL);
-    std::string name(tm.str() + s.c_str());
-    Target.open( name.c_str(), std::ios::out | std::ios::binary );
-    if (!Target.is_open())
-    {
-        std::cout << "cannot open file\n";
-        return (1);
-    }
-    Target << Req.getBody();
+    (void) tm;
+    // std::string name(tm.str() + s.c_str());
+    // Target.open( name.c_str(), std::ios::out | std::ios::binary );
+    // if (!Target.is_open())
+    // {
+    //     std::cout << "cannot open file\n";
+    //     return (1);
+    // }
+    // Target << Req.getBody();
     return (OK);
 }
 
@@ -71,24 +72,32 @@ Method::~Method(){}
 // 	return (true);
 // }
 
-int	GetRequestedLocation(std::vector<Location> &l, std::string &path)
+int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 {
 	for (int i = 0; i < (int)l.size(); i++)
 	{
 		if (l[i].GetPath() == path)
+        {
 			return (i);
+        }
 	}
 	return (-1);
 }
 
 bool	RunGet(Request &req, Server &s)
 {
-	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
-	int	location = GetRequestedLocation(s.GetLocations(), FullPath);
 
-    std::cout << FullPath << '\n';
+	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
+
+    std::cout << "fullpath == "<<req.getUri() << '\n';
+    std::cout << location << std::endl;
 	if (location != -1)
 	{
+        if (s.GetLocations()[location].GetItemsFromServer("root", s).empty())
+        {
+            std::cerr << "Not found" << std::endl;
+            return (false);
+        }
 		std::cout << "location "<< s.GetLocations()[location].GetItemsFromServer("root", s)[0] << " full path " ;
 	}
     // req.printRequestData();

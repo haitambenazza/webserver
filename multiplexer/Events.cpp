@@ -145,11 +145,11 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		}
 		close(m.GetEvents()[i].data.fd);
 	}
-	Request Req(buffer);
-	Method M;
+	// Request Req(buffer);
+	// Method M;
 
-	// Req.parse()
-	M.PostMethod(Req);
+	// // Req.parse()
+	// M.PostMethod(Req);
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
