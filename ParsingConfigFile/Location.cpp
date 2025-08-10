@@ -48,7 +48,7 @@ void               Location::SetCgiStatus( std::string s )
     CgiEnabled = s;
 }
 
-std::vector< std::string>      Location::GetItemsFromServer( std::string& s, Server& Serv )
+std::vector< std::string>      Location::GetItemsFromServer( std::string s, Server& Serv )
 {
     std::map<std::string, std::vector<std::string > > map;
     std::map<std::string, std::vector<std::string > >::iterator it;
