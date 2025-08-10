@@ -126,7 +126,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
 		if (!buffer.empty())
-			GetRequest(buffer, s);
+			GetRequest(buffer, s, m, i);
 		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
@@ -145,11 +145,6 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		}
 		close(m.GetEvents()[i].data.fd);
 	}
-	Request Req(buffer);
-	Method M;
-
-	// Req.parse()
-	M.PostMethod(Req);
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
@@ -162,26 +157,6 @@ int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
 	return -1;
 }
 
-bool SendData(Multiplexer &m, int i)
-{
-	std::stringstream response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 883\r\n\r\n");
-	std::ifstream file("www/index.html");
-	std::stringstream html;
-
-	if (!file.is_open())
-		std::cout << "FAILED\n";
-	html << file.rdbuf();
-	response << response.str() << html.str();
-	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
-	m.GetEvents()[i].events = EPOLLIN;
-	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
-	{
-		perror("epoll_ctl()");
-		return false;
-	}
-	return true;
-}
-
 void	CheckTimeout(Multiplexer &m)
 {
 	if (m.GetNumFd() == 0)
@@ -190,7 +165,6 @@ void	CheckTimeout(Multiplexer &m)
 		{
 			if (time(NULL) - m.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
 			{
-				std::cout << time(NULL) - m.GetClient()[i].GetTime() << ' ' << m.GetClient()[i].GetClientFd() << '\n';
 				std::cout << "\033[33mClient timeout" << "\033[0m\n";
 				close(m.GetClient()[i].GetClientFd());
 				m.RemoveClient(i);
@@ -229,8 +203,8 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
-			else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-				SendData(multiplexer, i);
+			// else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
+			// 	SendData(multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))// still testing...not working for now
 			{
 				std::cout << "client disconnected\n";

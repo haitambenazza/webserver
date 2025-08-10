@@ -1,5 +1,30 @@
 #include "../headers/webserver.hpp"
 
+// std::string fileExtention(std::string file)
+// {
+
+// }
+
+bool SendData(Multiplexer &m, int i, std::string &path)
+{
+	std::stringstream response("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 1066\r\n\r\n");
+	std::ifstream file(path.c_str());
+	std::stringstream html;
+
+	if (!file.is_open())
+		std::cout << "FAILED\n";
+	html << file.rdbuf();
+	response << response.str() << html.str();
+	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
+	m.GetEvents()[i].events = EPOLLIN;
+	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+	{
+		perror("epoll_ctl()");
+		return false;
+	}
+	return true;
+}
+
 std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::string key)
 {
     std::map<std::string, std::string >::iterator  				it;
@@ -14,21 +39,8 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     return "";
 }
 
-Method::Method(){}
-// Method::Method( const Method& copy )
-// {
 
-// }
-// Method& Method::operator=( const Method& copy )
-// {
-
-// }
-// int Method::GetMethod()
-// {
-
-// }
-
-int Method::PostMethod( Request& Req )
+int PostMethod( Request& Req )
 {
     struct stat     info;
     std::ofstream   Target;
@@ -61,17 +73,13 @@ int Method::PostMethod( Request& Req )
     return (OK);
 }
 
-int Method::DeleteMethod( Request& Req )
+int DeleteMethod( Request& Req )
 {
     (void)Req;
     return (OK);
 }
-Method::~Method(){}
-// 	//std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root /
-// 	return (true);
-// }
 
-int	GetRequestedLocation(std::vector<Location> &l, std::string &path)
+int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 {
 	for (int i = 0; i < (int)l.size(); i++)
 	{
@@ -81,25 +89,39 @@ int	GetRequestedLocation(std::vector<Location> &l, std::string &path)
 	return (-1);
 }
 
-bool	RunGet(Request &req, Server &s)
+bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 {
-	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
-	int	location = GetRequestedLocation(s.GetLocations(), FullPath);
+	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
+    int status = 0;
 
-    std::cout << FullPath << '\n';
+    std::cout << req.getUri() << '\n';
 	if (location != -1)
 	{
-		std::cout << "location "<< s.GetLocations()[location].GetItemsFromServer("root", s)[0] << " full path " ;
+        Location loc(s.GetLocations()[location]);
+		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
+		{
+			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
+			std::cout << "location "<< location << " full path " << loc.GetValuesLocation("root")[0] << loc.GetValuesLocation("index")[0] << '\n';
+			SendData(m, i, path);
+			status = OK;
+		}
+    }
+    else
+	{
+		std::string error = "error_pages/404.html";
+		SendData(m, i, error);
 	}
-    // req.printRequestData();
     return (true);
 }
 
-bool	GetRequest(std::string buffer, Server &server)
+bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
+	request.printRequestData();
 	if (request.getMethod() == "GET")
-		return (RunGet(request, server));
+		return (RunGet(request, server, m, i));
+	else if (request.getMethod() == "POST")
+		return (PostMethod(request));
 	return true;
 }
