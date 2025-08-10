@@ -1,14 +1,14 @@
 #include "../Includes/Request.hpp"
 
 
-Request::Request() : method(""), uri(""), version(""), body("") {}
+Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK) {}
 
 Request::Request(const std::string& request_string) {
     this->parse(request_string);
 }
 
 Request::Request(const Request& other)
-    : method(other.method), uri(other.uri), version(other.version), headers(other.headers), body(other.body) {}
+    : method(other.method), uri(other.uri), version(other.version), headers(other.headers), body(other.body), status_code(other.status_code) {}
 
 Request& Request::operator=(const Request& other) {
     if (this != &other) {
@@ -17,6 +17,7 @@ Request& Request::operator=(const Request& other) {
         version = other.version;
         headers = other.headers;
         body = other.body;
+        status_code = other.status_code;
     }
     return *this;
 }
@@ -43,6 +44,11 @@ std::string Request::getMethod()
     return this->method;
 }
 
+int Request::getStatusCode()
+{
+    return this->status_code;
+}
+
 std::string Request::getHeaderValue(const std::string& header_name)
 {
     std::map<std::string , std::string >::const_iterator it;
@@ -62,63 +68,100 @@ std::map<std::string , std::string> Request::getHeaders()
     return this->headers;
 }
 
+std::string isBadRequest(std::string &buffer)
+{
+    if (buffer.empty() || buffer[buffer.size() - 1] != '\r')
+        return "400 Bad Request";
+    return "";
+}
 
-void Request::parse(const std::string& request_string)
+void Request::stripCR(std::string &s) 
+{
+    if (!s.empty() && s[s.size() - 1] == '\r')
+        s.erase(s.size() - 1);
+}
+
+bool Request::parseRequestLine(const std::string &line) 
+{
+    std::stringstream ss(line);
+    std::string temp_method, temp_uri, temp_version;
+    ss >> temp_method >> temp_uri >> temp_version;
+
+    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
+        !temp_uri.empty() &&
+        (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1")) 
+    {
+        method = temp_method;
+        uri = temp_uri;
+        version = temp_version;
+        return true;
+    }
+    return false;
+}
+
+void Request::parseHeaders(std::stringstream &str) 
+{
+    std::string line;
+    while (std::getline(str, line)) 
+    {
+        stripCR(line);
+        if (line.empty()) break; // end of headers
+
+        size_t colon = line.find(':');
+        if (colon != std::string::npos) 
+        {
+            std::string key = line.substr(0, colon);
+            std::string value = line.substr(colon + 1);
+
+            // Trim leading spaces
+            while (!value.empty() && (value[0] == ' ' || value[0] == '\t'))
+                value.erase(0, 1);
+
+            headers[key] = value;
+        }
+    }
+}
+
+void Request::parseBody(std::stringstream &str) 
+{
+    std::map<std::string, std::string>::iterator it = headers.find("Content-Length");
+    if (it != headers.end()) 
+    {
+        size_t length = 0;
+        std::istringstream(it->second) >> length;
+        if (length > 0) 
+        {
+            std::vector<char> buffer(length);
+            str.read(&buffer[0], length);
+            body.assign(buffer.begin(), buffer.end());
+        }
+    } 
+    else 
+    {
+        std::stringstream body_stream;
+        body_stream << str.rdbuf();
+        body = body_stream.str();
+    }
+}
+
+void Request::parse(const std::string& request_string) 
 {
     std::stringstream str(request_string);
     std::string line;
 
-    std::getline(str, line);
-    std::stringstream request_line(line);
+    if (!std::getline(str, line)) 
+        return;
+    stripCR(line);
 
-    // Try to parse as HTTP request
-    std::string temp_method, temp_uri, temp_version;
-    request_line >> temp_method >> temp_uri >> temp_version;
-
-    // Check if this looks like a valid HTTP request
-    // Valid HTTP methods: GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH, etc.
-    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE")
-        && !temp_uri.empty() &&
-         (temp_version.find("HTTP/") == 0))
+    if (!parseRequestLine(line)) 
     {
-        // This is a valid HTTP request - parse normally
-        method = temp_method;
-        uri = temp_uri;
-        version = temp_version;
-
-        // Parse headers
-        while (std::getline(str, line) && !line.empty() && line != "\r")
-        {
-            size_t double_dots = line.find(':');
-            if (double_dots != std::string::npos)
-            {
-                std::string key = line.substr(0, double_dots);
-                std::string value = line.substr(double_dots + 2);
-
-                if (!value.empty() && value[value.size() - 1] == '\r')
-                {
-                    value.erase(value.size() - 1);
-                }
-                headers.insert(std::make_pair(key, value));
-            }
-        }
-
-        // Parse body
-        if (str)
-        {
-            std::stringstream body_string;
-            body_string << str.rdbuf();
-            this->body = body_string.str();
-        }
+        body = request_string; // treat as raw data
+        std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
+        return;
     }
-    else
-    {
-        // This is NOT a valid HTTP request - treat entire input as raw data
-        // Put the entire request_string as body
-        this->body = request_string;
 
-        std::cout << "[INFO] Non-HTTP request detected, treating as raw data" << std::endl;
-    }
+    parseHeaders(str);
+    parseBody(str);
 }
 
 void Request::printRequestData() const

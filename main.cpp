@@ -6,7 +6,7 @@ int main( int ac, char **av, char **envp )
 	std::vector<Server> 		servers;
 	Method				 M;
 	std::string lol("/home/kbassim/Desktop/webserv");
-	M.PostMethod(lol);
+	
 	(void)envp;
 	if (ac != 2)
 	{

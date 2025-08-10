@@ -28,42 +28,44 @@ Method::Method(){}
 
 // }
 
-int Method::PostMethod( std::string& path)
+int Method::PostMethod( Request& Req )
 {
     struct stat     info;
     std::ofstream   Target;
     std::string     s;
     std::ostringstream tm;
+    std::map<std::string, std::string >::iterator it;
 
 
-    if (stat(path.c_str(), &info) == -1)
-        return (404);
-    s = ".pdf";
+    if (stat(Req.getUri().c_str(), &info) == -1)
+        return (NotFound);
+    Req.printRequestData();
+    if (!Req.getHeaders().empty())
+    {
+        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") == std::string::npos)
+            s = "lol";
+        else if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
+            s = ".mp4";
+        else
+            s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];  
+    }
     tm << time(NULL);
     std::string name(tm.str() + s.c_str());
-    Target.open( name.c_str() );
+    Target.open( name.c_str(), std::ios::out | std::ios::binary );
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
         return (1);
     }
-    int i = 0;
-    while (i < 1000)
-    {
-        Target << "h\n";
-        i++;
-    }
-    return (0);
+    Target << Req.getBody();
+    return (OK);
 }
 
-// int Method::DeleteMethod( std::string& target )
-// {
-//     if ( access(target.c_str(), ) == -1)
-//         return (404);
-// }
-// bool	RunGet(Request &req, Server s)
-// {
-
+int Method::DeleteMethod( Request& Req )
+{
+    (void)Req;
+    return (OK);
+}
 Method::~Method(){}
 // 	//std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root /
 // 	return (true);
