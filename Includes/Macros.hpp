@@ -11,4 +11,4 @@
 #define EPOLL_TIMEOUT 500
 #define ALLOWED_CHAR_URI "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%"
 #define TIMEOUT_CLIENT 10
-
+#define URI_MAX_LENGTH 4096
