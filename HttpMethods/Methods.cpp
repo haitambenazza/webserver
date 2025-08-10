@@ -87,7 +87,6 @@ bool	RunGet(Request &req, Server &s)
 	if (location != -1)
 	{
 		std::cout << "location "<< location << " full path " ;
-		std::cout << s.GetLocations()[location].GetPath() << '\n';
 	}
     // req.printRequestData();
     return (true);
