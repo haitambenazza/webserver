@@ -115,11 +115,11 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char tmp[4096];
+	char tmp[59713];
 	std::string buffer;
 	Request req;
 	int bytes_read;
-	(void)s;
+	//(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
 	{
@@ -147,7 +147,8 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	}
 	Request Req(buffer);
 	Method M;
-
+	
+	std::cout << req.getBody();
 	M.PostMethod(Req);
 }
 
