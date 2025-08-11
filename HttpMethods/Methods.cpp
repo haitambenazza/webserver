@@ -89,7 +89,7 @@ bool	RunGet(Request &req, Server &s)
 
 	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
 
-    std::cout << "fullpath == "<<req.getUri() << '\n';
+    std::cout << "fullpath == "<< req.getUri() << '\n';
     std::cout << location << std::endl;
 	if (location != -1)
 	{
