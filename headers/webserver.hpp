@@ -14,7 +14,8 @@
 #include <ctime>
 #include <sys/stat.h>
 #include <sys/epoll.h>
-
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "../Includes/Block.hpp"
 #include "../Includes/File.hpp"
