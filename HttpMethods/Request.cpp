@@ -87,6 +87,8 @@ bool Request::parseRequestLine(const std::string &line)
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
 
+    std::cout<< temp_version << "yaaaaaaaaa  "<< temp_method << std::endl;
+
     if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
         !temp_uri.empty() &&
         (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1")) 
@@ -150,7 +152,10 @@ void Request::parse(const std::string& request_string)
     std::string line;
 
     if (!std::getline(str, line)) 
+    {
+        std::cout << "hello\n";
         return;
+    }
     stripCR(line);
 
     if (!parseRequestLine(line)) 

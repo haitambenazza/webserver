@@ -39,23 +39,22 @@ int Method::PostMethod( Request& Req )
 
     if (stat(Req.getUri().c_str(), &info) == -1)
         return (NotFound);
-    //Req.printRequestData();
+    s = "";
     if (!Req.getHeaders().empty())
     {
-        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
-            s = ".mp4";
-        else
-            s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+        // std::cout << GetValuesFromKeysReq(Req.getHeaders(), "Content-Type") << "\n";
+        s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
     }
     tm << time(NULL);
     std::string name(tm.str() + s.c_str());
-    //Target.open( name.c_str(), std::ios::out | std::ios::binary );
+    Target.open( "1.mp4" , std::ios::out);
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
         return (1);
     }
-    Target << Req.getBody();
+    // Req.printRequestData();
+    Target.write(Req.getBody().c_str(),Req.getBody().size()) ;
     return (OK);
 }
 
@@ -69,7 +68,7 @@ Method::~Method(){}
 // 	return (true);
 // }
 
-int	GetRequestedLocation(std::vector<Location> &l, std::string &path)
+int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 {
 	for (int i = 0; i < (int)l.size(); i++)
 	{
@@ -81,16 +80,21 @@ int	GetRequestedLocation(std::vector<Location> &l, std::string &path)
 
 bool	RunGet(Request &req, Server &s)
 {
-	std::string FullPath(s.GetRoot() + (req.getUri().c_str() + 1)); // plus one to skip the root
-	int	location = GetRequestedLocation(s.GetLocations(), FullPath);
 
-    //std::cout << "local ==== " << location << std::endl;
-    //location = 0;
+	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
+
+    // std::cout << "fullpath == "<<req.getUri() << '\n';
+    // std::cout << location << std::endl;
 	if (location != -1)
 	{
-        //if (!s.GetLocations()[location].GetItemsFromServer("root", s).empty())
-		    std::cout << "location ======= "<< s.GetLocations()[location].GetItemsFromServer("root", s)[0] << std::endl;
-    }
+        if (s.GetLocations()[location].GetItemsFromServer("root", s).empty())
+        {
+            std::cerr << "Not found" << std::endl;
+            return (false);
+        }
+		std::cout << "location "<< s.GetLocations()[location].GetItemsFromServer("root", s)[0] << " full path " ;
+	}
+    // req.printRequestData();
     return (true);
 }
 
