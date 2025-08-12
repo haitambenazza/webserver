@@ -89,23 +89,17 @@ int PostMethod( Request& Req )
         return (NotFound);
     s = "";
     if (!Req.getHeaders().empty())
-    {
-        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") == std::string::npos)//type/subtype
-            s = "lol";
-        else if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
-            s = ".mp4";
-        else
-            s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
-    }
+        s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+
     tm << time(NULL);
     std::string name(tm.str() + s.c_str());
-    Target.open( "1.mp4" , std::ios::out);
+    Target.open( "file.txt" , std::ios::out);
+	std::cout << name.c_str() << "    ==  \n";
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
         return (1);
     }
-    // Req.printRequestData();
     Target.write(Req.getBody().c_str(),Req.getBody().size()) ;
     return (OK);
 }
@@ -154,7 +148,7 @@ bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
-	request.printRequestData();
+	//request.printRequestData();
 	if (request.getMethod() == "GET")
 		return (RunGet(request, server, m, i));
 	else if (request.getMethod() == "POST")

@@ -87,8 +87,6 @@ bool Request::parseRequestLine(const std::string &line)
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
 
-    std::cout<< temp_version << "yaaaaaaaaa  "<< temp_method << std::endl;
-
     if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
         !temp_uri.empty() &&
         (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1")) 
@@ -107,8 +105,18 @@ void Request::parseHeaders(std::stringstream &str)
     while (std::getline(str, line)) 
     {
         stripCR(line);
-        if (line.empty()) break; // end of headers
-
+        if (line.empty()) 
+            break;
+        if (line.find(";") != std::string::npos)
+        {
+            std::vector<std::string> tmp = split(line, ";");
+            for (size_t i = 0; i < tmp.size(); i++)
+                std::cout << tmp[i] << "\n";
+        }
+        else 
+        {
+            std::cout << line << "\n";
+        }
         size_t colon = line.find(':');
         if (colon != std::string::npos) 
         {
@@ -150,23 +158,30 @@ void Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
+    //std::map<std::string, std::string> tst;
 
     if (!std::getline(str, line)) 
-    {
-        std::cout << "hello\n";
         return;
-    }
     stripCR(line);
-
+    
     if (!parseRequestLine(line)) 
     {
         body = request_string; // treat as raw data
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
         return;
     }
-
+    // std::cout << request_string << "\n";
     parseHeaders(str);
+    // tst = getHeaders();
+    // std::map<std::string, std::string>::iterator it;
+    // it = tst.begin();
+    // while (it != tst.end())
+    // {
+    //     std::cout << it->first << " :: " <<it->second <<std::endl;
+    //     it++;
+    // }
     parseBody(str);
+    std::cout << getBody();
 }
 
 void Request::printRequestData() const
@@ -174,15 +189,12 @@ void Request::printRequestData() const
     std::cout << "\nMethod: " << this->method << std::endl;
     std::cout << "URI: " << this->uri << std::endl;
     std::cout << "Version: " << this->version << std::endl;
-
     std::cout << "--- Headers ---" << std::endl;
-
     std::map<std::string, std::string>::const_iterator it;
     for (it = this->headers.begin(); it != this->headers.end(); ++it)
     {
         std::cout << it->first << ": " << it->second << std::endl;
     }
-
     std::cout << "--- Body ---" << std::endl;
     std::cout << this->body << std::endl;
 }
