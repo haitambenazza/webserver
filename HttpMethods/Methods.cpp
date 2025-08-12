@@ -32,8 +32,10 @@ std::string	BuildResponse(std::string type, int size, int status)
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
-	if (status == OK)
+	if (status == 200)
 		response += " OK\r\n";
+	if (status == 201)
+		response += " Created\r\n";
 	else if (status == NotFound)
 		response += " Not Found\r\n";
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
@@ -94,7 +96,7 @@ int PostMethod( Request& Req )
     }
     tm << time(NULL);
     std::string name(tm.str() + s.c_str());
-    Target.open( name.c_str(), std::ios::out | std::ios::binary );
+    Target.open( ("upload/" + name).c_str(), std::ios::out | std::ios::binary );
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
