@@ -115,7 +115,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char tmp[59713];
+	char tmp[300000];
 	std::string buffer;
 	Request req;
 	int bytes_read;
@@ -134,6 +134,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 			return ;
 		}
 	}
+	std::cout << buffer << "\n";
 	if (bytes_read == 0)
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
@@ -145,6 +146,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		}
 		close(m.GetEvents()[i].data.fd);
 	}
+	// m.GetBuff()+= buffer;
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
