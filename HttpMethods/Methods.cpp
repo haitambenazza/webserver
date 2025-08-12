@@ -51,7 +51,6 @@ bool SendData(Multiplexer &m, int i, std::string &path, int status)
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
-	std::cout << response.str();
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	m.GetEvents()[i].events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
@@ -91,11 +90,6 @@ int PostMethod( Request& Req )
     Req.printRequestData();
     if (!Req.getHeaders().empty())
     {
-        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") == std::string::npos)//type/subtype
-            s = "lol";
-        else if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
-            s = ".mp4";
-        else
             s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
     }
     tm << time(NULL);
@@ -129,22 +123,26 @@ int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 {
 	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
-    int status = 0;
+	std::string error = "error_pages/404.html";
 
-    std::cout << req.getUri() << '\n';
 	if (location != -1)
 	{
-        Location loc(s.GetLocations()[location]);
+		Location loc(s.GetLocations()[location]);
 		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
 		{
+			req.printRequestData();
 			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
+			std::cout << path << "--------------------\n";
 			SendData(m, i, path, OK);
-			status = OK;
 		}
-    }
+		else
+		{
+			SendData(m, i, error, NotFound);
+			return (false);
+		}
+	}
     else
 	{
-		std::string error = "error_pages/404.html";
 		SendData(m, i, error, NotFound);
 	}
     return (true);
@@ -154,7 +152,6 @@ bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
-	request.printRequestData();
 	if (request.getMethod() == "GET")
 		return (RunGet(request, server, m, i));
 	else if (request.getMethod() == "POST")
