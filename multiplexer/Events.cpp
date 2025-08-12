@@ -125,14 +125,14 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	{
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
-		if (!buffer.empty())
-			GetRequest(buffer, s, m, i);
 		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
 			perror("epoll_ctl()");
 			return ;
 		}
+		if (!buffer.empty())
+			GetRequest(buffer, s, m, i);
 	}
 	if (bytes_read == 0)
 	{

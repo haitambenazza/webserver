@@ -51,6 +51,7 @@ bool SendData(Multiplexer &m, int i, std::string &path, int status)
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
+	std::cout << response.str();
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	m.GetEvents()[i].events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
