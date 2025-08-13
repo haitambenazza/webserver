@@ -90,23 +90,19 @@ int PostMethod( Request& Req )
     Req.printRequestData();
     if (!Req.getHeaders().empty())
     {
-        if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") == std::string::npos)//type/subtype
-            s = "lol";
-        else if (GetValuesFromKeysReq(Req.getHeaders(), "Content-Type").find("form-data") != std::string::npos)
-            s = ".mp4";
-        else
             s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
     }
     tm << time(NULL);
     (void) tm;
-    // std::string name(tm.str() + s.c_str());
-    // Target.open( name.c_str(), std::ios::out | std::ios::binary );
-    // if (!Target.is_open())
-    // {
-    //     std::cout << "cannot open file\n";
-    //     return (1);
-    // }
-    // Target << Req.getBody();
+    std::string name(tm.str() + s.c_str());
+    Target.open( name.c_str(), std::ios::out | std::ios::binary );
+    if (!Target.is_open())
+    {
+        std::cout << "cannot open file\n";
+        return (1);
+    }
+	Target.write(Req.getBody().data(), Req.getBody().size());
+
     return (OK);
 }
 
