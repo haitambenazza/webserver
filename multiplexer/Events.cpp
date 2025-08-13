@@ -32,8 +32,8 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
 		servers[serv].InitializeServerSettings();
-		servers[serv].PrintData();
-		std::cout << "------------------------\n";
+		// servers[serv].PrintData();
+		// std::cout << "------------------------\n";
 	}
 	return true;
 }
@@ -115,26 +115,24 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char tmp[300000];
-	std::string buffer;
+	char tmp[MAX_READ];
+	// std::string buffer;
 	Request req;
 	int bytes_read;
-	//(void)s;
+	(void)s;
 
-	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
+	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		tmp[bytes_read] = '\0';
-		buffer += tmp;
+		m.SetDataRead((unsigned char *)tmp, bytes_read + 1);
 		m.GetEvents()[i].events = EPOLLOUT;
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 		{
 			perror("epoll_ctl()");
 			return ;
 		}
-		if (!buffer.empty())
-			GetRequest(buffer, s, m, i);
 	}
-	std::cout << buffer << "\n";
+	//std::cout << buffer << "\n";
 	if (bytes_read == 0)
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
@@ -199,15 +197,25 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		{
 			if (AcceptNewClient(multiplexer, i, server) == false)
 				return (false);
+
 		}
 		else if (isServer == -1)
 		{
 			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
+			{
 				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
-			// else if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-			// 	SendData(multiplexer, i);
-			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))// still testing...not working for now
+				if (multiplexer.GetDataRead().size() > 0)
+				{
+					std::string buff;
+					// std::cout << "size == " << multiplexer.GetDataRead().size() << "\n";
+					for (size_t i = 0; i < multiplexer.GetDataRead().size(); i++)
+						buff += multiplexer.GetDataRead()[i] ;
+					GetRequest(buff, server[multiplexer.GetClient().back().GetserverIndex()], multiplexer, i);
+					multiplexer.GetDataRead().clear();
+				}
+			}
+			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
@@ -215,6 +223,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		}
 	}
 	CheckTimeout(multiplexer);
+	
 	return (true);
 }
 

@@ -107,16 +107,6 @@ void Request::parseHeaders(std::stringstream &str)
         stripCR(line);
         if (line.empty()) 
             break;
-        if (line.find(";") != std::string::npos)
-        {
-            std::vector<std::string> tmp = split(line, ";");
-            for (size_t i = 0; i < tmp.size(); i++)
-                std::cout << tmp[i] << "\n";
-        }
-        else 
-        {
-            std::cout << line << "\n";
-        }
         size_t colon = line.find(':');
         if (colon != std::string::npos) 
         {
@@ -166,22 +156,12 @@ void Request::parse(const std::string& request_string)
     
     if (!parseRequestLine(line)) 
     {
-        body = request_string; // treat as raw data
+        body = request_string;
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
         return;
     }
-    // std::cout << request_string << "\n";
     parseHeaders(str);
-    // tst = getHeaders();
-    // std::map<std::string, std::string>::iterator it;
-    // it = tst.begin();
-    // while (it != tst.end())
-    // {
-    //     std::cout << it->first << " :: " <<it->second <<std::endl;
-    //     it++;
-    // }
     parseBody(str);
-    std::cout << getBody();
 }
 
 void Request::printRequestData() const
