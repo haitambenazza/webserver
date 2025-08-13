@@ -47,6 +47,10 @@ std::vector<std::string> split( std::string s, std::string delimiter )
     std::vector<std::string>    lst;
     bool                        InQuote;
 
+    if (s.empty())
+    {
+        return std::vector<std::string>();
+    }
     end = 0;
     st = 0;
     InQuote = false;
