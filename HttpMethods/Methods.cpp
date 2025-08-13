@@ -157,7 +157,7 @@ bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
-	request.printRequestData();
+	//request.printRequestData();
 	if (request.getMethod() == "GET")
 		return (RunGet(request, server, m, i));
 	else if (request.getMethod() == "POST")
