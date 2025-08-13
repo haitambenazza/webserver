@@ -207,12 +207,22 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
 				if (multiplexer.GetDataRead().size() > 0)
 				{
-					std::string buff;
-					// std::cout << "size == " << multiplexer.GetDataRead().size() << "\n";
-					for (size_t i = 0; i < multiplexer.GetDataRead().size(); i++)
-						buff += multiplexer.GetDataRead()[i] ;
-					GetRequest(buff, server[multiplexer.GetClient().back().GetserverIndex()], multiplexer, i);
-					multiplexer.GetDataRead().clear();
+					static std::string buff;
+
+					size_t j = 0;
+					while (j < multiplexer.GetDataRead().size())
+					{
+						buff += multiplexer.GetDataRead()[j];
+						j++;
+					}
+
+					if (multiplexer.GetDataRead()[j] != '\0')
+					{
+						GetRequest(buff, server[multiplexer.GetClient().back().GetserverIndex()], multiplexer, i);
+						multiplexer.GetDataRead().clear();
+					}
+					else
+						continue ;
 				}
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
