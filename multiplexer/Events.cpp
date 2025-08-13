@@ -119,12 +119,15 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	std::string buffer;
 	Request req;
 	int bytes_read;
-	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
 	{
 		tmp[bytes_read] = '\0';
 		buffer += tmp;
+
+		std::cout << "BUFFER :\n\n" << buffer << std::endl;
+		std::cout << "BUFFER SIZE == " << buffer.size() << std::endl;
+
 		if (!buffer.empty())
 			GetRequest(buffer, s, m, i);
 		m.GetEvents()[i].events = EPOLLOUT;
@@ -145,6 +148,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		}
 		close(m.GetEvents()[i].data.fd);
 	}
+	
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)

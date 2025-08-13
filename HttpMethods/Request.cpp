@@ -68,13 +68,6 @@ std::map<std::string , std::string> Request::getHeaders()
     return this->headers;
 }
 
-std::string isBadRequest(std::string &buffer)
-{
-    if (buffer.empty() || buffer[buffer.size() - 1] != '\r')
-        return "400 Bad Request";
-    return "";
-}
-
 void Request::stripCR(std::string &s) 
 {
     if (!s.empty() && s[s.size() - 1] == '\r')
@@ -87,16 +80,47 @@ bool Request::parseRequestLine(const std::string &line)
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
 
-    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
-        !temp_uri.empty() &&
-        (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1")) 
-    {
-        method = temp_method;
-        uri = temp_uri;
-        version = temp_version;
-        return true;
+    if (temp_method.empty() || temp_uri.empty() || temp_version.empty()) {
+        status_code = BadRequest;
+        return false;
     }
-    return false;
+    if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
+    {
+        status_code = NotImplemented;
+        return(false);
+    }
+    std::string extra;
+    if (ss >> extra) {
+        status_code = BadRequest;
+        return false;
+    }
+
+    if (!temp_uri.empty())
+    {
+        if (temp_uri.size() > RequestUriTooLong)
+        {
+            status_code = RequestUriTooLong;
+            return(false);
+        }
+        else if(temp_uri[0] != '/')
+        {
+            status_code = BadRequest;
+            return false;
+        }
+    }
+
+    if (temp_version != "HTTP/1.0" && temp_version != "HTTP/1.1")
+    {
+        status_code = HttpVersionNotSupported;
+        return false;
+    }
+    
+    method = temp_method;
+    uri = temp_uri;
+    version = temp_version;
+
+    status_code = OK;
+    return true;
 }
 
 void Request::parseHeaders(std::stringstream &str) 
@@ -105,19 +129,46 @@ void Request::parseHeaders(std::stringstream &str)
     while (std::getline(str, line)) 
     {
         stripCR(line);
-        if (line.empty()) break; // end of headers
+        if (line.empty()) 
+            break; // end of headers
 
         size_t colon = line.find(':');
         if (colon != std::string::npos) 
         {
             std::string key = line.substr(0, colon);
             std::string value = line.substr(colon + 1);
+            
+            if (key.empty()) 
+            {
+                status_code = BadRequest;
+                return;
+            }
+            for (size_t i = 0; i < key.size(); ++i) 
+            {
+                unsigned char c = key[i];
+                // allowed characters
+                if (!(std::isalnum(c) || c == '-')) 
+                {
+                    status_code = BadRequest;
+                    return;
+                }
+            }
+            if (key.find(' ') != std::string::npos || key.find('\t') != std::string::npos)
+            {
+                status_code = BadRequest;
+                return;
+            }
 
-            // Trim leading spaces
             while (!value.empty() && (value[0] == ' ' || value[0] == '\t'))
                 value.erase(0, 1);
 
             headers[key] = value;
+        }
+        else
+        {
+            // no colon found
+            status_code = BadRequest;
+            return;
         }
     }
 }
@@ -133,7 +184,21 @@ void Request::parseBody(std::stringstream &str)
         {
             std::vector<char> buffer(length);
             str.read(&buffer[0], length);
+            // if (str.gcount() != static_cast<std::streamsize>(length)) 
+            // {
+            //     std::cout << "str.gcount() ==== " << str.gcount() << "  static_cast<std::streamsize>(length) == " << static_cast<std::streamsize>(length) << "lenght == " << length << "\n";
+            //     status_code = BadRequest;
+            //     return;
+            // }
+            // for (size_t i = 0; i < length; i++)
+            // {
+            //     std::cout << "n ===== " << buffer[i];
+            // }
+            // std::cout << "BUFFER SIZE ===== " << buffer.size();
             body.assign(buffer.begin(), buffer.end());
+            std::cout << "----------BODY------------\n" ;
+            std::cout << body << std::endl;
+            std::cout << "BODY SIZE = " << body.size();
         }
     } 
     else 
@@ -152,6 +217,10 @@ void Request::parse(const std::string& request_string)
     if (!std::getline(str, line)) 
         return;
     stripCR(line);
+    if (request_string.empty())
+    {
+        status_code = BadRequest;
+    }
 
     if (!parseRequestLine(line)) 
     {
@@ -159,7 +228,7 @@ void Request::parse(const std::string& request_string)
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
         return;
     }
-
+    //std::cout  << " STTRRRRR ++++++++++ " << str.str() << std::endl;
     parseHeaders(str);
     parseBody(str);
 }
@@ -178,8 +247,8 @@ void Request::printRequestData() const
         std::cout << it->first << ": " << it->second << std::endl;
     }
 
-    std::cout << "--- Body ---" << std::endl;
-    std::cout << this->body << std::endl;
+    std::cout << "--- Body Size ---" << std::endl;
+    std::cout << this->body.size() << std::endl;
 }
 
 std::string Request::GetContentType()
