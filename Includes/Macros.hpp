@@ -12,3 +12,4 @@
 #define ALLOWED_CHAR_URI "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%"
 #define TIMEOUT_CLIENT 3
 #define URI_MAX_LENGTH 4096
+#define MAX_READ	1024
