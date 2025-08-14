@@ -41,8 +41,10 @@ class Request
         int         getStatusCode();
         void        printRequestData() const;
 
-        void stripCR(std::string &s);
-        bool parseRequestLine(const std::string &line);
-        void parseHeaders(std::stringstream &str);
-        void parseBody(std::stringstream &str);
+        void        stripCR(std::string &s);
+        bool        parseRequestLine(const std::string &line);
+        void        parseHeaders(std::stringstream &str);
+        void        parseBody(std::stringstream &str);
+        void        SetHeaders( std::string s );
+        void        SetStatusCode( HttpStatus val );
 };

@@ -67,6 +67,15 @@ std::map<std::string , std::string> Request::getHeaders()
 {
     return this->headers;
 }
+void       Request::SetHeaders( std::string s )
+{
+    parse(s);
+}
+
+void       Request::SetStatusCode( HttpStatus val )
+{
+    status_code = val;
+}
 
 std::string isBadRequest(std::string &buffer)
 {
