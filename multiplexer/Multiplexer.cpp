@@ -28,6 +28,15 @@ Multiplexer::Multiplexer()
     NumFds = -1;
     NewConnection = -1;
 }
+void                 Multiplexer::SetDataRead( const unsigned char *buff, size_t size )
+{
+    DataRead.assign(buff, buff + size);
+}
+
+std::vector<unsigned char>       Multiplexer::GetDataRead()
+{
+    return (DataRead);
+}
 
 Multiplexer::Multiplexer( std::vector<Server> &server )
 {

@@ -68,6 +68,10 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     std::map<std::string, std::string >::iterator  				it;
     std::string                                   				values;
 
+	if (map.empty() || key.empty())
+	{
+		return "";
+	}
     it = map.find(key);
     if (it != map.end())
     {
@@ -88,21 +92,25 @@ int PostMethod( Request& Req )
 
 
     if (stat(Req.getUri().c_str(), &info) == -1)
+	{
         return (NotFound);
-    Req.printRequestData();
-    if (!Req.getHeaders().empty())
-    {
-            s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
-    }
+	}
+
+    if (!Req.getHeaders().empty() && !split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/").empty())
+	{
+        s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+	}
+
     tm << time(NULL);
     std::string name(tm.str() + s.c_str());
-    Target.open( ("upload/" + name).c_str(), std::ios::out | std::ios::binary );
+    Target.open( name.c_str(), std::ios::binary);
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
         return (1);
     }
-    Target << Req.getBody();
+    Target.write(Req.getBody().c_str(), Req.getBody().size());
+	Target.close();
     return (OK);
 }
 
