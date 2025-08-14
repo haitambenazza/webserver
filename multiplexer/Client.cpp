@@ -13,8 +13,8 @@ Client::Client( const Client& copy )
     ServerIndex = copy.ServerIndex;
     connectedTime = copy.connectedTime;
     ReadDone = false;
-    buffer.clear();
-    file.clear();
+    Headers.clear();
+    Body.clear();
 }
 
 Client& Client::operator=( const Client& copy )
@@ -31,8 +31,8 @@ Client& Client::operator=( const Client& copy )
 Client::~Client()
 {
     //close (fd);
-    buffer.clear();
-    file.clear();
+    Headers.clear();
+    Body.clear();
 }
 
 void	Client::SetClient(int16_t val)
@@ -62,22 +62,22 @@ void        Client::Settime(time_t time)
 {
     connectedTime = time;
 }
-void       Client::SetBuffer(char *tmp)
+void       Client::SetHeaders(char *tmp)
 {
-    buffer += tmp;
+    Headers << tmp;
 }
 
-void            Client::ReadToFile( std::string s )
+void            Client::WriteToBody( std::string s )
 {
-    file << s;
+    Body << s;
 }
-std::string Client::GetFile() const
+std::stringstream Client::GetBody() const
 {
-    return (file.str());
+    return (Body);
 }
-std::string Client::GetBuffer() const
+std::stringstream Client::GetHeaders() const
 {
-    return buffer;
+    return Headers;
 }
 
 void        Client::SetReadStatus(bool flag)
@@ -90,5 +90,5 @@ bool        Client::GetReadStatus() const{
 
 void            Client::ResetFile()
 {
-    this->file.str("");
+    this->Body.str("");
 }

@@ -32,8 +32,8 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
 		servers[serv].InitializeServerSettings();
-		// servers[serv].PrintData();
-		// std::cout << "------------------------\n";
+		servers[serv].PrintData();
+		std::cout << "------------------------\n";
 	}
 	return true;
 }
@@ -103,11 +103,11 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept()");
 		return false;
 	}
-	if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
-	{
-		perror("fcntl()");
-		return (false);
-	}
+	// if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
+	// {
+	// 	perror("fcntl()");
+	// 	return (false);
+	// }
 	epoll_client.data.fd = m.GetClientFd();
 	epoll_client.events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
@@ -121,9 +121,10 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char tmp[MAX_READ];
+	char 		tmp[MAX_READ];
 	std::string buffer;
-	int bytes_read;
+	// Request		Req;
+	int			bytes_read;
 	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
@@ -131,20 +132,28 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		tmp[bytes_read] = '\0';
 		if (m.GetClient()[i].GetReadStatus() == false)
 		{
-			m.GetClient()[i].SetBuffer(tmp);//append the header to the string
-			if (m.GetClient()[i].GetBuffer().find("\r\n\r\n") != std::string::npos && !m.GetClient()[i].GetReadStatus())// read header
+			m.GetClient()[i].SetHeaders(tmp);//append the header to the string
+			if (m.GetClient()[i].GetHeaders().str().find("\r\n\r\n") != std::string::npos && !m.GetClient()[i].GetReadStatus())// read header
 			{
 				// std::cout << "------" << m.GetClient()[i].GetReadStatus() << '\n';
 				m.GetClient()[i].SetReadStatus(true);
-				m.GetClient()[i].ReadToFile(m.GetClient()[i].GetBuffer().substr(m.GetClient()[i].GetBuffer().find("\r\n\r\n") + 4));
-				GetRequest(m.GetClient()[i].GetBuffer(), s, m, i);
+				m.GetClient()[i].WriteToBody(m.GetClient()[i].GetHeaders().str().substr(m.GetClient()[i].GetHeaders().str().find("\r\n\r\n") + 4));
+				GetRequest(m.GetClient()[i].GetHeaders().str(), s, m, i);
+				// Req.SetHeaders(m.GetClient()[i].GetHeaders());
 			}
 		}
-		else {
-			m.GetClient()[i].ReadToFile(std::string(tmp));
+		else 
+		{
+			// if (atoll(Req.getHeaderValue("Content-Length").c_str()) > (long long)s.GetMaxBodySize())
+			// {
+			// 	Req.SetStatusCode(BadRequest);
+			// 	close(m.GetEvents()[i].data.fd);
+			// 	return ;
+			// }
+			m.GetClient()[i].WriteToBody(std::string(tmp));
 			// hna ghatkon post khdmat
 		}
-		std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetFile() << "\n";
+		std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetBody() << "\n";
 		m.GetClient()[i].ResetFile();
 	}
 
@@ -220,25 +229,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 			{
 				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
-				if (multiplexer.GetDataRead().size() > 0)
-				{
-					static std::string buff;
-
-					size_t j = 0;
-					while (j < multiplexer.GetDataRead().size())
-					{
-						buff += multiplexer.GetDataRead()[j];
-						j++;
-					}
-
-					if (multiplexer.GetDataRead()[j] != '\0')
-					{
-						GetRequest(buff, server[multiplexer.GetClient().back().GetserverIndex()], multiplexer, i);
-						multiplexer.GetDataRead().clear();
-					}
-					else
-						continue ;
-				}
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
