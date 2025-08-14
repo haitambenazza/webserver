@@ -162,9 +162,14 @@ bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
-	if (request.getMethod() == "GET")
-		return (RunGet(request, server, m, i));
-	else if (request.getMethod() == "POST")
-		return (PostMethod(request));
+    //request.printRequestData();
+    (void)server;
+    (void)m;
+    (void)i;
+    // if (request.)
+	// if (request.getMethod() == "GET")
+	// 	return (RunGet(request, server, m, i));
+	// else if (request.getMethod() == "POST")
+	// 	return (PostMethod(request));
 	return true;
 }

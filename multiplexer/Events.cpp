@@ -85,6 +85,12 @@ void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	NewClient.SetServerIndex(GetServerIndex(s, m.GetEvents()[fd].data.fd));
 	m.AddClient(NewClient);
 }
+bool	ChangeClientEvent(Multiplexer &m , int i , int event)
+{
+	m.GetEvents()->events = event;
+	(void)i;
+	return (true);
+}
 
 bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
@@ -116,23 +122,32 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
 	char tmp[MAX_READ];
-	// std::string buffer;
-	Request req;
+	std::string buffer;
 	int bytes_read;
 	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		tmp[bytes_read] = '\0';
-		m.SetDataRead((unsigned char *)tmp, bytes_read + 1);
-		m.GetEvents()[i].events = EPOLLOUT;
-		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+		if (m.GetClient()[i].GetReadStatus() == false)
 		{
-			perror("epoll_ctl()");
-			return ;
+			m.GetClient()[i].SetBuffer(tmp);//append the header to the string
+			if (m.GetClient()[i].GetBuffer().find("\r\n\r\n") != std::string::npos && !m.GetClient()[i].GetReadStatus())// read header
+			{
+				// std::cout << "------" << m.GetClient()[i].GetReadStatus() << '\n';
+				m.GetClient()[i].SetReadStatus(true);
+				m.GetClient()[i].ReadToFile(m.GetClient()[i].GetBuffer().substr(m.GetClient()[i].GetBuffer().find("\r\n\r\n") + 4));
+				GetRequest(m.GetClient()[i].GetBuffer(), s, m, i);
+			}
 		}
+		else {
+			m.GetClient()[i].ReadToFile(std::string(tmp));
+			// hna ghatkon post khdmat
+		}
+		std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetFile() << "\n";
+		m.GetClient()[i].ResetFile();
 	}
-	//std::cout << buffer << "\n";
+
 	if (bytes_read == 0)
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";

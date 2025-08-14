@@ -12,6 +12,9 @@ Client::Client( const Client& copy )
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
     connectedTime = copy.connectedTime;
+    ReadDone = false;
+    buffer.clear();
+    file.clear();
 }
 
 Client& Client::operator=( const Client& copy )
@@ -28,6 +31,8 @@ Client& Client::operator=( const Client& copy )
 Client::~Client()
 {
     //close (fd);
+    buffer.clear();
+    file.clear();
 }
 
 void	Client::SetClient(int16_t val)
@@ -56,4 +61,34 @@ const time_t    &Client::GetTime() const
 void        Client::Settime(time_t time)
 {
     connectedTime = time;
+}
+void       Client::SetBuffer(char *tmp)
+{
+    buffer += tmp;
+}
+
+void            Client::ReadToFile( std::string s )
+{
+    file << s;
+}
+std::string Client::GetFile() const
+{
+    return (file.str());
+}
+std::string Client::GetBuffer() const
+{
+    return buffer;
+}
+
+void        Client::SetReadStatus(bool flag)
+{
+    ReadDone = flag;
+}
+bool        Client::GetReadStatus() const{
+    return ReadDone;
+}
+
+void            Client::ResetFile()
+{
+    this->file.str("");
 }
