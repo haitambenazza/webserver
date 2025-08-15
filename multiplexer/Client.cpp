@@ -4,6 +4,7 @@ Client::Client()
 {
     fd = -1;
     ServerIndex = -1;
+    readDone = false;
 }
 
 Client::Client( const Client& copy )
@@ -12,6 +13,7 @@ Client::Client( const Client& copy )
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
     connectedTime = copy.connectedTime;
+    readDone = copy.readDone;
 }
 
 Client& Client::operator=( const Client& copy )
@@ -57,3 +59,27 @@ void        Client::Settime(time_t time)
 {
     connectedTime = time;
 }
+
+void            Client::appendToBuffer(const char *tmp, size_t size, bool which)
+{
+    if (which == true)
+        headers.append(tmp, size);
+    else
+        body.append(tmp, size);
+}
+std::string     Client::getBuffer(bool which) const
+{
+    if (which)
+        return (headers);
+    return (body);
+}
+
+void            Client::changeStatusRead(bool stat)
+{
+    readDone = stat;
+}
+bool            Client::getStatusRead() const
+{
+    return readDone;
+}
+

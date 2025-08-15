@@ -68,21 +68,33 @@ std::map<std::string , std::string> Request::getHeaders()
     return this->headers;
 }
 
-void Request::stripCR(std::string &s) 
+std::string isBadRequest(std::string &buffer)
+{
+    if (buffer.empty() || buffer[buffer.size() - 1] != '\r')
+        return "400 Bad Request";
+    return "";
+}
+
+void Request::stripCR(std::string &s)
 {
     if (!s.empty() && s[s.size() - 1] == '\r')
         s.erase(s.size() - 1);
 }
 
-bool Request::parseRequestLine(const std::string &line) 
+bool Request::parseRequestLine(const std::string &line)
 {
     std::stringstream ss(line);
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
 
-    if (temp_method.empty() || temp_uri.empty() || temp_version.empty()) {
-        status_code = BadRequest;
-        return false;
+    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
+        !temp_uri.empty() &&
+        (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1"))
+    {
+        method = temp_method;
+        uri = temp_uri;
+        version = temp_version;
+        return true;
     }
     if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
     {
@@ -123,17 +135,17 @@ bool Request::parseRequestLine(const std::string &line)
     return true;
 }
 
-void Request::parseHeaders(std::stringstream &str) 
+void Request::parseHeaders(std::stringstream &str)
 {
     std::string line;
-    while (std::getline(str, line)) 
+    while (std::getline(str, line))
     {
         stripCR(line);
         if (line.empty()) 
             break; // end of headers
 
         size_t colon = line.find(':');
-        if (colon != std::string::npos) 
+        if (colon != std::string::npos)
         {
             std::string key = line.substr(0, colon);
             std::string value = line.substr(colon + 1);
@@ -173,14 +185,14 @@ void Request::parseHeaders(std::stringstream &str)
     }
 }
 
-void Request::parseBody(std::stringstream &str) 
+void Request::parseBody(std::stringstream &str)
 {
     std::map<std::string, std::string>::iterator it = headers.find("Content-Length");
-    if (it != headers.end()) 
+    if (it != headers.end())
     {
         size_t length = 0;
         std::istringstream(it->second) >> length;
-        if (length > 0) 
+        if (length > 0)
         {
             std::vector<char> buffer(length);
             str.read(&buffer[0], length);
@@ -200,8 +212,8 @@ void Request::parseBody(std::stringstream &str)
             std::cout << body << std::endl;
             std::cout << "BODY SIZE = " << body.size();
         }
-    } 
-    else 
+    }
+    else
     {
         std::stringstream body_stream;
         body_stream << str.rdbuf();
@@ -209,12 +221,12 @@ void Request::parseBody(std::stringstream &str)
     }
 }
 
-void Request::parse(const std::string& request_string) 
+void Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
 
-    if (!std::getline(str, line)) 
+    if (!std::getline(str, line))
         return;
     stripCR(line);
     if (request_string.empty())
@@ -222,7 +234,7 @@ void Request::parse(const std::string& request_string)
         status_code = BadRequest;
     }
 
-    if (!parseRequestLine(line)) 
+    if (!parseRequestLine(line))
     {
         body = request_string; // treat as raw data
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
@@ -247,8 +259,8 @@ void Request::printRequestData() const
         std::cout << it->first << ": " << it->second << std::endl;
     }
 
-    std::cout << "--- Body Size ---" << std::endl;
-    std::cout << this->body.size() << std::endl;
+    // std::cout << "--- Body ---" << std::endl;
+    // std::cout << this->body << std::endl;
 }
 
 std::string Request::GetContentType()
