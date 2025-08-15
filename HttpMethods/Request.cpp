@@ -208,9 +208,9 @@ void Request::parseBody(std::stringstream &str)
             // }
             // std::cout << "BUFFER SIZE ===== " << buffer.size();
             body.assign(buffer.begin(), buffer.end());
-            std::cout << "----------BODY------------\n" ;
-            std::cout << body << std::endl;
-            std::cout << "BODY SIZE = " << body.size();
+            // std::cout << "----------BODY------------\n" ;
+            // std::cout << body << std::endl;
+            // std::cout << "BODY SIZE = " << body.size();
         }
     }
     else

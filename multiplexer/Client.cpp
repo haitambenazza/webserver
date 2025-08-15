@@ -12,8 +12,9 @@ Client::Client( const Client& copy )
     fd = copy.fd;
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
-    connectedTime = copy.connectedTime;
     readDone = copy.readDone;
+    // headers.clear();
+    // body.clear();
 }
 
 Client& Client::operator=( const Client& copy )

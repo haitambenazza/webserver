@@ -125,7 +125,6 @@ void 		Post69( std::string body)
 		std::cerr << "file error" << std::endl;
 		return ;
 	}
-	std::cout << "aji tchof\n";
 	file << body;
 }
 
@@ -144,18 +143,18 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 			if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
 			{
 				m.GetClient()[i].changeStatusRead(true);
-				std::cout << m.GetClient()[i].getStatusRead() << "\n";
+				// std::cout << m.GetClient()[i].getStatusRead() << "\n";
 				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
 				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
 				req.parse(m.GetClient()[i].getBuffer(true));
-				req.printRequestData();
+				//req.printRequestData();
 			}
 		}
 		else
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
-		if (atoll(req.getHeaderValue("Content-Length").c_str()) == (int long long)m.GetClient()[i].getBuffer(false).size())
+		if (atoll(req.getHeaderValue("Content-Length").c_str()) <= (int long long)m.GetClient()[i].getBuffer(false).size())
 			Post69(m.GetClient()[i].getBuffer(false));
-		//std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "buff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
+		// std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "\nbuff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
 	}
 	if (bytes_read == 0)
 	{

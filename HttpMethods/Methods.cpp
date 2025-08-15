@@ -89,10 +89,10 @@ int PostMethod( Request& Req )
 
     if (stat(Req.getUri().c_str(), &info) == -1)
         return (NotFound);
-    Req.printRequestData();
+    // Req.printRequestData();
     if (!Req.getHeaders().empty())
     {
-            s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+        s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
     }
     tm << time(NULL);
     (void) tm;
@@ -136,7 +136,7 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 		Location loc(s.GetLocations()[location]);
 		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
 		{
-			req.printRequestData();
+			// req.printRequestData();
 			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
 			std::cout << path << "--------------------\n";
 			SendData(m, i, path, OK);
