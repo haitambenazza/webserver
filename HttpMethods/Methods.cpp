@@ -94,14 +94,13 @@ int PostMethod( Request& Req )
     if (stat(Req.getUri().c_str(), &info) == -1)
 	{
         return (NotFound);
-	}
-
-    if (!Req.getHeaders().empty() && !split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/").empty())
-	{
+    // Req.printRequestData();
+    if (!Req.getHeaders().empty())
+    {
         s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
-	}
-
+    }
     tm << time(NULL);
+    (void) tm;
     std::string name(tm.str() + s.c_str());
     Target.open( name.c_str(), std::ios::binary);
     if (!Target.is_open())
@@ -109,8 +108,8 @@ int PostMethod( Request& Req )
         std::cout << "cannot open file\n";
         return (1);
     }
-    Target.write(Req.getBody().c_str(), Req.getBody().size());
-	Target.close();
+	Target.write(Req.getBody().data(), Req.getBody().size());
+
     return (OK);
 }
 
@@ -140,7 +139,7 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 		Location loc(s.GetLocations()[location]);
 		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
 		{
-			req.printRequestData();
+			// req.printRequestData();
 			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
 			std::cout << path << "--------------------\n";
 			SendData(m, i, path, OK);
