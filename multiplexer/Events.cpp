@@ -123,7 +123,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 {
 	char 		tmp[MAX_READ];
 	std::string buffer;
-	// Request		Req;
+	Request		Req;
 	int			bytes_read;
 	(void)s;
 
@@ -132,28 +132,24 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		tmp[bytes_read] = '\0';
 		if (m.GetClient()[i].GetReadStatus() == false)
 		{
+			std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetReadStatus() << "\n";
 			m.GetClient()[i].SetHeaders(tmp);//append the header to the string
-			if (m.GetClient()[i].GetHeaders().str().find("\r\n\r\n") != std::string::npos && !m.GetClient()[i].GetReadStatus())// read header
+			if (m.GetClient()[i].GetHeaders().find("\r\n\r\n") != std::string::npos && !m.GetClient()[i].GetReadStatus())// read header
 			{
-				// std::cout << "------" << m.GetClient()[i].GetReadStatus() << '\n';
 				m.GetClient()[i].SetReadStatus(true);
-				m.GetClient()[i].WriteToBody(m.GetClient()[i].GetHeaders().str().substr(m.GetClient()[i].GetHeaders().str().find("\r\n\r\n") + 4));
-				GetRequest(m.GetClient()[i].GetHeaders().str(), s, m, i);
-				// Req.SetHeaders(m.GetClient()[i].GetHeaders());
+				m.GetClient()[i].WriteToBody(m.GetClient()[i].GetHeaders().substr(m.GetClient()[i].GetHeaders().find("\r\n\r\n") + 4));
+				GetRequest(m.GetClient()[i].GetHeaders(), s, m, i);
+				Req.SetHeaders(m.GetClient()[i].GetHeaders());
+				Req.printRequestData();
 			}
+			std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetReadStatus() << "\n";
 		}
 		else 
 		{
-			// if (atoll(Req.getHeaderValue("Content-Length").c_str()) > (long long)s.GetMaxBodySize())
-			// {
-			// 	Req.SetStatusCode(BadRequest);
-			// 	close(m.GetEvents()[i].data.fd);
-			// 	return ;
-			// }
 			m.GetClient()[i].WriteToBody(std::string(tmp));
+			
 			// hna ghatkon post khdmat
 		}
-		std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetBody() << "\n";
 		m.GetClient()[i].ResetFile();
 	}
 

@@ -185,7 +185,6 @@ void Request::printRequestData() const
         std::cout << it->first << ": " << it->second << std::endl;
     }
     std::cout << "--- Body ---" << std::endl;
-    std::cout << this->body << std::endl;
 }
 
 std::string Request::GetContentType()

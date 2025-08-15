@@ -23,10 +23,10 @@ class Client
         const time_t    &GetTime() const;
         void            Settime(time_t time);
         void            SetHeaders(char *tmp);
-        std::stringstream     GetHeaders() const;
+        std::string     GetHeaders() const;
         void            SetReadStatus(bool flag);
         bool            GetReadStatus() const;
         void            WriteToBody( std::string s );
         void            ResetFile();
-        std::stringstream GetBody() const;
+        std::string GetBody() const;
 };
