@@ -113,29 +113,49 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
+void 		Post69( std::string body)
+{
+	std::ofstream 	file;
+
+	if (body.empty())
+		return ;
+	file.open("ajiTchouf.mp4", std::ios::out | std::ios::binary );
+	if (!file.is_open())
+	{
+		std::cerr << "file error" << std::endl;
+		return ;
+	}
+	std::cout << "aji tchof\n";
+	file << body;
+}
+
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char tmp[4096];
-	std::string buffer;
-	Request req;
-	int bytes_read;
+	char	tmp[1024];
+	Request	req;
+	int		bytes_read;
+	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
 	{
-		tmp[bytes_read] = '\0';
-		buffer += tmp;
-
-		std::cout << "BUFFER :\n\n" << buffer << std::endl;
-		std::cout << "BUFFER SIZE == " << buffer.size() << std::endl;
-
-		if (!buffer.empty())
-			GetRequest(buffer, s, m, i);
-		m.GetEvents()[i].events = EPOLLOUT;
-		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+		if (!m.GetClient()[i].getStatusRead())
 		{
-			perror("epoll_ctl()");
-			return ;
+			m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
+			if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
+			{
+				m.GetClient()[i].changeStatusRead(true);
+				std::cout << m.GetClient()[i].getStatusRead() << "\n";
+				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
+				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
+				req.parse(m.GetClient()[i].getBuffer(true));
+				req.printRequestData();
+			}
 		}
+		else
+			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
+		if (atoll(req.getHeaderValue("Content-Length").c_str()) == (int long long)m.GetClient()[i].getBuffer(false).size())
+			Post69(m.GetClient()[i].getBuffer(false));
+		//std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "buff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
 	}
 	if (bytes_read == 0)
 	{

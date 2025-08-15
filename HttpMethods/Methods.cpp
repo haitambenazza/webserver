@@ -32,8 +32,10 @@ std::string	BuildResponse(std::string type, int size, int status)
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
-	if (status == OK)
+	if (status == 200)
 		response += " OK\r\n";
+	if (status == 201)
+		response += " Created\r\n";
 	else if (status == NotFound)
 		response += " Not Found\r\n";
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
@@ -95,7 +97,7 @@ int PostMethod( Request& Req )
     tm << time(NULL);
     (void) tm;
     std::string name(tm.str() + s.c_str());
-    Target.open( name.c_str(), std::ios::out | std::ios::binary );
+    Target.open( ("upload/" + name).c_str(), std::ios::out | std::ios::binary );
     if (!Target.is_open())
     {
         std::cout << "cannot open file\n";
@@ -127,22 +129,26 @@ int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 {
 	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
-    int status = 0;
+	std::string error = "error_pages/404.html";
 
-    std::cout << req.getUri() << '\n';
 	if (location != -1)
 	{
-        Location loc(s.GetLocations()[location]);
+		Location loc(s.GetLocations()[location]);
 		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
 		{
+			req.printRequestData();
 			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
+			std::cout << path << "--------------------\n";
 			SendData(m, i, path, OK);
-			status = OK;
 		}
-    }
+		else
+		{
+			SendData(m, i, error, NotFound);
+			return (false);
+		}
+	}
     else
 	{
-		std::string error = "error_pages/404.html";
 		SendData(m, i, error, NotFound);
 	}
     return (true);
@@ -152,7 +158,6 @@ bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
-	request.printRequestData();
 	if (request.getMethod() == "GET")
 		return (RunGet(request, server, m, i));
 	else if (request.getMethod() == "POST")
