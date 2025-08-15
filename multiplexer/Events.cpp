@@ -113,28 +113,27 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-void 		Post69( std::string body )
+void 		Post69( std::string body)
 {
-	std::ofstream file;
+	std::ofstream 	file;
 
 	if (body.empty())
 		return ;
-	file.open("a7.pdf", std::ios::out | std::ios::binary );
+	file.open("ajiTchouf.mp4", std::ios::out | std::ios::binary );
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
 		return ;
 	}
-	std::cout << body << '\n';
-	//std::cout << "body ==    " << body << "\n";
+	std::cout << "aji tchof\n";
 	file << body;
 }
 
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char tmp[4096];
-	Request req;
-	int bytes_read;
+	char	tmp[1024];
+	Request	req;
+	int		bytes_read;
 	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp) - 1, 0)) > 0)
@@ -142,23 +141,21 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		if (!m.GetClient()[i].getStatusRead())
 		{
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
-
 			if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
 			{
-				//std::cout << m.GetClient()[i].getBuffer(true) << "\n";
 				m.GetClient()[i].changeStatusRead(true);
 				std::cout << m.GetClient()[i].getStatusRead() << "\n";
 				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
 				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
+				req.parse(m.GetClient()[i].getBuffer(true));
+				req.printRequestData();
 			}
-			//get and delete methods
 		}
 		else
-		{
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
+		if (atoll(req.getHeaderValue("Content-Length").c_str()) == (int long long)m.GetClient()[i].getBuffer(false).size())
 			Post69(m.GetClient()[i].getBuffer(false));
-			//post method
-		}
+		//std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "buff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
 	}
 	if (bytes_read == 0)
 	{
