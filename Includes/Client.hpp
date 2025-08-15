@@ -7,6 +7,9 @@ class Client
         int16_t         fd;
         int16_t         ServerIndex;
         time_t          connectedTime;
+        std::string     headers;
+        std::string     body;
+        bool            readDone;
     public :
         Client();
         Client( const Client& copy );
@@ -19,4 +22,8 @@ class Client
         int16_t	        GetserverIndex() const ;
         const time_t    &GetTime() const;
         void            Settime(time_t time);
+        void            appendToBuffer(const char *tmp, size_t size, bool which);
+        std::string     getBuffer(bool which) const;
+        void            changeStatusRead(bool stat);
+        bool            getStatusRead() const;
 };
