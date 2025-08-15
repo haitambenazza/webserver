@@ -119,38 +119,48 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
+void 		Post69( std::string body)
+{
+	std::ofstream 	file;
+
+	if (body.empty())
+		return ;
+	file.open("ajiTchouf.mp4", std::ios::out | std::ios::binary );
+	if (!file.is_open())
+	{
+		std::cerr << "file error" << std::endl;
+		return ;
+	}
+	file << body;
+}
+
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char 		tmp[MAX_READ];
-	std::string buffer;
-	Request		Req;
-	int			bytes_read;
+	char	tmp[1024];
+	Request	req;
+	int		bytes_read;
 	(void)s;
 
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
-		tmp[bytes_read] = '\0';
-		if (m.GetClient()[i].GetReadStatus() == false)
+		if (!m.GetClient()[i].getStatusRead())
 		{
-			std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetReadStatus() << "\n";
-			m.GetClient()[i].SetHeaders(tmp);//append the header to the string
-			if (m.GetClient()[i].GetHeaders().find("\r\n\r\n") != std::string::npos && !m.GetClient()[i].GetReadStatus())// read header
+			m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
+			if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
 			{
-				m.GetClient()[i].SetReadStatus(true);
-				m.GetClient()[i].WriteToBody(m.GetClient()[i].GetHeaders().substr(m.GetClient()[i].GetHeaders().find("\r\n\r\n") + 4));
-				GetRequest(m.GetClient()[i].GetHeaders(), s, m, i);
-				Req.SetHeaders(m.GetClient()[i].GetHeaders());
-				Req.printRequestData();
+				m.GetClient()[i].changeStatusRead(true);
+				// std::cout << m.GetClient()[i].getStatusRead() << "\n";
+				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
+				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
+				req.parse(m.GetClient()[i].getBuffer(true));
+				//req.printRequestData();
 			}
-			std::cout<< "\n-------------------------\n"<< m.GetClient()[i].GetReadStatus() << "\n";
 		}
-		else 
-		{
-			m.GetClient()[i].WriteToBody(std::string(tmp));
-			
-			// hna ghatkon post khdmat
-		}
-		m.GetClient()[i].ResetFile();
+		else
+			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
+		if (atoll(req.getHeaderValue("Content-Length").c_str()) <= (int long long)m.GetClient()[i].getBuffer(false).size())
+			Post69(m.GetClient()[i].getBuffer(false));
+		// std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "\nbuff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
 	}
 
 	if (bytes_read == 0)
@@ -164,7 +174,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		}
 		close(m.GetEvents()[i].data.fd);
 	}
-	// m.GetBuff()+= buffer;
+	
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)

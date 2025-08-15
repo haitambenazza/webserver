@@ -7,9 +7,11 @@
 enum HttpStatus {
     OK = 200,
     BadRequest = 400,
-    NotImplemented = 501,
     NotFound = 404,
-    UriTooLong = 414,
+    MethodNotAllowed = 405,
+    RequestUriTooLong = 414,
+    NotImplemented = 501,
+    HttpVersionNotSupported = 505
 };
 
 class Request

@@ -4,12 +4,12 @@
 class Client
 {
     private :
-        int16_t                 fd;
-        int16_t                 ServerIndex;
-        time_t                  connectedTime;
-        std::stringstream       Headers;
-        bool                    ReadDone;
-        std::stringstream       Body;
+        int16_t         fd;
+        int16_t         ServerIndex;
+        time_t          connectedTime;
+        std::string     headers;
+        std::string     body;
+        bool            readDone;
     public :
         Client();
         Client( const Client& copy );
@@ -22,11 +22,8 @@ class Client
         int16_t	        GetserverIndex() const ;
         const time_t    &GetTime() const;
         void            Settime(time_t time);
-        void            SetHeaders(char *tmp);
-        std::string     GetHeaders() const;
-        void            SetReadStatus(bool flag);
-        bool            GetReadStatus() const;
-        void            WriteToBody( std::string s );
-        void            ResetFile();
-        std::string GetBody() const;
+        void            appendToBuffer(const char *tmp, size_t size, bool which);
+        std::string     getBuffer(bool which) const;
+        void            changeStatusRead(bool stat);
+        bool            getStatusRead() const;
 };
