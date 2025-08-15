@@ -71,13 +71,13 @@ void            Client::WriteToBody( std::string s )
 {
     Body << s;
 }
-std::stringstream Client::GetBody() const
+std::string Client::GetBody() const
 {
-    return (Body);
+    return (Body.str());
 }
-std::stringstream Client::GetHeaders() const
+std::string Client::GetHeaders() const
 {
-    return Headers;
+    return Headers.str();
 }
 
 void        Client::SetReadStatus(bool flag)
