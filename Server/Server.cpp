@@ -39,8 +39,7 @@ bool    Server::SetServer()
 
     SetDefaultValue();
     InitializeServerSettings();
-    fd = socket(AF_INET, SOCK_STREAM, 0);
-    fcntl(fd, F_SETFL, O_NONBLOCK);
+    fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (fd == -1)
         return false;
     if (setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)

@@ -97,11 +97,6 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept()");
 		return false;
 	}
-	if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
-	{
-		perror("fcntl()");
-		return (false);
-	}
 	epoll_client.data.fd = m.GetClientFd();
 	epoll_client.events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
@@ -131,7 +126,7 @@ void 		Post69( std::string body)
 
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char	tmp[1024];
+	char	tmp[BUFFER_SIZE];
 	Request	req;
 	int		bytes_read;
 	(void)s;
@@ -151,12 +146,13 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 				req.printRequestData();
 			}
 		}
+		else if (66488630 <= m.GetClient()[i].getBuffer(false).size())
+			Post69(m.GetClient()[i].getBuffer(false));
 		else
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
-		if (atoll(req.getHeaderValue("Content-Length").c_str()) == (int long long)m.GetClient()[i].getBuffer(false).size())
-			Post69(m.GetClient()[i].getBuffer(false));
+		std::cout << m.GetClient()[i].getBuffer(false).size() / 1000000 << "MB\n";
 	}
-	if (bytes_read == 0)
+	else if (bytes_read == 0)
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
