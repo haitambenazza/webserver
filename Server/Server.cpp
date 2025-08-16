@@ -84,6 +84,7 @@ Server::Server( const Server& copy ) : keys(copy.keys), Locations(copy.Locations
     Locations = copy.Locations;
     Commands = copy.Commands;
     status = copy.status;
+    max_body_size = copy.max_body_size;
     if (!SetServer())
     {
         status = false;
@@ -98,6 +99,7 @@ Server& Server::operator=( const Server& copy )
         keys = copy.keys;
         Locations = copy.Locations;
         Commands = copy.Commands;
+        max_body_size = copy.max_body_size;
         close(fd);
         SetServer();
     }
@@ -167,6 +169,15 @@ int Server::Getfd() const{
     return (fd);
 }
 
+void              Server::SetMaxBodySize( std::string val )
+{
+    max_body_size = atoll(val.c_str());
+}
+u_int64_t         Server::GetMaxBodySize() const
+{
+    return (max_body_size);
+}
+
 void    Server::InitializeServerSettings()
 {
     if (GetValuesFromKeys(Commands, "listen") != "")
@@ -179,6 +190,8 @@ void    Server::InitializeServerSettings()
         root = GetValuesFromKeys(Commands, "root");
     if (GetValuesFromKeys(Commands, "index") != "")
         index = GetValuesFromKeys(Commands, "index");
+    if (GetValuesFromKeys(Commands, "Max_Client_Body_size") != "")
+        max_body_size = atoll(GetValuesFromKeys(Commands, "Max_Client_Body_size").c_str());
 }
 
 std::string Server::GetIp() const

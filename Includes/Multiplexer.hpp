@@ -1,7 +1,7 @@
 #pragma once
 #include "Includes.hpp"
-#include"../headers/webserver.hpp"
-
+#include "Client.hpp"
+#include "Server.hpp"
 class Multiplexer
 {
     private:
@@ -10,6 +10,8 @@ class Multiplexer
         int                                             NewConnection;//remove
         struct epoll_event                              Events[MAX_EVENT];
         std::vector<Client>                             Clients;
+        std::vector<unsigned char>                      DataRead;
+        
 
     public:
         Multiplexer();
@@ -29,6 +31,8 @@ class Multiplexer
         void                        AddClient( Client& NewClient );
         std::vector<Client>&        GetClient();
         void                        RemoveClient(int i);
+        void                        SetDataRead( const unsigned char *buff, size_t size );
+        std::vector<unsigned char>  GetDataRead();
 };
 
 

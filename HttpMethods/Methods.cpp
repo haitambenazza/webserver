@@ -68,6 +68,10 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     std::map<std::string, std::string >::iterator  				it;
     std::string                                   				values;
 
+	if (map.empty() || key.empty())
+	{
+		return "";
+	}
     it = map.find(key);
     if (it != map.end())
     {
@@ -78,32 +82,33 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
 }
 
 
-int PostMethod( Request& Req )
+int PostMethod( std::string s, Request& Req )
 {
-    struct stat     info;
-    std::ofstream   Target;
-    std::string     s;
-    std::ostringstream tm;
+    struct stat     	info;
+    std::ofstream   	Target;
+	std::string			FileName;
+    std::ostringstream 	tm;
     std::map<std::string, std::string >::iterator it;
 
 
     if (stat(Req.getUri().c_str(), &info) == -1)
+	{
         return (NotFound);
-    Req.printRequestData();
-    if (!Req.getHeaders().empty())
-    {
-            s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
-    }
-    tm << time(NULL);
-    std::string name(tm.str() + s.c_str());
-    Target.open( ("upload/" + name).c_str(), std::ios::out | std::ios::binary );
-    if (!Target.is_open())
-    {
-        std::cout << "cannot open file\n";
-        return (1);
-    }
-    Target << Req.getBody();
-    return (OK);
+	}
+	if (!Req.getHeaders().empty())
+	{
+		FileName = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+	}
+	tm << time(NULL);
+	std::string name(tm.str() + FileName.c_str());
+	Target.open( name.c_str(), std::ios::binary);
+	if (!Target.is_open())
+	{
+		std::cout << "cannot open file\n";
+		return (1);
+	}
+	Target << s;
+	return (OK);
 }
 
 int DeleteMethod( Request& Req )
@@ -132,7 +137,7 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 		Location loc(s.GetLocations()[location]);
 		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
 		{
-			req.printRequestData();
+			// req.printRequestData();
 			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
 			std::cout << path << "--------------------\n";
 			SendData(m, i, path, OK);
@@ -154,9 +159,14 @@ bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
 {
 	Request request(buffer);
 
-	if (request.getMethod() == "GET")
-		return (RunGet(request, server, m, i));
-	else if (request.getMethod() == "POST")
-		return (PostMethod(request));
+    //request.printRequestData();
+    (void)server;
+    (void)m;
+    (void)i;
+    // if (request.)
+	// if (request.getMethod() == "GET")
+	// 	return (RunGet(request, server, m, i));
+	// else if (request.getMethod() == "POST")
+	// 	return (PostMethod(request));
 	return true;
 }

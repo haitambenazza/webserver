@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../headers/webserver.hpp"
 #include "Includes.hpp"
-#include "Server.hpp"
 
 enum HttpStatus {
     OK = 200,
     BadRequest = 400,
-    NotImplemented = 501,
     NotFound = 404,
-    UriTooLong = 414,
+    MethodNotAllowed = 405,
+    RequestUriTooLong = 414,
+    NotImplemented = 501,
+    HttpVersionNotSupported = 505
 };
 
 class Request
@@ -41,8 +41,10 @@ class Request
         int         getStatusCode();
         void        printRequestData() const;
 
-        void stripCR(std::string &s);
-        bool parseRequestLine(const std::string &line);
-        void parseHeaders(std::stringstream &str);
-        void parseBody(std::stringstream &str);
+        void        stripCR(std::string &s);
+        bool        parseRequestLine(const std::string &line);
+        void        parseHeaders(std::stringstream &str);
+        void        parseBody(std::stringstream &str);
+        void        SetHeaders( std::string s );
+        void        SetStatusCode( HttpStatus val );
 };

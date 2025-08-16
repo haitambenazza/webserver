@@ -1,4 +1,4 @@
-#include "../Includes/Request.hpp"
+#include "../headers/webserver.hpp"
 
 
 Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK) {}
@@ -17,6 +17,8 @@ Request& Request::operator=(const Request& other) {
         version = other.version;
         headers = other.headers;
         body = other.body;
+        headers.clear();
+        body.clear();
         status_code = other.status_code;
     }
     return *this;
@@ -53,19 +55,25 @@ std::string Request::getHeaderValue(const std::string& header_name)
 {
     std::map<std::string , std::string >::const_iterator it;
 
+
     it = this->headers.find(header_name);
-
     if (it != this->headers.end())
-    {
         return it->second;
-    }
-
     return "";
 }
 
 std::map<std::string , std::string> Request::getHeaders()
 {
     return this->headers;
+}
+void       Request::SetHeaders( std::string s )
+{
+    parse(s);
+}
+
+void       Request::SetStatusCode( HttpStatus val )
+{
+    status_code = val;
 }
 
 std::string isBadRequest(std::string &buffer)
@@ -96,7 +104,43 @@ bool Request::parseRequestLine(const std::string &line)
         version = temp_version;
         return true;
     }
-    return false;
+    if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
+    {
+        status_code = NotImplemented;
+        return(false);
+    }
+    std::string extra;
+    if (ss >> extra) {
+        status_code = BadRequest;
+        return false;
+    }
+
+    if (!temp_uri.empty())
+    {
+        if (temp_uri.size() > RequestUriTooLong)
+        {
+            status_code = RequestUriTooLong;
+            return(false);
+        }
+        else if(temp_uri[0] != '/')
+        {
+            status_code = BadRequest;
+            return false;
+        }
+    }
+
+    if (temp_version != "HTTP/1.0" && temp_version != "HTTP/1.1")
+    {
+        status_code = HttpVersionNotSupported;
+        return false;
+    }
+    
+    method = temp_method;
+    uri = temp_uri;
+    version = temp_version;
+
+    status_code = OK;
+    return true;
 }
 
 void Request::parseHeaders(std::stringstream &str)
@@ -105,19 +149,46 @@ void Request::parseHeaders(std::stringstream &str)
     while (std::getline(str, line))
     {
         stripCR(line);
-        if (line.empty()) break; // end of headers
+        if (line.empty()) 
+            break; // end of headers
 
         size_t colon = line.find(':');
         if (colon != std::string::npos)
         {
             std::string key = line.substr(0, colon);
             std::string value = line.substr(colon + 1);
+            
+            if (key.empty()) 
+            {
+                status_code = BadRequest;
+                return;
+            }
+            for (size_t i = 0; i < key.size(); ++i) 
+            {
+                unsigned char c = key[i];
+                // allowed characters
+                if (!(std::isalnum(c) || c == '-')) 
+                {
+                    status_code = BadRequest;
+                    return;
+                }
+            }
+            if (key.find(' ') != std::string::npos || key.find('\t') != std::string::npos)
+            {
+                status_code = BadRequest;
+                return;
+            }
 
-            // Trim leading spaces
             while (!value.empty() && (value[0] == ' ' || value[0] == '\t'))
                 value.erase(0, 1);
 
             headers[key] = value;
+        }
+        else
+        {
+            // no colon found
+            status_code = BadRequest;
+            return;
         }
     }
 }
@@ -152,14 +223,17 @@ void Request::parse(const std::string& request_string)
     if (!std::getline(str, line))
         return;
     stripCR(line);
+    if (request_string.empty())
+    {
+        status_code = BadRequest;
+    }
 
     if (!parseRequestLine(line))
     {
-        body = request_string; // treat as raw data
+        body = request_string;
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
         return;
     }
-
     parseHeaders(str);
     parseBody(str);
 }
@@ -169,17 +243,12 @@ void Request::printRequestData() const
     std::cout << "\nMethod: " << this->method << std::endl;
     std::cout << "URI: " << this->uri << std::endl;
     std::cout << "Version: " << this->version << std::endl;
-
     std::cout << "--- Headers ---" << std::endl;
-
     std::map<std::string, std::string>::const_iterator it;
     for (it = this->headers.begin(); it != this->headers.end(); ++it)
     {
         std::cout << it->first << ": " << it->second << std::endl;
     }
-
-    // std::cout << "--- Body ---" << std::endl;
-    // std::cout << this->body << std::endl;
 }
 
 std::string Request::GetContentType()

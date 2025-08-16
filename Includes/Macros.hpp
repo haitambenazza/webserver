@@ -1,7 +1,7 @@
 
 #pragma once
 
-#define MAX_CLIENT_BODY 30720// 30mg
+#define MAX_CLIENT_BODY 30000
 #define PORT "8080"
 #define IP "0.0.0.0"
 #define ROOT "/"
@@ -10,6 +10,7 @@
 #define MAX_EVENT 10024
 #define EPOLL_TIMEOUT 500
 #define ALLOWED_CHAR_URI "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._~:/?#[]@!$&'()*+,;=%"
-#define TIMEOUT_CLIENT 10
+#define TIMEOUT_CLIENT 5
 #define URI_MAX_LENGTH 4096
 #define BUFFER_SIZE 4096
+
