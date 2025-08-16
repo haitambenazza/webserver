@@ -1,4 +1,4 @@
-#include "../Includes/Request.hpp"
+#include "../headers/webserver.hpp"
 
 
 Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK) {}
@@ -17,6 +17,8 @@ Request& Request::operator=(const Request& other) {
         version = other.version;
         headers = other.headers;
         body = other.body;
+        headers.clear();
+        body.clear();
         status_code = other.status_code;
     }
     return *this;
@@ -53,13 +55,10 @@ std::string Request::getHeaderValue(const std::string& header_name)
 {
     std::map<std::string , std::string >::const_iterator it;
 
+
     it = this->headers.find(header_name);
-
     if (it != this->headers.end())
-    {
         return it->second;
-    }
-
     return "";
 }
 
@@ -205,21 +204,7 @@ void Request::parseBody(std::stringstream &str)
         {
             std::vector<char> buffer(length);
             str.read(&buffer[0], length);
-            // if (str.gcount() != static_cast<std::streamsize>(length)) 
-            // {
-            //     std::cout << "str.gcount() ==== " << str.gcount() << "  static_cast<std::streamsize>(length) == " << static_cast<std::streamsize>(length) << "lenght == " << length << "\n";
-            //     status_code = BadRequest;
-            //     return;
-            // }
-            // for (size_t i = 0; i < length; i++)
-            // {
-            //     std::cout << "n ===== " << buffer[i];
-            // }
-            // std::cout << "BUFFER SIZE ===== " << buffer.size();
             body.assign(buffer.begin(), buffer.end());
-            // std::cout << "----------BODY------------\n" ;
-            // std::cout << body << std::endl;
-            // std::cout << "BODY SIZE = " << body.size();
         }
     }
     else
@@ -234,7 +219,6 @@ void Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
-    //std::map<std::string, std::string> tst;
 
     if (!std::getline(str, line))
         return;
@@ -250,7 +234,6 @@ void Request::parse(const std::string& request_string)
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
         return;
     }
-    //std::cout  << " STTRRRRR ++++++++++ " << str.str() << std::endl;
     parseHeaders(str);
     parseBody(str);
 }
@@ -266,9 +249,6 @@ void Request::printRequestData() const
     {
         std::cout << it->first << ": " << it->second << std::endl;
     }
-
-    // std::cout << "--- Body ---" << std::endl;
-    // std::cout << this->body << std::endl;
 }
 
 std::string Request::GetContentType()

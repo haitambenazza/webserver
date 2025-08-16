@@ -31,8 +31,8 @@ Client& Client::operator=( const Client& copy )
 Client::~Client()
 {
     //close (fd);
-    Headers.clear();
-    Body.clear();
+    headers.clear();
+    body.clear();
 }
 
 void	Client::SetClient(int16_t val)
@@ -42,6 +42,11 @@ void	Client::SetClient(int16_t val)
 void	Client::SetServerIndex(int16_t val)
 {
     ServerIndex = val;
+}
+
+Request&         Client::GetRequest()
+{
+    return (Req);
 }
 int16_t     Client::GetClientFd() const
 {

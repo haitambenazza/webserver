@@ -82,35 +82,33 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
 }
 
 
-int PostMethod( Request& Req )
+int PostMethod( std::string s, Request& Req )
 {
-    struct stat     info;
-    std::ofstream   Target;
-    std::string     s;
-    std::ostringstream tm;
+    struct stat     	info;
+    std::ofstream   	Target;
+	std::string			FileName;
+    std::ostringstream 	tm;
     std::map<std::string, std::string >::iterator it;
 
 
     if (stat(Req.getUri().c_str(), &info) == -1)
 	{
         return (NotFound);
-    // Req.printRequestData();
-    if (!Req.getHeaders().empty())
-    {
-        s = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
-    }
-    tm << time(NULL);
-    (void) tm;
-    std::string name(tm.str() + s.c_str());
-    Target.open( name.c_str(), std::ios::binary);
-    if (!Target.is_open())
-    {
-        std::cout << "cannot open file\n";
-        return (1);
-    }
-	Target.write(Req.getBody().data(), Req.getBody().size());
-
-    return (OK);
+	}
+	if (!Req.getHeaders().empty())
+	{
+		FileName = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+	}
+	tm << time(NULL);
+	std::string name(tm.str() + FileName.c_str());
+	Target.open( name.c_str(), std::ios::binary);
+	if (!Target.is_open())
+	{
+		std::cout << "cannot open file\n";
+		return (1);
+	}
+	Target << s;
+	return (OK);
 }
 
 int DeleteMethod( Request& Req )

@@ -1,7 +1,7 @@
 #pragma once
 #include "Includes.hpp"
-#include"../headers/webserver.hpp"
-
+#include "Client.hpp"
+#include "Server.hpp"
 class Multiplexer
 {
     private:
