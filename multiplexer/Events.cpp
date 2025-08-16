@@ -119,7 +119,7 @@ void 		Post69( std::string body)
 
 	if (body.empty())
 		return ;
-	file.open("ajiTchouf.mp4", std::ios::out | std::ios::binary );
+	file.open("upload/ajiTchouf.mp4", std::ios::out | std::ios::binary );
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
@@ -155,7 +155,6 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
 		if (atoll(req.getHeaderValue("Content-Length").c_str()) == (int long long)m.GetClient()[i].getBuffer(false).size())
 			Post69(m.GetClient()[i].getBuffer(false));
-		//std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "buff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
 	}
 	if (bytes_read == 0)
 	{
