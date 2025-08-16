@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../headers/webserver.hpp"
 #include "Includes.hpp"
-#include "Server.hpp"
 
 enum HttpStatus {
     OK = 200,

@@ -2,9 +2,9 @@
 #ifndef LOCATION_HPP
 #define LOCATION_HPP
 #include "Includes.hpp"
-#include "../headers/webserver.hpp"
+#include "Server.hpp"
 
-class Server;
+
 
 class Location
 {

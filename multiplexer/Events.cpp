@@ -119,13 +119,29 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-void 		Post69( std::string body)
+std::string	GetFileName(Request&	req)
+{
+	std::string				FileType;
+	std::string				FileName;
+	std::ostringstream		tme;
+
+	if (split(req.getHeaderValue("Content-Type"), "/").empty())
+		return (FileType);
+	FileType = split(req.getHeaderValue("Content-Type"), "/")[1];
+	if (FileType.empty())
+		return (std::string("bad request"));
+	tme << time(NULL);
+	FileName = tme.str() + "." + FileType;
+	return FileName;
+}
+
+void 		Post69( std::string body,Request& req )
 {
 	std::ofstream 	file;
 
 	if (body.empty())
 		return ;
-	file.open("ajiTchouf.mp4", std::ios::out | std::ios::binary );
+	file.open( GetFileName(req).c_str(), std::ios::out | std::ios::binary );
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
@@ -134,13 +150,13 @@ void 		Post69( std::string body)
 	file << body;
 }
 
+
 void	ReadData(Multiplexer &m, int &i, Server &s)
 {
-	char	tmp[1024];
-	Request	req;
+	char	tmp[BUFFER_SIZE];
 	int		bytes_read;
 	(void)s;
-
+	
 	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
 	{
 		if (!m.GetClient()[i].getStatusRead())
@@ -149,20 +165,20 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 			if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
 			{
 				m.GetClient()[i].changeStatusRead(true);
-				// std::cout << m.GetClient()[i].getStatusRead() << "\n";
 				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
 				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
-				req.parse(m.GetClient()[i].getBuffer(true));
-				//req.printRequestData();
+				m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
 			}
 		}
 		else
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
-		if (atoll(req.getHeaderValue("Content-Length").c_str()) <= (int long long)m.GetClient()[i].getBuffer(false).size())
-			Post69(m.GetClient()[i].getBuffer(false));
-		// std::cout << "cl == "  << req.getHeaderValue("Content-Length") << "\nbuff size == " << m.GetClient()[i].getBuffer(false).size()<< std::endl;
+		if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) <= (int long long)m.GetClient()[i].getBuffer(false).size())
+		{
+			// std::cout << "----------------------------------------\n";
+			m.GetClient()[i].getBuffer(false);
+			Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest());
+		}
 	}
-
 	if (bytes_read == 0)
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
@@ -173,6 +189,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 			return ;
 		}
 		close(m.GetEvents()[i].data.fd);
+		m.RemoveClient(i);
 	}
 	
 }
@@ -227,7 +244,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		{
 			if (AcceptNewClient(multiplexer, i, server) == false)
 				return (false);
-
 		}
 		else if (isServer == -1)
 		{
@@ -244,7 +260,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		}
 	}
 	CheckTimeout(multiplexer);
-	
 	return (true);
 }
 
