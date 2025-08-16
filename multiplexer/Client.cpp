@@ -12,8 +12,9 @@ Client::Client( const Client& copy )
     fd = copy.fd;
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
-    connectedTime = copy.connectedTime;
     readDone = copy.readDone;
+    // headers.clear();
+    // body.clear();
 }
 
 Client& Client::operator=( const Client& copy )
@@ -30,6 +31,8 @@ Client& Client::operator=( const Client& copy )
 Client::~Client()
 {
     //close (fd);
+    headers.clear();
+    body.clear();
 }
 
 void	Client::SetClient(int16_t val)
@@ -39,6 +42,11 @@ void	Client::SetClient(int16_t val)
 void	Client::SetServerIndex(int16_t val)
 {
     ServerIndex = val;
+}
+
+Request&         Client::GetRequest()
+{
+    return (Req);
 }
 int16_t     Client::GetClientFd() const
 {

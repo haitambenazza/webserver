@@ -1,7 +1,6 @@
 #pragma once
 #include "Includes.hpp"
 #include "../Includes/Block.hpp"
-#include "../headers/webserver.hpp"
 
 class Location;
 class Server
@@ -21,6 +20,7 @@ class Server
         bool                                                    status;
         struct addrinfo                                         *result;
         std::vector<int16_t>                                    ClientFd;
+
     public :
         Server();
         Server( const Server& copy );
@@ -46,6 +46,8 @@ class Server
         std::string                                             GetRoot() const;
         void                                                    AddNewClient(int16_t fd);
         std::vector<int16_t>                                    GetClients() const;
+        void                                                    SetMaxBodySize( std::string val );
+        u_int64_t                                               GetMaxBodySize() const;
 };
 
 std::vector<std::string>	FillVector( std::vector<std::string> Src );

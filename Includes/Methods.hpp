@@ -1,16 +1,18 @@
 #pragma once
 
-#include "../headers/webserver.hpp"
-#include "Includes.hpp"
+
+#include "Request.hpp"
+#include "Server.hpp"
+#include "Multiplexer.hpp"
 
 class Request;
 
 
 int             GetMethod();
-int          PostMethod( Request& Req );
-int          DeleteMethod(  Request& Req  );
-bool	    GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i);
-std::string GetValuesFromKeysReq(std::map<std::string, std::string >& map, std::string key);
+int             PostMethod(  std::string s, Request& Req );
+int             DeleteMethod(  Request& Req  );
+bool	        GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i);
+std::string     GetValuesFromKeysReq(std::map<std::string, std::string >& map, std::string key);
 
 //post
 //check if upload enabled

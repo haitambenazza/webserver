@@ -16,6 +16,7 @@
 #include <sys/epoll.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <algorithm>
 
 #include "../Includes/Block.hpp"
 #include "../Includes/File.hpp"

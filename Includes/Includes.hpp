@@ -11,7 +11,6 @@
 #include <map>
 #include <sys/types.h>
 #include <netinet/in.h>
-#include "Location.hpp"
 #include <sys/epoll.h>
 
 std::vector<std::string>    split(std::string s, std::string delimiter);

@@ -1,5 +1,6 @@
 
 #pragma once
+#include "Request.hpp"
 
 class Client
 {
@@ -9,6 +10,7 @@ class Client
         time_t          connectedTime;
         std::string     headers;
         std::string     body;
+        Request         Req;
         bool            readDone;
     public :
         Client();
@@ -26,4 +28,5 @@ class Client
         std::string     getBuffer(bool which) const;
         void            changeStatusRead(bool stat);
         bool            getStatusRead() const;
+        Request&        GetRequest();
 };

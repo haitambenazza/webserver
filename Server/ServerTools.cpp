@@ -171,7 +171,8 @@ bool CheckValidKeys(const std::vector<std::string> str)
 	valid_keys.push_back("cgi_path");
 	valid_keys.push_back("cgi_ext");
 	valid_keys.push_back("try_files");
-
+	valid_keys.push_back("Max_Client_Body_size");
+	
 	size_t i = 0;
 	while (i < str.size())
 	{
