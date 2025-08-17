@@ -12,8 +12,8 @@ class Client
         std::string     body;
         Request         Req;
         bool            readDone;
-    public :
         size_t          readeSize;
+    public :
         Client();
         Client( const Client& copy );
         Client& operator=( const Client& copy );
@@ -30,4 +30,6 @@ class Client
         void            changeStatusRead(bool stat);
         bool            getStatusRead() const;
         Request&        GetRequest();
+        size_t          GetReadSize() const;
+        void            SetReadSize( size_t val );
 };
