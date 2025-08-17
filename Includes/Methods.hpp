@@ -11,7 +11,7 @@ class Request;
 int             GetMethod();
 int             PostMethod(  std::string s, Request& Req );
 int             DeleteMethod(  Request& Req  );
-bool	        GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i);
+bool	        GetRequest(Server &server, Multiplexer &m, int &i);
 std::string     GetValuesFromKeysReq(std::map<std::string, std::string >& map, std::string key);
 
 //post

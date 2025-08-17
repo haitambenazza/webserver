@@ -155,18 +155,15 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
     return (true);
 }
 
-bool	GetRequest(std::string buffer, Server &server, Multiplexer &m, int &i)
+bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	Request request(buffer);
-
-    //request.printRequestData();
-    (void)server;
-    (void)m;
-    (void)i;
-    // if (request.)
-	// if (request.getMethod() == "GET")
-	// 	return (RunGet(request, server, m, i));
-	// else if (request.getMethod() == "POST")
-	// 	return (PostMethod(request));
+	(void)server;
+	//build location
+	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
+		std::cout << "GET is up\n";
+	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
+		std::cout << "POST is up\n";
+	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
+		std::cout << "DELETE is up\n";
 	return true;
 }
