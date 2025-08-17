@@ -134,9 +134,11 @@ void 		Post69( std::string body,Request& req )
 {
 	std::ofstream 	file;
 
+	std::cout << "YAAAAAA\n";
 	if (body.empty())
 		return ;
-	file.open( GetFileName(req).c_str(), std::ios::out | std::ios::binary );
+	file.open(("upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
+	std::cout << GetFileName(req).c_str() << '\n';
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
@@ -152,7 +154,7 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 	int		bytes_read;
 	(void)s;
 
-	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
+	if ((bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp))) > 0)
 	{
 		if (!m.GetClient()[i].getStatusRead())
 		{
@@ -163,14 +165,18 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
 				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
 				m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
+				m.GetClient()[i].GetRequest().printRequestData();
 			}
+			m.GetClient()[i].readeSize += m.GetClient()[i].getBuffer(false).size();
 		}
-		else if (66488630 <= m.GetClient()[i].getBuffer(false).size())
-			Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest());
 		else
+		{
+			m.GetClient()[i].readeSize += bytes_read;
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
-		std::cout << m.GetClient()[i].getBuffer(false).size() / 1000000 << "MB\n";
+		}
 	}
+	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].readeSize)
+		Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest());
 	else if (bytes_read == 0)
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
@@ -183,7 +189,6 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 		close(m.GetEvents()[i].data.fd);
 		m.RemoveClient(i);
 	}
-
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
