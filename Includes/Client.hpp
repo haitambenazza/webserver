@@ -13,6 +13,7 @@ class Client
         Request         Req;
         bool            readDone;
     public :
+        size_t          readeSize;
         Client();
         Client( const Client& copy );
         Client& operator=( const Client& copy );

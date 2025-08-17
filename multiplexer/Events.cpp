@@ -103,11 +103,6 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 		perror("accept()");
 		return false;
 	}
-	// if (-1 == fcntl(m.GetClientFd(), F_SETFL, O_NONBLOCK ))
-	// {
-	// 	perror("fcntl()");
-	// 	return (false);
-	// }
 	epoll_client.data.fd = m.GetClientFd();
 	epoll_client.events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
@@ -141,7 +136,7 @@ void 		Post69( std::string body,Request& req )
 
 	if (body.empty())
 		return ;
-	file.open( GetFileName(req).c_str(), std::ios::out | std::ios::binary );
+	file.open(("upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
@@ -150,53 +145,54 @@ void 		Post69( std::string body,Request& req )
 	file << body;
 }
 
+void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
+{
+	m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
+	if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
+	{
+		m.GetClient()[i].changeStatusRead(true);
+		size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
+		m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
+		m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
+	}
+	m.GetClient()[i].readeSize += m.GetClient()[i].getBuffer(false).size();
+}
 
-void	ReadData(Multiplexer &m, int &i, Server &s)
+void	disconnectClient(Multiplexer &m, int i)
+{
+	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
+	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
+	{
+		perror("epoll_ctl()");
+		close(m.GetEvents()[i].data.fd);
+		return ;
+	}
+	close(m.GetEvents()[i].data.fd);
+	m.RemoveClient(i);
+}
+int	ReadData(Multiplexer &m, int &i)
 {
 	char	tmp[BUFFER_SIZE];
 	int		bytes_read;
-	(void)s;
-	
-	if ((bytes_read = recv(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp), 0)) > 0)
+
+	if ((bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp))) > 0)
 	{
 		if (!m.GetClient()[i].getStatusRead())
-		{
-			m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
-			if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
-			{
-				m.GetClient()[i].changeStatusRead(true);
-				size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
-				m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
-				m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
-			}
-		}
+			appendToHeader(m, i, tmp, bytes_read);
 		else
 		{
+			m.GetClient()[i].readeSize += bytes_read;
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
 		}
-		if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) <= (int long long)m.GetClient()[i].getBuffer(false).size())
-		{
-			std::cout << m.GetClient()[i].getBuffer(false) << std::endl;
-			size_t pos;
-			if ( (pos = m.GetClient()[i].getBuffer(false).find("\r\n\r\n")) != std::string::npos)
-				m.GetClient()[i].getBuffer(false).replace(pos, 4 , "0000");
-			m.GetClient()[i].getBuffer(false);
-			Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest());
-		}
 	}
-	if (bytes_read == 0)
+	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].readeSize)
+		return (1);
+	else if (bytes_read == 0)
 	{
-		std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
-		if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
-		{
-			perror("epoll_ctl()");
-			close(m.GetEvents()[i].data.fd);
-			return ;
-		}
-		close(m.GetEvents()[i].data.fd);
-		m.RemoveClient(i);
+		disconnectClient(m, i);
+		return (1);
 	}
-	
+	return (0);
 }
 
 int	IsServerSocket(Multiplexer &m, std::vector<Server> &server, int j)
@@ -255,7 +251,8 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 			{
-				ReadData(multiplexer, i, server[multiplexer.GetClient().back().GetserverIndex()]);
+				if (ReadData(multiplexer, i))
+					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{

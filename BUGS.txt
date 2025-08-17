@@ -1,6 +1,2 @@
-1- we might need to refactor how the multiplexer handle the server and client and how the server read from the buffer
 
-2- when a client timeout all the clients disconnect
-
-3- the root and location should be in the location
 
