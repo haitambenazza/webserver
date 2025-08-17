@@ -171,10 +171,15 @@ void	ReadData(Multiplexer &m, int &i, Server &s)
 			}
 		}
 		else
+		{
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
+		}
 		if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) <= (int long long)m.GetClient()[i].getBuffer(false).size())
 		{
-			// std::cout << "----------------------------------------\n";
+			std::cout << m.GetClient()[i].getBuffer(false) << std::endl;
+			size_t pos;
+			if ( (pos = m.GetClient()[i].getBuffer(false).find("\r\n\r\n")) != std::string::npos)
+				m.GetClient()[i].getBuffer(false).replace(pos, 4 , "0000");
 			m.GetClient()[i].getBuffer(false);
 			Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest());
 		}
