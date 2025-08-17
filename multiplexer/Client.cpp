@@ -5,6 +5,7 @@ Client::Client()
     fd = -1;
     ServerIndex = -1;
     readDone = false;
+    readeSize = 0;
 }
 
 Client::Client( const Client& copy )
@@ -13,6 +14,7 @@ Client::Client( const Client& copy )
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
     readDone = copy.readDone;
+    readeSize = copy.readeSize;
     // headers.clear();
     // body.clear();
 }
