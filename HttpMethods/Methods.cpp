@@ -155,10 +155,33 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
     return (true);
 }
 
+int	GetMatchedLocation(Server &server, std::string URI)
+{
+	std::vector<Location>	Tmp;
+
+	Tmp = server.GetLocations();
+	for (int i = 0; i < (int)Tmp.size(); i++)
+	{
+		if (Tmp[i].GetPath() == URI)
+			return (i);
+	}
+	return (-1);
+}
+
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	(void)server;
-	//build location
+	// (void)server;
+	
+	if (GetMatchedLocation(server, m.GetClient()[i].GetRequest().getUri()) == -1)
+	{
+		std::cerr << "No matching Location\n";
+		exit(1);
+	}
+	else
+	{
+		std::cerr << "matched location\n";
+		exit(1);
+	}
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		std::cout << "GET is up\n";
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")

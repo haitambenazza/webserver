@@ -155,7 +155,7 @@ void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 		m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
 		m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
 	}
-	m.GetClient()[i].readeSize += m.GetClient()[i].getBuffer(false).size();
+	m.GetClient()[i].SetReadSize(m.GetClient()[i].getBuffer(false).size());
 }
 
 void	disconnectClient(Multiplexer &m, int i)
@@ -181,11 +181,11 @@ int	ReadData(Multiplexer &m, int &i)
 			appendToHeader(m, i, tmp, bytes_read);
 		else
 		{
-			m.GetClient()[i].readeSize += bytes_read;
+			m.GetClient()[i].SetReadSize(bytes_read);
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
 		}
 	}
-	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].readeSize)
+	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
 		return (1);
 	else if (bytes_read == 0)
 	{

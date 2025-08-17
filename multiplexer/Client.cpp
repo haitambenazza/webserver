@@ -15,8 +15,9 @@ Client::Client( const Client& copy )
     ServerIndex = copy.ServerIndex;
     readDone = copy.readDone;
     readeSize = copy.readeSize;
-    // headers.clear();
-    // body.clear();
+    // Req = copy.Req;
+    // headers = copy.headers;
+    // body = copy.body;
 }
 
 Client& Client::operator=( const Client& copy )
@@ -26,6 +27,7 @@ Client& Client::operator=( const Client& copy )
         fd = copy.fd;
         ServerIndex = copy.ServerIndex;
         connectedTime = copy.connectedTime;
+        readeSize = 0;
     }
     return (*this);
 }
@@ -53,6 +55,16 @@ Request&         Client::GetRequest()
 int16_t     Client::GetClientFd() const
 {
     return (fd);
+}
+
+size_t          Client::GetReadSize() const
+{
+    return (readeSize);
+}
+
+void            Client::SetReadSize( size_t val )
+{
+    readeSize += val;
 }
 
 int16_t	    Client::GetserverIndex() const
