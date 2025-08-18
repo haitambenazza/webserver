@@ -155,33 +155,54 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
     return (true);
 }
 
-int	GetMatchedLocation(Server &server, std::string URI)
+int	GetMatchedLocation(Server &server, std::string Uri)
 {
 	std::vector<Location>	Tmp;
 
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		if (Tmp[i].GetPath() == URI)
+		if (Tmp[i].GetPath() == Uri)
 			return (i);
 	}
 	return (-1);
 }
 
-bool	GetRequest(Server &server, Multiplexer &m, int &i)
+std::string		GetMethodPath(Server &server, std::string Uri)
 {
-	// (void)server;
-	
-	if (GetMatchedLocation(server, m.GetClient()[i].GetRequest().getUri()) == -1)
-	{
-		std::cerr << "No matching Location\n";
-		exit(1);
-	}
+	std::string path;
+	std::map<std::string, std::vector<std::string> > mp;
+
+	if (GetMatchedLocation(server, Uri) == -1)
+		return (std::cerr << "No matching Location\n", path);
+	mp = server.GetLocations()[GetMatchedLocation(server, Uri)].GetCommands();
+
+	if (mp.find("root") != mp.end())
+		path += mp.find("root")->second[0];
 	else
 	{
-		std::cerr << "matched location\n";
-		exit(1);
+		if (server.GetCommands().find("root") != server.GetCommands().end())
+			path += server.GetCommands().find("root")->second[0];
+		else
+		{
+			std::cerr << "root not found" << "\n";
+			return path;
+		}
 	}
+	if (mp.find("index") != mp.end())
+		path += mp.find("index")->second[0];
+	else
+		return path;
+	return path;
+}
+
+bool	GetRequest(Server &server, Multiplexer &m, int &i)
+{
+	
+	if (GetMethodPath(server, m.GetClient()[i].GetRequest().getUri()).empty())
+		return false;
+	else
+		std::cout << GetMethodPath(server, m.GetClient()[i].GetRequest().getUri()) << "\n";
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		std::cout << "GET is up\n";
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
