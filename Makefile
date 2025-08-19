@@ -11,7 +11,7 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++11 -g3 -Wall -Wextra -Werror -fsanitize=address
+CXXFLAGS = -std=c++11 -g3 -Wall -Wextra -Werror #-fsanitize=address
 
 %.o: %.cpp
 	@$(CC) $(CXXFLAGS) -c $^ -o $@
