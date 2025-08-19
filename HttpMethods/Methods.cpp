@@ -82,34 +82,34 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
 }
 
 
-int PostMethod( std::string s, Request& Req )
-{
-    struct stat     	info;
-    std::ofstream   	Target;
-	std::string			FileName;
-    std::ostringstream 	tm;
-    std::map<std::string, std::string >::iterator it;
+// int PostMethod( std::string s, Request& Req )
+// {
+//     struct stat     	info;
+//     std::ofstream   	Target;
+// 	std::string			FileName;
+//     std::ostringstream 	tm;
+//     std::map<std::string, std::string >::iterator it;
 
 
-    if (stat(Req.getUri().c_str(), &info) == -1)
-	{
-        return (NotFound);
-	}
-	if (!Req.getHeaders().empty())
-	{
-		FileName = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
-	}
-	tm << time(NULL);
-	std::string name(tm.str() + FileName.c_str());
-	Target.open( name.c_str(), std::ios::binary);
-	if (!Target.is_open())
-	{
-		std::cout << "cannot open file\n";
-		return (1);
-	}
-	Target << s;
-	return (OK);
-}
+//     if (stat(Req.getUri().c_str(), &info) == -1)
+// 	{
+//         return (NotFound);
+// 	}
+// 	if (!Req.getHeaders().empty())
+// 	{
+// 		FileName = "." + split(GetValuesFromKeysReq(Req.getHeaders(), "Content-Type"), "/")[1];
+// 	}
+// 	tm << time(NULL);
+// 	std::string name(tm.str() + FileName.c_str());
+// 	Target.open( name.c_str(), std::ios::binary);
+// 	if (!Target.is_open())
+// 	{
+// 		std::cout << "cannot open file\n";
+// 		return (1);
+// 	}
+// 	Target << s;
+// 	return (OK);
+// }
 
 int DeleteMethod( Request& Req )
 {
@@ -196,6 +196,13 @@ std::string		GetMethodPath(Server &server, std::string Uri)
 	return path;
 }
 
+int		Delete(  std::string path  )
+{
+	if (access(path.c_str(), F_OK) == -1)
+		return (NotFound);
+	remove(path.c_str());
+	return (201);
+}
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	
@@ -208,6 +215,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		std::cout << "POST is up\n";
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-		std::cout << "DELETE is up\n";
+		return (Delete(GetMethodPath(server, m.GetClient()[i].GetRequest().getUri())));
 	return true;
 }

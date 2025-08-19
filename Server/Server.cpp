@@ -134,7 +134,7 @@ void Server::SetServers( Block& block )
 			StringToMap( children[i].GetArg(), Com, 0 );
             NewLocation.SetLocationStatus( Com );
 			NewLocation.SetCommands( Com );
-            std::cout << "CGI == " << NewLocation.GetCgiStatus() << " Upload == " << NewLocation.GetUploadStatus() << std::endl;
+            // std::cout << "CGI == " << NewLocation.GetCgiStatus() << " Upload == " << NewLocation.GetUploadStatus() << std::endl;
             if ( lst.size() != 1 )
                 NewLocation.SetPath( lst[1] );
             else
