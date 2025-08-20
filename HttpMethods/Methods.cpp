@@ -155,30 +155,13 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
     return (true);
 }
 
-int	GetMatchedLocation(Server &server, std::string Uri)
-{
-	std::vector<Location>	Tmp;
-
-	Tmp = server.GetLocations();
-	for (int i = 0; i < (int)Tmp.size(); i++)
-	{
-		if (Tmp[i].GetPath() == Uri)
-			return (i);
-	}
-	return (-1);
-}
-
-std::string		GetMethodPath(Server &server, std::string Uri)
+std::string SetFullPath(Server &server, Location loc)
 {
 	std::string path;
 	std::map<std::string, std::vector<std::string> > mp;
 
-	if (GetMatchedLocation(server, Uri) == -1)
-		return (std::cerr << "No matching Location\n", path);
-	mp = server.GetLocations()[GetMatchedLocation(server, Uri)].GetCommands();
-
-	if (mp.find("root") != mp.end())
-		path += mp.find("root")->second[0];
+	if (loc.GetCommands().find("root") != loc.GetCommands().end())
+		path += loc.GetCommands().find("root")->second[0];
 	else
 	{
 		if (server.GetCommands().find("root") != server.GetCommands().end())
@@ -189,32 +172,52 @@ std::string		GetMethodPath(Server &server, std::string Uri)
 			return path;
 		}
 	}
-	if (mp.find("index") != mp.end())
-		path += mp.find("index")->second[0];
+	if (path[path.size() - 1] == '/' && loc.GetPath()[0] == '/')
+	{
+		path = path.substr(0, path.size() - 1);
+	}
+	if (loc.GetPath() == "/")
+		loc.GetPath() = "";
+	path += loc.GetPath();
+	if (loc.GetCommands().find("index") != loc.GetCommands().end())
+		path += "/" + loc.GetCommands().find("index")->second[0];
 	else
 		return path;
-	return path;
+	return (path);
 }
+
+std::string	FullPath(Server &server, std::string Uri)
+{
+	std::vector<Location>	Tmp;
+	std::string				path;
+
+	Tmp = server.GetLocations();
+	for (int i = 0; i < (int)Tmp.size(); i++)
+	{
+		if (SetFullPath(server, Tmp[i]).find(Uri) != std::string::npos)
+			return (SetFullPath(server, Tmp[i]));
+	}
+	return (path);
+}
+
 
 int		Delete(  std::string path  )
 {
 	if (access(path.c_str(), F_OK) == -1)
 		return (NotFound);
-	remove(path.c_str());
-	return (201);
+	std::remove(path.c_str());
+	return (OK);
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	
-	if (GetMethodPath(server, m.GetClient()[i].GetRequest().getUri()).empty())
-		return false;
-	else
-		std::cout << GetMethodPath(server, m.GetClient()[i].GetRequest().getUri()) << "\n";
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		std::cout << "GET is up\n";
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		std::cout << "POST is up\n";
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-		return (Delete(GetMethodPath(server, m.GetClient()[i].GetRequest().getUri())));
+	{
+		return(Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri())));
+	}
 	return true;
 }

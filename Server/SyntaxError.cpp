@@ -1,6 +1,6 @@
 #include "../headers/webserver.hpp"
 
-int AllDigit(std::string& s)
+bool AllDigit(std::string s)
 {
     size_t  i;
 
@@ -8,13 +8,13 @@ int AllDigit(std::string& s)
     while (i < s.size())
     {
         if (!isdigit(s[i]))
-            return (1);
+            return (false);
         i++;
     }
-    return (0);
+    return (true);
 }   
 
-int CheckIp( std::string& s )
+bool CheckIp( std::string s )
 {
     size_t  i;
     int     count;
@@ -27,24 +27,24 @@ int CheckIp( std::string& s )
         if (s[i] == '.')
         {
             if (s[i - 1] && s[i - 1] == '.')
-                return (1);
+                return (false);
             count++;
         }
         else if (!isdigit(s[i]))
-            return (1);
+            return (false);
         i++;
     }
     if (count != 3)
-        return (1);
+        return (false);
     lst = split(s, ".");
     if (lst.size() != 4)
-        return (1);
+        return (false);
     i = 0;
     while (i < lst.size())
     {
         if (atoi(lst[i].c_str()) < 0 || atoi(lst[i].c_str()) > 255)
-            return (1);
+            return (false);
         i++;
     }
-    return (0);
+    return (true);
 }

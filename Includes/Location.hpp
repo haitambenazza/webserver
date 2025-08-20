@@ -11,11 +11,9 @@ class Location
     private :
         std::string                                             Path;
         std::map < std::string, std::vector< std::string > >    Commands;
-        std::string                                             AutoIndex;
         std::string                                             UploadEnable;
         std::string                                             CgiEnabled;
-        // std::string                                             root;
-        // std::string                                             index;
+        std::string                                             AutoIndex;
     public :
         Location();
         Location( const Location&  copy );
@@ -27,6 +25,7 @@ class Location
         void                                                    SetCommands( std::map < std::string, std::vector< std::string > >& Ref );
         std::string&                                            GetUploadStatus();
         std::string&                                            GetCgiStatus();
+        std::string&                                            GetAutoIndex();
         void                                                    SetUploadStatus( std::string s );
         void                                                    SetCgiStatus( std::string s );
         void                                                    SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map );

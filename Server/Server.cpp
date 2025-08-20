@@ -38,7 +38,11 @@ bool    Server::SetServer()
     int opt = 1;
 
     SetDefaultValue();
-    InitializeServerSettings();
+    if (InitializeServerSettings() == false)
+    {
+        status = false;
+        return (false);
+    }
     fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (fd == -1)
         return false;
@@ -101,7 +105,8 @@ Server& Server::operator=( const Server& copy )
         Commands = copy.Commands;
         max_body_size = copy.max_body_size;
         close(fd);
-        SetServer();
+        if (SetServer() == false)
+            return (*this);
     }
     return (*this);
 }
@@ -116,7 +121,7 @@ std::vector<std::string>    Server::GetKeys()
     return (keys);
 }
 
-void Server::SetServers( Block& block )
+bool Server::SetServers( Block& block )
 {
 	std::vector<Block>& children = block.GetBlocks();
 	int 	i;
@@ -124,7 +129,10 @@ void Server::SetServers( Block& block )
     while ( ++i < (int)children.size() )
 	{
 		if ( children[i].GetLvl() == 1 )
-            StringToMap(children[i].GetArg(), Commands, 1);
+        {
+            if (StringToMap(children[i].GetArg(), Commands, 1) == false)
+                return (false);
+        }
 		else if ( children[i].GetLvl() == 2 )
 		{
             std::vector<std::string> lst;
@@ -134,7 +142,7 @@ void Server::SetServers( Block& block )
 			StringToMap( children[i].GetArg(), Com, 0 );
             NewLocation.SetLocationStatus( Com );
 			NewLocation.SetCommands( Com );
-            // std::cout << "CGI == " << NewLocation.GetCgiStatus() << " Upload == " << NewLocation.GetUploadStatus() << std::endl;
+            // std::cout << "CGI == " << NewLocation.GetCgiStatus() << " Upload == " << NewLocation.GetUploadStatus() << " autoindex = "<< NewLocation.GetAutoIndex() << std::endl;
             if ( lst.size() != 1 )
                 NewLocation.SetPath( lst[1] );
             else
@@ -143,9 +151,10 @@ void Server::SetServers( Block& block )
 		}
         SetServers( children[i] );
     }
+    return (true);
 }
 
-void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag )
+bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag )
 {
 	std::vector< std::string > 	tmp;
 	std::string					key;
@@ -156,6 +165,12 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	i = 0;
 	while ( i < (int)tmp.size() )
 	{
+        if (split( tmp[i], " " ).size() != 2 && flag)
+        {
+            std::cerr << "wrong directive format\n";
+            status = false;
+            return false;
+        }
         key = split( tmp[i], " " )[0];
         if (flag)
             keys.push_back(key);
@@ -163,6 +178,7 @@ void	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 		Mp.insert(std::make_pair(key, values));
 		i++;
 	}
+    return (true);
 }
 
 int Server::Getfd() const{
@@ -178,20 +194,33 @@ u_int64_t         Server::GetMaxBodySize() const
     return (max_body_size);
 }
 
-void    Server::InitializeServerSettings()
+bool    Server::InitializeServerSettings()
 {
     if (GetValuesFromKeys(Commands, "listen") != "")
+    {
+        if (AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
+            return(std::cerr << "invalid port number\n", false);
         port = GetValuesFromKeys(Commands, "listen");
+    }
     if (GetValuesFromKeys(Commands, "server_name") != "")
         server_name = GetValuesFromKeys(Commands, "server_name");
     if (GetValuesFromKeys(Commands, "host") != "")
+    {
+        if (CheckIp(GetValuesFromKeys(Commands, "host")) == false)
+            return (std::cerr << "invalid ip address\n", false);
         ip = GetValuesFromKeys(Commands, "host");
+    }
     if (GetValuesFromKeys(Commands, "root") != "")
         root = GetValuesFromKeys(Commands, "root");
     if (GetValuesFromKeys(Commands, "index") != "")
         index = GetValuesFromKeys(Commands, "index");
     if (GetValuesFromKeys(Commands, "Max_Client_Body_size") != "")
+    {
+        if (AllDigit( GetValuesFromKeys(Commands, "Max_Client_Body_size")) == false)
+            return(std::cerr << "invalid Max_Client_Body_size\n", false);
         max_body_size = atoll(GetValuesFromKeys(Commands, "Max_Client_Body_size").c_str());
+    }
+    return (true);
 }
 
 std::string Server::GetIp() const
@@ -211,7 +240,8 @@ std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 
 Server::~Server()
 {
-    freeaddrinfo(result);
+    if (status)
+        freeaddrinfo(result);
     close(fd);
 }
 

@@ -4,6 +4,7 @@ Location::Location(  )
 {
     UploadEnable = "off";
     CgiEnabled = "off";
+    AutoIndex = "off";
 }
 
 Location::Location( const Location&  copy )
@@ -35,6 +36,12 @@ std::string&       Location::GetUploadStatus()
 {
     return (UploadEnable);
 }
+
+std::string&       Location::GetAutoIndex()
+{
+    return (AutoIndex);
+}
+
 std::string&       Location::GetCgiStatus()
 {
     return (CgiEnabled);
@@ -90,6 +97,8 @@ void               Location::SetLocationStatus( std::map < std::string, std::vec
             CgiEnabled = "on";
         else if (it->first == "upload_enable" && it->second[0] == "on")
             UploadEnable = "on";
+        else if (it->first == "autoindex" && it->second[0] == "on")
+            AutoIndex = "on";
         it++;
     }
 }
