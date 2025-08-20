@@ -23,7 +23,6 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 		{
 			std::cerr << servers[i].GetServerName() << " \033[31m ENCOUNTERED AN ERROR\033[0m\n";
 			running = false;
-			//servers.clear();
 			return (false);
 		}
 		if (servers.size() == 0)
@@ -31,7 +30,8 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	}
 	for(int serv = 0 ; serv < (int)servers.size() ; serv++)
 	{
-		servers[serv].InitializeServerSettings();
+		if (servers[serv].GetStatus() == false)
+			return (false);
 		servers[serv].PrintData();
 		std::cout << "------------------------\n";
 	}
