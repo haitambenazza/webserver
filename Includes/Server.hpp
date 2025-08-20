@@ -27,15 +27,15 @@ class Server
         Server& operator=( const Server& copy );
         ~Server();
 
-        void                                                    SetServers( Block& block );
+        bool                                                    SetServers( Block& block );
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::vector < Location >&                               GetLocations();
-        void	                                                StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
+        bool	                                                StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
         std::vector<std::string>                                GetKeys();
         bool                                                    SetServer();
         int                                                     Getfd() const;
         std::string                                             GetServerName()const;
-        void                                                    InitializeServerSettings();
+        bool                                                    InitializeServerSettings();
         void                                                    PrintData();
         void                                                    SetDefaultValue();
         void	                                                SetAddrServer(struct sockaddr_in *addr);

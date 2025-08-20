@@ -121,7 +121,11 @@ std::vector<Server>   GetFullServers( char* FileName )
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
 		srvs.push_back( NewServer );
-		srvs.back().SetServers( NewBlock );
+		if (srvs.back().SetServers( NewBlock ) == false)
+		{
+			srvs.empty();
+			return (srvs);
+		}
 		srvs.back().SetStatus(NewBlock.GetStatus());
 		if (!CheckBrackets(lst[i]))
 		{
