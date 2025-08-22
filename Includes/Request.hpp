@@ -8,6 +8,7 @@ enum HttpStatus {
     NotFound = 404,
     MethodNotAllowed = 405,
     RequestUriTooLong = 414,
+    InternalServerError = 500,
     NotImplemented = 501,
     HttpVersionNotSupported = 505
 };

@@ -120,20 +120,21 @@ std::vector<Server>   GetFullServers( char* FileName )
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		srvs.push_back( NewServer );
-		if (srvs.back().SetServers( NewBlock ) == false)
+		NewServer.SetServers( NewBlock );
+		if (NewServer.SetServers( NewBlock ) == false)
 		{
-			srvs.empty();
+			lst.empty();
 			return (srvs);
 		}
-		srvs.back().SetStatus(NewBlock.GetStatus());
+		NewServer.SetStatus(NewBlock.GetStatus());
 		if (!CheckBrackets(lst[i]))
 		{
-			srvs.back().SetStatus(false);
+			NewServer.SetStatus(false);
 			i++;
 		}
-		if ( CheckLocationParams( srvs.back() ) == false || CheckValidKeys(srvs.back().GetKeys()) == false )
-			srvs.back().SetStatus(false);
+		if ( CheckLocationParams( NewServer ) == false || CheckValidKeys(NewServer.GetKeys()) == false )
+			NewServer.SetStatus(false);
+		srvs.push_back( NewServer );
 		i++;
 	}
 	return (srvs);
@@ -167,15 +168,13 @@ bool CheckValidKeys(const std::vector<std::string> str)
 	valid_keys.push_back("root");
 	valid_keys.push_back("index");
 	valid_keys.push_back("location");
-	valid_keys.push_back("error_page");
 	valid_keys.push_back("client_max_body_size");
-	valid_keys.push_back("allow_methods");
+	valid_keys.push_back("allowed_methods");
 	valid_keys.push_back("return");
 	valid_keys.push_back("autoindex");
 	valid_keys.push_back("cgi_path");
 	valid_keys.push_back("cgi_ext");
-	valid_keys.push_back("try_files");
-	valid_keys.push_back("Max_Client_Body_size");
+	valid_keys.push_back("error_page");
 	
 	size_t i = 0;
 	while (i < str.size())
