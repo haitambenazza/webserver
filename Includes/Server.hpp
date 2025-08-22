@@ -38,7 +38,7 @@ class Server
         bool                                                    InitializeServerSettings();
         void                                                    PrintData();
         void                                                    SetDefaultValue();
-        void	                                                SetAddrServer(struct sockaddr_in *addr);
+        bool	                                                SetAddrServer(struct sockaddr_in *addr);
         std::string                                             GetIp() const;
         std::string                                             GetPort() const;
         bool                                                    GetStatus() const;
@@ -47,6 +47,8 @@ class Server
         void                                                    AddNewClient(int16_t fd);
         std::vector<int16_t>                                    GetClients() const;
         void                                                    SetMaxBodySize( std::string val );
+        std::map<u_int16_t , std::string>                       GetErrorMap() const;
+        void                                                    SetErrorMap( u_int16_t key, std::string value );
         u_int64_t                                               GetMaxBodySize() const;
 };
 

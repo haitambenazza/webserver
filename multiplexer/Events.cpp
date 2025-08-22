@@ -16,7 +16,10 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 {
 	servers = GetFullServers(filename);
 	if (servers.empty())
+	{
+		running = false;
 		return (false);
+	}
 	for (int i = 0; i < (int)servers.size(); i++)
 	{
 		if (servers[i].GetStatus() == false)
@@ -114,37 +117,6 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-std::string	GetFileName(Request&	req)
-{
-	std::string				FileType;
-	std::string				FileName;
-	std::ostringstream		tme;
-
-	if (split(req.getHeaderValue("Content-Type"), "/").empty())
-		return (FileType);
-	FileType = split(req.getHeaderValue("Content-Type"), "/")[1];
-	if (FileType.empty())
-		return (std::string("bad request"));
-	tme << time(NULL);
-	FileName = tme.str() + "." + FileType;
-	return FileName;
-}
-
-void 		Post69( std::string body,Request& req )
-{
-	std::ofstream 	file;
-
-	if (body.empty())
-		return ;
-	file.open(("upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
-	if (!file.is_open())
-	{
-		std::cerr << "file error" << std::endl;
-		return ;
-	}
-	file << body;
-}
-
 void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 {
 	m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
@@ -192,6 +164,7 @@ int	ReadData(Multiplexer &m, int &i)
 		disconnectClient(m, i);
 		return (1);
 	}
+	// m.GetEvents()[i].events = EPOLLOUT;
 	return (0);
 }
 
@@ -251,8 +224,15 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 			{
-				if (ReadData(multiplexer, i))
-					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+				if (ReadData(multiplexer, i) == 1)
+				{
+					if (GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i))
+						multiplexer.GetEvents()[i].events = EPOLLOUT;
+				}
+			}
+			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
+			{
+				SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{

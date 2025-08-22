@@ -1,6 +1,6 @@
 #include "../headers/webserver.hpp"
 
-void	Server::SetAddrServer(struct sockaddr_in *addr)
+bool	Server::SetAddrServer(struct sockaddr_in *addr)
 {
     struct addrinfo hints;
     struct addrinfo *res;
@@ -14,11 +14,12 @@ void	Server::SetAddrServer(struct sockaddr_in *addr)
     {
         freeaddrinfo(res);
         perror("IP:Port");
-        return ;
+        return (false);
     }
     result = res;
 	memset(addr, 0, sizeof(struct sockaddr_in));
     memcpy(addr, res->ai_addr, sizeof(sockaddr_in));
+    return (true);
 }
 
 void    Server::SetDefaultValue()
@@ -48,7 +49,8 @@ bool    Server::SetServer()
         return false;
     if (setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
 		return false;
-	SetAddrServer(&addr);
+	if (SetAddrServer(&addr) == false)
+        return (false);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
         return false;
     if ((listen(fd, SOMAXCONN)) == -1)
@@ -64,6 +66,7 @@ void Server::PrintData()
     std::cout << "INDEX : " << this->index << "\n";
     std::cout << "ROOT : " << this->root << "\n";
     std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";
+    // std::cout << "error_page : " << this->error_map.find(404)->second << "\n";
 }
 
 std::string Server::GetServerName()const
@@ -121,6 +124,16 @@ std::vector<std::string>    Server::GetKeys()
     return (keys);
 }
 
+std::map<u_int16_t , std::string>   Server::GetErrorMap() const
+{
+    return (error_map);
+}
+
+void      Server::SetErrorMap( u_int16_t key, std::string value )
+{
+    error_map.insert(std::make_pair(key, value));
+}
+
 bool Server::SetServers( Block& block )
 {
 	std::vector<Block>& children = block.GetBlocks();
@@ -139,10 +152,10 @@ bool Server::SetServers( Block& block )
             lst = split( children[i].GetName(), " " );
 			std::map < std::string, std::vector< std::string > >  Com;
 			Location NewLocation;
-			StringToMap( children[i].GetArg(), Com, 0 );
+			if (StringToMap( children[i].GetArg(), Com, 0 ) == false)
+                return (false);
             NewLocation.SetLocationStatus( Com );
 			NewLocation.SetCommands( Com );
-            // std::cout << "CGI == " << NewLocation.GetCgiStatus() << " Upload == " << NewLocation.GetUploadStatus() << " autoindex = "<< NewLocation.GetAutoIndex() << std::endl;
             if ( lst.size() != 1 )
                 NewLocation.SetPath( lst[1] );
             else
@@ -161,15 +174,22 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	std::vector< std::string >  values;
 	int 						i;
 
+    if (s.empty())
+    {
+        return (false);
+    }
 	tmp = split(s, ";");
 	i = 0;
 	while ( i < (int)tmp.size() )
 	{
-        if (split( tmp[i], " " ).size() != 2 && flag)
+        if (flag)
         {
-            std::cerr << "wrong directive format\n";
-            status = false;
-            return false;
+            if (((split( tmp[i], " " )[0] != "error_page" ) && split( tmp[i], " " ).size() != 2) || ((split( tmp[i], " " )[0] == "error_page" ) && split( tmp[i], " " ).size() != 3))
+            {
+                std::cerr << "wrong directive format\n";
+                status = false;
+                return false;
+            }
         }
         key = split( tmp[i], " " )[0];
         if (flag)
@@ -220,6 +240,14 @@ bool    Server::InitializeServerSettings()
             return(std::cerr << "invalid Max_Client_Body_size\n", false);
         max_body_size = atoll(GetValuesFromKeys(Commands, "Max_Client_Body_size").c_str());
     }
+    if (GetValuesFromKeys(Commands, "error_page") != "")
+    {
+        if (AllDigit( GetValuesFromKeys(Commands, "error_page")) == false)
+            return(std::cerr << "invalid error_page\n", false);
+        std::map<std::string, std::vector<std::string> >::iterator it;
+        it = Commands.find("error_page");
+        SetErrorMap(atoi(it->second[0].c_str()), it->second[1]);
+    }
     return (true);
 }
 
@@ -242,7 +270,8 @@ Server::~Server()
 {
     if (status)
         freeaddrinfo(result);
-    close(fd);
+    if (fd)
+        close(fd);
 }
 
 bool Server::GetStatus() const
