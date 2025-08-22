@@ -178,7 +178,6 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
             if (s[i] == '{')
             {
                 j++;
-                Child.Parent = &block;
                 Child.Lvl = j;
                 SetBlockName( s, Child, i );
                 block.Blocks.push_back(Child);
