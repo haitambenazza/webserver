@@ -210,7 +210,6 @@ int		Delete(  std::string path  )
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		std::cout << "GET is up\n";
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
