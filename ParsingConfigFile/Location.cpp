@@ -70,6 +70,8 @@ std::vector<std::string> Location::GetValuesLocation( std::string key)
         return std::vector<std::string>();
 }
 
+
+
 std::vector< std::string>      Location::GetItemsFromServer( std::string s, Server& Serv )
 {
     std::map<std::string, std::vector<std::string > > map;
@@ -77,7 +79,7 @@ std::vector< std::string>      Location::GetItemsFromServer( std::string s, Serv
 
     map = Serv.GetCommands();
     it = map.find(s);
-    std::cout << "find has found  === " << it->first << std::endl;
+
     if (it != map.end())
     {
         return (it->second);
