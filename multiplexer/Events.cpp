@@ -110,7 +110,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	epoll_client.events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
 	{
-		perror("epoll_ctl()");
+		perror("epoll_ctl()_ADD");
 		return (false);
 	}
 	std::cout << "\033[32mNew client [" << m.GetClientFd() << "] connected to " << GetAddrServer(m,s,fd) << "\033[0m\n";
@@ -135,7 +135,7 @@ void	disconnectClient(Multiplexer &m, int i)
 	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
-		perror("epoll_ctl()");
+		perror("epoll_ctl()_DEL");
 		close(m.GetEvents()[i].data.fd);
 		return ;
 	}
@@ -164,7 +164,6 @@ int	ReadData(Multiplexer &m, int &i)
 		disconnectClient(m, i);
 		return (1);
 	}
-	// m.GetEvents()[i].events = EPOLLOUT;
 	return (0);
 }
 
@@ -232,6 +231,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			}
 			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 			{
+				std::cout << "SEND PATH == " << multiplexer.GetClient()[i].GetRequest().getUri() << std::endl;
 				SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
