@@ -99,23 +99,25 @@ std::string	BuildResponse(std::string type, int size, int status)
 
 bool SendData(Multiplexer &m, int i, std::string path, int status)
 {
-	std::cout << path << std::endl;
-	if (path.empty())
-	{
-		status = NotFound;
-		path = "error_pages/404.html";
-	}
-
 	std::stringstream response;
-	std::ifstream file(path.c_str());
 	std::stringstream data;
 
-	if (!file.is_open() )
+	if ( path.empty() || access(path.c_str(), R_OK) == -1)
+	{
+		path = "error_pages/404.html";
+		status = NotFound;
+	}
+	std::ifstream file(path.c_str());
+	if ( !file.is_open() )
 		status = NotFound;
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
-	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
+	if (send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0) == -1)
+	{
+		perror("send");
+		return (false);
+	}
 	m.GetEvents()[i].events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
@@ -231,7 +233,7 @@ int		Delete(  std::string path  )
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
-		std::cout << "GET is up\n";
+		return (true);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		return (Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")

@@ -120,7 +120,7 @@ std::vector<Server>   GetFullServers( char* FileName )
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		NewServer.SetServers( NewBlock );
+		NewServer.SetServers( NewBlock ); 
 		if (NewServer.SetServers( NewBlock ) == false)
 		{
 			lst.empty();
@@ -133,7 +133,9 @@ std::vector<Server>   GetFullServers( char* FileName )
 			i++;
 		}
 		if ( CheckLocationParams( NewServer ) == false || CheckValidKeys(NewServer.GetKeys()) == false )
+		{
 			NewServer.SetStatus(false);
+		}
 		srvs.push_back( NewServer );
 		i++;
 	}

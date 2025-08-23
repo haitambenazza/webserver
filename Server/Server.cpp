@@ -66,7 +66,6 @@ void Server::PrintData()
     std::cout << "INDEX : " << this->index << "\n";
     std::cout << "ROOT : " << this->root << "\n";
     std::cout << "MAX_BODY_SIZE : " << this->max_body_size << "\n";
-    // std::cout << "error_page : " << this->error_map.find(404)->second << "\n";
 }
 
 std::string Server::GetServerName()const
@@ -174,6 +173,7 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	std::vector< std::string >  values;
 	int 						i;
 
+    (void)flag;
     if (s.empty())
     {
         return (false);
@@ -182,15 +182,16 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	i = 0;
 	while ( i < (int)tmp.size() )
 	{
-        if (flag)
-        {
-            if (((split( tmp[i], " " )[0] != "error_page" ) && split( tmp[i], " " ).size() != 2) || ((split( tmp[i], " " )[0] == "error_page" ) && split( tmp[i], " " ).size() != 3))
-            {
-                std::cerr << "wrong directive format\n";
-                status = false;
-                return false;
-            }
-        }
+        // if (flag)
+        // {
+        //     if (((split( tmp[i], " " )[0] != "error_page" ) && split( tmp[i], " " ).size() != 2))
+        //     {
+        //         tmp.clear();
+        //         std::cerr << "wrong directive format\n";
+        //         status = false;
+        //         return false;
+        //     }
+        // }
         key = split( tmp[i], " " )[0];
         if (flag)
             keys.push_back(key);
@@ -214,35 +215,61 @@ u_int64_t         Server::GetMaxBodySize() const
     return (max_body_size);
 }
 
+bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
+{
+    (void)size;
+    std::map<std::string , std::vector<std::string> >mp = s.GetCommands();
+    std::map<std::string , std::vector<std::string> >::iterator it = mp.find(ToFind);
+
+    if (it != mp.end())
+    {
+        if (it->second.size() != size)
+            return (false);
+    }
+    return (true);
+}
+
 bool    Server::InitializeServerSettings()
 {
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
-        if (AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
+        if (CheckCommandServer(*this, "listen", 1) == false || AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
             return(std::cerr << "invalid port number\n", false);
         port = GetValuesFromKeys(Commands, "listen");
     }
-    if (GetValuesFromKeys(Commands, "server_name") != "")
+    if ( GetValuesFromKeys(Commands, "server_name") != "")
+    {
+        if (CheckCommandServer(*this, "server_name", 1) == false)
+            return(std::cerr << "invalid server_name\n", false);
         server_name = GetValuesFromKeys(Commands, "server_name");
+    }
     if (GetValuesFromKeys(Commands, "host") != "")
     {
-        if (CheckIp(GetValuesFromKeys(Commands, "host")) == false)
+        if (CheckCommandServer(*this, "host", 1) == false || CheckIp(GetValuesFromKeys(Commands, "host")) == false)
             return (std::cerr << "invalid ip address\n", false);
         ip = GetValuesFromKeys(Commands, "host");
     }
     if (GetValuesFromKeys(Commands, "root") != "")
+    {
+        if (CheckCommandServer(*this, "root", 1) == false)
+            return(std::cerr << "invalid root\n", false);
         root = GetValuesFromKeys(Commands, "root");
+    }
     if (GetValuesFromKeys(Commands, "index") != "")
+    {
+        if (CheckCommandServer(*this, "index", 1) == false)
+            return (std::cerr << "invalid index\n", false);
         index = GetValuesFromKeys(Commands, "index");
+    }
     if (GetValuesFromKeys(Commands, "Max_Client_Body_size") != "")
     {
-        if (AllDigit( GetValuesFromKeys(Commands, "Max_Client_Body_size")) == false)
+        if (CheckCommandServer(*this, "Max_Clent_Body_size", 1) == false || AllDigit( GetValuesFromKeys(Commands, "Max_Client_Body_size")) == false)
             return(std::cerr << "invalid Max_Client_Body_size\n", false);
         max_body_size = atoll(GetValuesFromKeys(Commands, "Max_Client_Body_size").c_str());
     }
     if (GetValuesFromKeys(Commands, "error_page") != "")
     {
-        if (AllDigit( GetValuesFromKeys(Commands, "error_page")) == false)
+        if ( CheckCommandServer(*this, "error_page", 2) == false || AllDigit( GetValuesFromKeys(Commands, "error_page")) == false)
             return(std::cerr << "invalid error_page\n", false);
         std::map<std::string, std::vector<std::string> >::iterator it;
         it = Commands.find("error_page");
