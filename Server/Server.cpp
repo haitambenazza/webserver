@@ -217,7 +217,6 @@ u_int64_t         Server::GetMaxBodySize() const
 
 bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
 {
-    (void)size;
     std::map<std::string , std::vector<std::string> >mp = s.GetCommands();
     std::map<std::string , std::vector<std::string> >::iterator it = mp.find(ToFind);
 
@@ -229,8 +228,30 @@ bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
     return (true);
 }
 
+bool CheckCommandLocation(Location& L)
+{
+    std::map<std::string , std::vector<std::string> >mp = L.GetCommands();
+    std::map<std::string , std::vector<std::string> >::iterator it = mp.begin();
+
+    while (it != mp.end())
+    {
+        if (it->second.size() != 1)
+            return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
+        else if ((it->first == "cgi_enable" || it->first == "autoindex" || it->first == "upload_enable"))
+        {
+            if (it->second[0] != "on" && it->second[0] != "off")
+                return (std::cerr<< "location00 " << L.GetPath() << " has invalid arguments\n", false);
+        }
+        it++;
+    }
+    return (true);
+}
+
 bool    Server::InitializeServerSettings()
 {
+    std::vector<Location> locs = Locations;
+
+    
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
         if (CheckCommandServer(*this, "listen", 1) == false || AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
@@ -274,6 +295,13 @@ bool    Server::InitializeServerSettings()
         std::map<std::string, std::vector<std::string> >::iterator it;
         it = Commands.find("error_page");
         SetErrorMap(atoi(it->second[0].c_str()), it->second[1]);
+    }
+    size_t i = 0;
+    while (i < locs.size())
+    {
+        if (CheckCommandLocation(locs[i]) == false)
+            return (false);
+        i++;
     }
     return (true);
 }
