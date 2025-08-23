@@ -247,7 +247,8 @@ void Request::printRequestData() const
     std::map<std::string, std::string>::const_iterator it;
     for (it = this->headers.begin(); it != this->headers.end(); ++it)
     {
-        std::cout << it->first << ": " << it->second << std::endl;
+        if (!it->second.empty())
+            std::cout << it->first << ": " << it->second << std::endl;
     }
 }
 
