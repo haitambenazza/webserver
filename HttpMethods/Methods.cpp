@@ -115,11 +115,15 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
-	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
+	if(send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0) == -1)
+	{
+		perror("send failed");
+		return false;
+	}
 	m.GetEvents()[i].events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
-		perror("epoll_ctl()");
+		perror("epoll_ctl()_MOD");
 		return false;
 	}
 	return true;
@@ -231,11 +235,17 @@ int		Delete(  std::string path  )
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
+	{
 		std::cout << "GET is up\n";
+	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
+	{
+		std::cout << "POST is up\n";
 		return (Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
+	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 	{
+		std::cout << "DELETE is up\n";
 		return(Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri())));
 	}
 	return true;
