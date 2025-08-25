@@ -1,6 +1,9 @@
 #include "../headers/webserver.hpp"
 
 Cgi::Cgi(){}
+Cgi::Cgi( Request& Req ){
+    SetEnv(  Req );
+}
 Cgi::~Cgi(){}
 
 void    Cgi::SetEnv( Request& Req )
@@ -13,4 +16,67 @@ void    Cgi::SetEnv( Request& Req )
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     // env.push_back("SERVER_SOFTWARE=YourServer/1.0");
     env.push_back("REQUEST_URI=" + Req.getUri());
+}
+
+std::vector<char *> Cgi::GetEnvCgi()
+{
+    std::vector<char *> EnvVars;
+    for (size_t i = 0; i < env.size(); i++)
+    {
+        EnvVars.push_back((char *)env[i].c_str());
+        std::cout << EnvVars.back() << std::endl;
+    }
+    EnvVars.push_back(NULL);
+    return (EnvVars);
+}
+
+void    Cgi::ExecuteCgi(Request &req)
+{
+    if (pipe(fd) < 0)
+    {
+        return;
+    }
+    
+    child_pid = fork();
+    if (child_pid == -1)
+    {
+        close(fd[0]);
+        close(fd[1]);
+        return;
+    } 
+    else if (child_pid == 0)
+    {
+        close(fd[0]);
+        dup2(fd[1] , STDOUT_FILENO);
+        close(fd[1]);
+
+        std::vector<char *> envVars = GetEnvCgi();
+
+        char *cmds[3];
+        cmds[0] = (char *)req.GetScriptPath().c_str();
+        cmds[1] = (char *)req.GetScriptName().c_str();
+        cmds[2] = NULL;
+
+        execve(cmds[0] , cmds , envVars.data());
+        exit(1);
+    }
+    else
+    {
+        close(fd[1]);
+
+        char buffer[4096];
+        ssize_t bytes_read;
+        output.clear();
+
+        while ((bytes_read = read(fd[0] , buffer , sizeof(buffer) - 1)) > 0)
+        {
+            buffer[bytes_read] = '\0';
+            output += buffer;
+        }
+        close(fd[0]);
+
+        int status;
+
+        waitpid(child_pid , &status , 0);
+    }
 }

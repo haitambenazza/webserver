@@ -7,6 +7,7 @@ class Client
     private :
         int16_t         fd;
         int16_t         ServerIndex;
+        
         time_t          connectedTime;
         std::string     headers;
         std::string     body;

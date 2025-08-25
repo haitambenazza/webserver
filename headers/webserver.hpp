@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <algorithm>
+#include <sys/wait.h>
 
 #include "../Includes/Block.hpp"
 #include "../Includes/File.hpp"
