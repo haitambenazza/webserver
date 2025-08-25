@@ -1,14 +1,15 @@
 #include "../headers/webserver.hpp"
 
 
-Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK) {}
+Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK),query_string(""), ScriptName(""), Scriptpath(""){}
 
 Request::Request(const std::string& request_string) {
     this->parse(request_string);
 }
 
 Request::Request(const Request& other)
-    : method(other.method), uri(other.uri), version(other.version), headers(other.headers), body(other.body), status_code(other.status_code) {}
+    : method(other.method), uri(other.uri), version(other.version), headers(other.headers), body(other.body), status_code(other.status_code), query_string (other.query_string),
+        ScriptName(other.ScriptName), Scriptpath(other.Scriptpath) {}
 
 Request& Request::operator=(const Request& other) {
     if (this != &other) {
@@ -17,6 +18,9 @@ Request& Request::operator=(const Request& other) {
         version = other.version;
         headers = other.headers;
         body = other.body;
+        query_string = other.query_string;
+        ScriptName = other.ScriptName;
+        Scriptpath = other.Scriptpath;
         headers.clear();
         body.clear();
         status_code = other.status_code;
@@ -76,11 +80,30 @@ void       Request::SetStatusCode( HttpStatus val )
     status_code = val;
 }
 
+void       Request::SetQueryString(std::string& val )
+{
+    query_string = val;
+}
+std::string Request::getQueryString() const
+{
+    return this->query_string;
+}
+
 std::string isBadRequest(std::string &buffer)
 {
     if (buffer.empty() || buffer[buffer.size() - 1] != '\r')
         return "400 Bad Request";
     return "";
+}
+
+std::string Request::GetScriptPath() const
+{
+    return (Scriptpath);
+}
+
+std::string Request::GetScriptName() const
+{
+    return (ScriptName);
 }
 
 void Request::stripCR(std::string &s)
@@ -95,15 +118,6 @@ bool Request::parseRequestLine(const std::string &line)
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
 
-    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
-        !temp_uri.empty() &&
-        (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1"))
-    {
-        method = temp_method;
-        uri = temp_uri;
-        version = temp_version;
-        return true;
-    }
     if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
     {
         status_code = NotImplemented;
@@ -114,7 +128,7 @@ bool Request::parseRequestLine(const std::string &line)
         status_code = BadRequest;
         return false;
     }
-
+    
     if (!temp_uri.empty())
     {
         if (temp_uri.size() > URI_MAX_LENGTH)
@@ -127,19 +141,33 @@ bool Request::parseRequestLine(const std::string &line)
             status_code = BadRequest;
             return false;
         }
+        if (temp_uri.find("?") != std::string::npos)
+        {
+            if (!split(temp_uri, "?")[1].empty())
+                query_string = split(temp_uri, "?")[1];
+            std::cout << "turkolisouccisse == "<< query_string << std::endl;
+        }
     }
-
+    
     if (temp_version != "HTTP/1.0" && temp_version != "HTTP/1.1")
     {
         status_code = HttpVersionNotSupported;
         return false;
     }
-    
-    method = temp_method;
-    uri = temp_uri;
-    version = temp_version;
 
-    status_code = OK;
+
+
+    if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
+        !temp_uri.empty() &&
+        (temp_version == "HTTP/1.0" || temp_version == "HTTP/1.1"))
+    {
+        method = temp_method;
+        uri = temp_uri;
+        version = temp_version;
+
+        status_code = OK;
+        return true;
+    }
     return true;
 }
 
@@ -150,8 +178,8 @@ void Request::parseHeaders(std::stringstream &str)
     {
         stripCR(line);
         if (line.empty()) 
-            break; // end of headers
-
+        break; // end of headers
+        
         size_t colon = line.find(':');
         if (colon != std::string::npos)
         {
