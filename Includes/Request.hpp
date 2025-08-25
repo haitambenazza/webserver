@@ -25,6 +25,7 @@ class Request
         std::string                         query_string;
         std::string                         ScriptName;
         std::string                         Scriptpath;
+        
 
     public:
         Request();
@@ -55,5 +56,5 @@ class Request
         void        parseBody(std::stringstream &str);
         void        SetHeaders( std::string s );
         void        SetStatusCode( HttpStatus val );
-        void        SetQueryString(std::string& val );
+        void        SetScriptPath(std::string& val );
 };

@@ -80,20 +80,13 @@ void       Request::SetStatusCode( HttpStatus val )
     status_code = val;
 }
 
-void       Request::SetQueryString(std::string& val )
+void       Request::SetScriptPath(std::string& val )
 {
-    query_string = val;
+    Scriptpath = val;
 }
 std::string Request::getQueryString() const
 {
     return this->query_string;
-}
-
-std::string isBadRequest(std::string &buffer)
-{
-    if (buffer.empty() || buffer[buffer.size() - 1] != '\r')
-        return "400 Bad Request";
-    return "";
 }
 
 std::string Request::GetScriptPath() const
@@ -112,6 +105,31 @@ void Request::stripCR(std::string &s)
         s.erase(s.size() - 1);
 }
 
+std::string ReturnExtention(std::string s)
+{
+    if (s.empty())
+        return "";
+    size_t i = s.size();
+    while (i > 0)
+    {
+        if (s[i] == '.')
+            return (s.substr(i));
+        i--;
+    }
+    return "";
+}
+
+bool ValidCgiExtention(std::string extention)
+{
+    return (extention == ".cgi" || 
+            extention == ".pl" || 
+            extention == ".py" || 
+            extention == ".php" || 
+            extention == ".sh" || 
+            extention == ".rb" || 
+            extention == ".exe" ||
+            extention == ".out");
+}
 bool Request::parseRequestLine(const std::string &line)
 {
     std::stringstream ss(line);
@@ -141,11 +159,20 @@ bool Request::parseRequestLine(const std::string &line)
             status_code = BadRequest;
             return false;
         }
-        if (temp_uri.find("?") != std::string::npos)
+        if (!ReturnExtention(temp_uri).empty() && ReturnExtention(temp_uri) != ".html")
         {
-            if (!split(temp_uri, "?")[1].empty())
-                query_string = split(temp_uri, "?")[1];
-            std::cout << "turkolisouccisse == "<< query_string << std::endl;
+            if (temp_uri.find("?") != std::string::npos)
+            {
+                if (!split(temp_uri, "?")[0].empty())
+                    ScriptName = split(temp_uri, "?")[0];
+                if (!split(temp_uri, "?")[1].empty())
+                    query_string = split(temp_uri, "?")[1];
+            }
+            else
+                ScriptName = temp_uri;
+            Scriptpath = "/www" + ScriptName;
+            if (ValidCgiExtention(ReturnExtention(ScriptName)) == false)
+                return (false);
         }
     }
     
@@ -154,8 +181,6 @@ bool Request::parseRequestLine(const std::string &line)
         status_code = HttpVersionNotSupported;
         return false;
     }
-
-
 
     if ((temp_method == "GET" || temp_method == "POST" || temp_method == "DELETE") &&
         !temp_uri.empty() &&

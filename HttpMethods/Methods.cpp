@@ -232,6 +232,8 @@ int		Delete(  std::string path  )
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
+	Cgi cg(m.GetClient()[i].GetRequest());
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		return (true);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
