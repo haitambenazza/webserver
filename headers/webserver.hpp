@@ -31,6 +31,7 @@
 #include "../Includes/Events.hpp"
 #include "../Includes/Request.hpp"
 #include "../Includes/Methods.hpp"
+#include "../Includes/CGI.hpp"
 
 
 

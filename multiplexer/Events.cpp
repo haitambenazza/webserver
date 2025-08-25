@@ -231,7 +231,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			}
 			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
 			{
-				std::cout << "SEND PATH == " << multiplexer.GetClient()[i].GetRequest().getUri() << std::endl;
 				SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
