@@ -18,7 +18,6 @@ class Server
 		u_int64_t	                                            max_body_size;
 		std::map<u_int16_t , std::string>                       error_map;
         bool                                                    status;
-        struct addrinfo                                         *result;
         std::vector<int16_t>                                    ClientFd;
 
     public :
