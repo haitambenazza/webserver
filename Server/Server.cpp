@@ -5,7 +5,7 @@ bool	Server::SetAddrServer(struct sockaddr_in *addr)
 
 	memset(addr, 0, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;
-    addr->sin_addr.s_addr = StrToIp(ip.c_str());
+    addr->sin_addr.s_addr = htonl(StrToIp(ip.c_str()));
     addr->sin_port = htons(atoi(port.c_str()));
     return (true);
 }
@@ -239,7 +239,7 @@ bool    Server::InitializeServerSettings()
 {
     std::vector<Location> locs = Locations;
 
-    
+
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
         if (CheckCommandServer(*this, "listen", 1) == false || AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
@@ -311,8 +311,6 @@ std::map < std::string, std::vector< std::string > >    Server::GetCommands()
 
 Server::~Server()
 {
-    if (status)
-        freeaddrinfo(result);
     if (fd)
         close(fd);
 }
