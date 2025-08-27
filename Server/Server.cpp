@@ -2,23 +2,11 @@
 
 bool	Server::SetAddrServer(struct sockaddr_in *addr)
 {
-    struct addrinfo hints;
-    struct addrinfo *res;
-    int status = 0;
 
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    status = getaddrinfo(ip.c_str(), port.c_str(), &hints, &res);
-    if (status)
-    {
-        freeaddrinfo(res);
-        perror("IP:Port");
-        return (false);
-    }
-    result = res;
 	memset(addr, 0, sizeof(struct sockaddr_in));
-    memcpy(addr, res->ai_addr, sizeof(sockaddr_in));
+    addr->sin_family = AF_INET;
+    addr->sin_addr.s_addr = StrToIp(ip.c_str());
+    addr->sin_port = htons(atoi(port.c_str()));
     return (true);
 }
 
