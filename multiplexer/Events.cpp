@@ -75,7 +75,7 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	Client NewClient;
-	int val = accept(m.GetEvents()[fd].data.fd, NULL, NULL);
+	int val = accept4(m.GetEvents()[fd].data.fd, NULL, NULL , 0);
 
 	if (val == -1)
 	{
@@ -132,6 +132,7 @@ void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 
 void	disconnectClient(Multiplexer &m, int i)
 {
+	
 	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
@@ -156,10 +157,13 @@ int	ReadData(Multiplexer &m, int &i)
 			m.GetClient()[i].SetReadSize(bytes_read);
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
 		}
+		m.GetClient()[i].GetRequest().printRequestData();
+		if (m.GetClient()[i].getStatusRead() && m.GetClient()[i].GetRequest().getMethod() != "POST")
+			return 1;
 	}
-	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
-		return (1);
-	else if (bytes_read == 0)
+	// if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
+	// 	return (1);
+	if (bytes_read == 0)
 	{
 		disconnectClient(m, i);
 		return (1);
@@ -225,13 +229,14 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			{
 				if (ReadData(multiplexer, i) == 1)
 				{
-					if (GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i))
-						multiplexer.GetEvents()[i].events = EPOLLOUT;
+					multiplexer.GetEvents()[i].events = EPOLLOUT;
+					if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]))
+					{
+						perror("epoll_ctl()_MOD");
+						return false;
+					}
+					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 				}
-			}
-			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-			{
-				SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
 			}
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
