@@ -173,7 +173,6 @@ bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
 		{
 			// req.printRequestData();
 			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
-			std::cout << path << "--------------------\n";
 			SendData(m, i, path, OK);
 		}
 		else
