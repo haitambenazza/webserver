@@ -213,7 +213,7 @@ int		Post69( std::string body,Request& req )
 
 	if (body.empty())
 		return (BadRequest);
-	file.open(( GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
+	file.open(("www/upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
@@ -233,6 +233,7 @@ int		Delete(  std::string path  )
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	Cgi cg(m.GetClient()[i].GetRequest());
+	// build the path std::string path = GetPath()
 
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		return (true);
