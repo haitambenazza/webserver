@@ -207,11 +207,12 @@ std::string	GetFileName(Request&	req)
 	return FileName;
 }
 
-int		Post69( std::string body,Request& req )
+int		Post( std::string body,Request& req )
 {
 	std::ofstream 	file;
+	
 
-	if (body.empty())
+	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
 	file.open(("www/upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
@@ -240,7 +241,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 	{
 		std::cout << "POST is up\n";
-		return (Post69(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
+		return (Post(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
 	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 	{
