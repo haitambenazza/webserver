@@ -210,7 +210,7 @@ std::string	GetFileName(Request&	req)
 int		Post( std::string body,Request& req )
 {
 	std::ofstream 	file;
-	
+
 
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
@@ -233,7 +233,7 @@ int		Delete(  std::string path  )
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	Cgi cg(m.GetClient()[i].GetRequest());
+	// Cgi cg(m.GetClient()[i].GetRequest());
 	// build the path std::string path = GetPath()
 
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
