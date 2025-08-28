@@ -119,8 +119,7 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
-	std::cout << "SIZE " << response.str().size() << '\n';
-	std::cout << "SENT  " << send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0) << '\n';
+	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	return true;
 }
 
@@ -165,12 +164,10 @@ bool	RunGet(Multiplexer &m, int &i, std::string location)
 	std::cout << location;
 	if (!location.empty())
 			SendData(m, i, location, OK);
-    else
+	else
 		SendData(m, i, error, NotFound);
-    return (true);
+	return (true);
 }
-
-
 
 std::string	GetFileName(Request&	req)
 {
