@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <algorithm>
+#include <sys/wait.h>
 
 #include "../Includes/Block.hpp"
 #include "../Includes/File.hpp"
@@ -31,6 +32,7 @@
 #include "../Includes/Events.hpp"
 #include "../Includes/Request.hpp"
 #include "../Includes/Methods.hpp"
+#include "../Includes/CGI.hpp"
 
 
 

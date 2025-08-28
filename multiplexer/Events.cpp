@@ -75,7 +75,7 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	Client NewClient;
-	int val = accept(m.GetEvents()[fd].data.fd, NULL, NULL);
+	int val = accept4(m.GetEvents()[fd].data.fd, NULL, NULL, SOCK_NONBLOCK);
 
 	if (val == -1)
 	{
@@ -110,7 +110,7 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	epoll_client.events = EPOLLIN;
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
 	{
-		perror("epoll_ctl()");
+		perror("epoll_ctl()_ADD");
 		return (false);
 	}
 	std::cout << "\033[32mNew client [" << m.GetClientFd() << "] connected to " << GetAddrServer(m,s,fd) << "\033[0m\n";
@@ -135,7 +135,7 @@ void	disconnectClient(Multiplexer &m, int i)
 	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
-		perror("epoll_ctl()");
+		perror("epoll_ctl()_DEL");
 		close(m.GetEvents()[i].data.fd);
 		return ;
 	}
@@ -156,15 +156,16 @@ int	ReadData(Multiplexer &m, int &i)
 			m.GetClient()[i].SetReadSize(bytes_read);
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
 		}
+		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
+			return (1);
 	}
-	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
-		return (1);
-	else if (bytes_read == 0)
+	if (m.GetClient()[i].GetRequest().getMethod() == "POST" && atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
+		return (std::cout << "[" << bytes_read <<"]\n", 1);
+	if (bytes_read == 0)
 	{
 		disconnectClient(m, i);
-		return (1);
+		return (0);
 	}
-	// m.GetEvents()[i].events = EPOLLOUT;
 	return (0);
 }
 
@@ -226,11 +227,17 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			{
 				if (ReadData(multiplexer, i) == 1)
 				{
-					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+					multiplexer.GetEvents()[i].events = EPOLLOUT;
+					if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]))
+					{
+						perror("epoll_ctl()_MOD");
+						return false;
+					}
 				}
 			}
-			SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
-			if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
+			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
+						GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);

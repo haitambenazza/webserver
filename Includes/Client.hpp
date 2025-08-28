@@ -7,6 +7,7 @@ class Client
     private :
         int16_t         fd;
         int16_t         ServerIndex;
+
         time_t          connectedTime;
         std::string     headers;
         std::string     body;
@@ -32,4 +33,5 @@ class Client
         Request&        GetRequest();
         size_t          GetReadSize() const;
         void            SetReadSize( size_t val );
+        void            clearBuffer();
 };

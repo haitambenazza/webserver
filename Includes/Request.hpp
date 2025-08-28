@@ -22,6 +22,10 @@ class Request
         std::map<std::string, std::string>  headers;
         std::string                         body;
         HttpStatus                          status_code;
+        std::string                         query_string;
+        std::string                         ScriptName;
+        std::string                         Scriptpath;
+        
 
     public:
         Request();
@@ -39,8 +43,12 @@ class Request
         std::map<std::string, std::string> getHeaders();
         std::string getBody() const;
         std::string GetContentType();
+        std::string GetScriptName() const;
+        std::string GetScriptPath() const;
         int         getStatusCode();
+        std::string getQueryString() const;
         void        printRequestData() const;
+
 
         void        stripCR(std::string &s);
         bool        parseRequestLine(const std::string &line);
@@ -48,4 +56,5 @@ class Request
         void        parseBody(std::stringstream &str);
         void        SetHeaders( std::string s );
         void        SetStatusCode( HttpStatus val );
+        void        SetScriptPath(std::string& val );
 };
