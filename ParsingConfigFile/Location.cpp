@@ -13,6 +13,7 @@ Location::Location( const Location&  copy )
     Commands = copy.Commands;
     UploadEnable = copy.UploadEnable;
     CgiEnabled = copy.CgiEnabled;
+    AutoIndex = copy.AutoIndex;
 }
 
 Location&   Location::operator=( const Location&  copy )
@@ -23,6 +24,7 @@ Location&   Location::operator=( const Location&  copy )
         Commands = copy.Commands;
         UploadEnable = copy.UploadEnable;
         CgiEnabled = copy.CgiEnabled;
+        AutoIndex = copy.AutoIndex;
     }
     return (*this);
 }
@@ -71,7 +73,6 @@ std::vector<std::string> Location::GetValuesLocation( std::string key)
 }
 
 
-
 std::vector< std::string>      Location::GetItemsFromServer( std::string s, Server& Serv )
 {
     std::map<std::string, std::vector<std::string > > map;
@@ -86,7 +87,6 @@ std::vector< std::string>      Location::GetItemsFromServer( std::string s, Serv
     }
     return std::vector< std::string >();
 }
-
 
 void               Location::SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map )
 {

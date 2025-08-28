@@ -13,7 +13,7 @@ int             PostMethod(  std::string s, Request& Req );
 int             DeleteMethod(  Request& Req  );
 bool	        GetRequest(Server &server, Multiplexer &m, int &i);
 std::string     GetValuesFromKeysReq(std::map<std::string, std::string >& map, std::string key);
-
+bool	RunGet(Multiplexer &m, int &i, std::string location);
 //post
 //check if upload enabled
 //if so create file with name sent and save body in it
