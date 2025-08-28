@@ -11,7 +11,7 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++11 -g3 -Wall -Wextra -Werror #-fsanitize=address
+CXXFLAGS = -std=c++98 -g3 -Wall -Wextra -Werror #-fsanitize=address
 
 %.o: %.cpp
 	@$(CC) $(CXXFLAGS) -c $^ -o $@
@@ -29,7 +29,7 @@ fclean:
 	@echo "objects and executable are removed"
 
 debugg: $(NAME)
-	@valgrind --track-fds=yes ./$(NAME) $(CONFIG)
+	@valgrind --leak-check=full --track-fds=yes ./$(NAME) $(CONFIG)
 
 
 re:fclean $(NAME)
