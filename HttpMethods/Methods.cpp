@@ -1,5 +1,21 @@
 #include "../headers/webserver.hpp"
 
+
+bool	MatchLocationWithUri(std::string Uri, std::string Loc)
+{
+	std::vector<std::string> vec;
+
+	if (Uri.empty() || Loc.empty())
+		return (false);
+	Loc = Loc.substr(1, Loc.size());
+	vec = split(Uri, "/");
+	if (vec[0] == Loc)
+	{
+		return (true);
+	}
+	return(false); 
+}
+
 std::string	GetRoot(Server &server, Location loc)
 {
 	std::string path;
@@ -25,25 +41,33 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 {
 	std::string path;
 	std::string root;
+	bool		is_root;
+
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-
+	is_root = true;
 	mp = loc.GetCommands();
 	root = GetRoot(server, loc);
-
-	if (loc.GetPath() == "/")
-		path += "";
-	else
+	if (loc.GetPath() != "/")
 		path += loc.GetPath();
-	it = mp.find("index");
-	if (it != mp.end())
+	else
+		path += "";
+	if ( MatchLocationWithUri(Uri, path) || (!MatchLocationWithUri(Uri, path) && loc.GetPath() == "/"))
 	{
-		if (!it->second.empty())
-		path += "/" + it->second[0];
+		it = mp.find("index");
+		if (it != mp.end())
+			path += "/" + it->second[0];
+		else
+		{
+			if (loc.GetAutoIndex() == "on")
+				return (root + path);
+			else
+				return ("");
+		}
+		if (path.find(Uri) != std::string::npos)
+			return (root + path);
 	}
-	if ( Uri == path || Uri == "/")
-		return root + path;
-	return("");
+	return ("");
 }
 
 std::string	FullPath(Server &server, std::string Uri)
@@ -54,8 +78,12 @@ std::string	FullPath(Server &server, std::string Uri)
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
+		// SetFullPath(server, Tmp[i], Uri);
 		if (!SetFullPath(server, Tmp[i], Uri).empty())
+		{
+			// std::cout << SetFullPath(server, Tmp[i], Uri) << std::endl;
 			return (SetFullPath(server, Tmp[i], Uri));
+		}
 	}
 	return (path);
 }
