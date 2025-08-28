@@ -78,10 +78,8 @@ std::string	FullPath(Server &server, std::string Uri)
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		// SetFullPath(server, Tmp[i], Uri);
 		if (!SetFullPath(server, Tmp[i], Uri).empty())
 		{
-			// std::cout << SetFullPath(server, Tmp[i], Uri) << std::endl;
 			return (SetFullPath(server, Tmp[i], Uri));
 		}
 	}
@@ -191,7 +189,7 @@ bool	RunGet(Multiplexer &m, int &i, std::string location)
 
 	if (!location.empty() && location[location.size() - 1] != '/')
 			SendData(m, i, location, OK);
-	else if (location[location.length()] != '/')
+	else if (location[location.length()] == '/')
 		std::cout << "autoindex\n";
 	else
 		SendData(m, i, error, NotFound);
@@ -244,7 +242,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	// build the path std::string path = GetPath()
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
 
-	m.GetClient()[i].GetRequest().printRequestData();
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
