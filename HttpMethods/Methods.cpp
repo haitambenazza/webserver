@@ -81,7 +81,7 @@ std::string	FullPath(Server &server, std::string Uri)
 		// SetFullPath(server, Tmp[i], Uri);
 		if (!SetFullPath(server, Tmp[i], Uri).empty())
 		{
-			std::cout << SetFullPath(server, Tmp[i], Uri) << std::endl;
+			// std::cout << SetFullPath(server, Tmp[i], Uri) << std::endl;
 			return (SetFullPath(server, Tmp[i], Uri));
 		}
 	}
