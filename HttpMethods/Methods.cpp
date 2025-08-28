@@ -1,10 +1,25 @@
 #include "../headers/webserver.hpp"
 
-std::string SetFullPath(Server &server, Location loc)
+
+bool	MatchLocationWithUri(std::string Uri, std::string Loc)
+{
+	std::vector<std::string> vec;
+
+	if (Uri.empty() || Loc.empty())
+		return (false);
+	Loc = Loc.substr(1, Loc.size());
+	vec = split(Uri, "/");
+	if (vec[0] == Loc)
+	{
+		return (true);
+	}
+	return(false);
+}
+
+std::string	GetRoot(Server &server, Location loc)
 {
 	std::string path;
 	std::map<std::string, std::vector<std::string> > mp;
-	std::map<std::string, std::vector<std::string> >::iterator it;
 
 	mp = loc.GetCommands();
 	if (mp.find("root") != mp.end())
@@ -19,36 +34,53 @@ std::string SetFullPath(Server &server, Location loc)
 			return path;
 		}
 	}
-	if (path[path.size() - 1] == '/' && loc.GetPath()[0] == '/')
-	{
-		path = path.substr(0, path.size() - 1);
-	}
-	if (loc.GetPath() == "/")
-		loc.GetPath() = "";
-	path += loc.GetPath();
+	return (path.substr(0, path.size() - 1));
+}
 
-	it = mp.find("index");
-	if (it != mp.end())
-	{
-		if (!it->second.empty())
-			path += "/" + it->second[0];
-	}
+std::string SetFullPath(Server &server, Location loc, std::string Uri)
+{
+	std::string path;
+	std::string root;
+	bool		is_root;
+
+	std::map<std::string, std::vector<std::string> > mp;
+	std::map<std::string, std::vector<std::string> >::iterator it;
+	is_root = true;
+	mp = loc.GetCommands();
+	root = GetRoot(server, loc);
+	if (loc.GetPath() != "/")
+		path += loc.GetPath();
 	else
-		return path;
-	return (path);
+		path += "";
+	if ( MatchLocationWithUri(Uri, path) || (!MatchLocationWithUri(Uri, path) && loc.GetPath() == "/"))
+	{
+		it = mp.find("index");
+		if (it != mp.end())
+			path += "/" + it->second[0];
+		else
+		{
+			if (loc.GetAutoIndex() == "on")
+				return (root + path + '/');
+			else
+				return ("");
+		}
+		if (path.find(Uri) != std::string::npos)
+			return (root + path);
+	}
+	return ("");
 }
 
 std::string	FullPath(Server &server, std::string Uri)
 {
 	std::vector<Location>	Tmp;
 	std::string				path;
-
+	(void)Uri;
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		if (SetFullPath(server, Tmp[i]).find(Uri) != std::string::npos)
+		if (!SetFullPath(server, Tmp[i], Uri).empty())
 		{
-			return (SetFullPath(server, Tmp[i]));
+			return (SetFullPath(server, Tmp[i], Uri));
 		}
 	}
 	return (path);
@@ -113,17 +145,7 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
-	if (send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0) == -1)
-	{
-		perror("send");
-		return (false);
-	}
-	m.GetEvents()[i].events = EPOLLIN;
-	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
-	{
-		perror("epoll_ctl()_MOD");
-		return false;
-	}
+	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	return true;
 }
 
@@ -161,34 +183,18 @@ int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 	return (-1);
 }
 
-bool	RunGet(Request &req, Server &s, Multiplexer &m, int &i)
+bool	RunGet(Multiplexer &m, int &i, std::string location)
 {
-	int	location = GetRequestedLocation(s.GetLocations(), req.getUri());
 	std::string error = "error_pages/404.html";
 
-	if (location != -1)
-	{
-		Location loc(s.GetLocations()[location]);
-		if (!loc.GetValuesLocation("root").empty() && !loc.GetValuesLocation("index").empty())
-		{
-			// req.printRequestData();
-			std::string path = loc.GetValuesLocation("root")[0] + loc.GetValuesLocation("index")[0];
-			SendData(m, i, path, OK);
-		}
-		else
-		{
-			SendData(m, i, error, NotFound);
-			return (false);
-		}
-	}
-    else
-	{
+	if (!location.empty() && location[location.size() - 1] != '/')
+			SendData(m, i, location, OK);
+	else if (location[location.length()] == '/')
+		std::cout << "autoindex\n";
+	else
 		SendData(m, i, error, NotFound);
-	}
-    return (true);
+	return (true);
 }
-
-
 
 std::string	GetFileName(Request&	req)
 {
@@ -209,7 +215,7 @@ std::string	GetFileName(Request&	req)
 int		Post( std::string body,Request& req )
 {
 	std::ofstream 	file;
-	
+
 
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
@@ -232,22 +238,16 @@ int		Delete(  std::string path  )
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
+	// Cgi cg(m.GetClient()[i].GetRequest());
 	// build the path std::string path = GetPath()
-	
+	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
-	{
-		std::cout << "GET\n";
-		return (RunGet(m.GetClient()[i].GetRequest(),server, m ,i));
-	}
+		RunGet(m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
-	{
-		std::cout << "POST is up\n";
 		return (Post(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
-	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-	{
-		std::cout << "DELETE is up\n";
 		return(Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri())));
-	}
+	disconnectClient(m, i);
 	return true;
 }

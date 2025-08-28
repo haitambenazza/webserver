@@ -170,16 +170,6 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
 	i = 0;
 	while ( i < (int)tmp.size() )
 	{
-        // if (flag)
-        // {
-        //     if (((split( tmp[i], " " )[0] != "error_page" ) && split( tmp[i], " " ).size() != 2))
-        //     {
-        //         tmp.clear();
-        //         std::cerr << "wrong directive format\n";
-        //         status = false;
-        //         return false;
-        //     }
-        // }
         key = split( tmp[i], " " )[0];
         if (flag)
             keys.push_back(key);
@@ -239,7 +229,7 @@ bool    Server::InitializeServerSettings()
 {
     std::vector<Location> locs = Locations;
 
-    
+
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
         if (CheckCommandServer(*this, "listen", 1) == false || AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
