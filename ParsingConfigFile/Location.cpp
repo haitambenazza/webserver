@@ -13,6 +13,7 @@ Location::Location( const Location&  copy )
     Commands = copy.Commands;
     UploadEnable = copy.UploadEnable;
     CgiEnabled = copy.CgiEnabled;
+    AutoIndex = copy.AutoIndex;
 }
 
 Location&   Location::operator=( const Location&  copy )
@@ -23,6 +24,7 @@ Location&   Location::operator=( const Location&  copy )
         Commands = copy.Commands;
         UploadEnable = copy.UploadEnable;
         CgiEnabled = copy.CgiEnabled;
+        AutoIndex = copy.AutoIndex;
     }
     return (*this);
 }
