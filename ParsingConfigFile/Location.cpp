@@ -71,7 +71,6 @@ std::vector<std::string> Location::GetValuesLocation( std::string key)
 }
 
 
-
 std::vector< std::string>      Location::GetItemsFromServer( std::string s, Server& Serv )
 {
     std::map<std::string, std::vector<std::string > > map;
@@ -86,7 +85,6 @@ std::vector< std::string>      Location::GetItemsFromServer( std::string s, Serv
     }
     return std::vector< std::string >();
 }
-
 
 void               Location::SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map )
 {
