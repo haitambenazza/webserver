@@ -75,7 +75,7 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	Client NewClient;
-	int val = accept(m.GetEvents()[fd].data.fd, NULL, NULL);
+	int val = accept4(m.GetEvents()[fd].data.fd, NULL, NULL, SOCK_NONBLOCK);
 
 	if (val == -1)
 	{
@@ -156,13 +156,15 @@ int	ReadData(Multiplexer &m, int &i)
 			m.GetClient()[i].SetReadSize(bytes_read);
 			m.GetClient()[i].appendToBuffer(tmp, bytes_read, false);
 		}
+		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
+			return (1);
 	}
-	if (atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
-		return (1);
-	else if (bytes_read == 0)
+	if (m.GetClient()[i].GetRequest().getMethod() == "POST" && atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
+		return (std::cout << "[" << bytes_read <<"]\n", 1);
+	if (bytes_read == 0)
 	{
 		disconnectClient(m, i);
-		return (1);
+		return (0);
 	}
 	return (0);
 }
@@ -225,14 +227,16 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			{
 				if (ReadData(multiplexer, i) == 1)
 				{
-					if (GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i))
-						multiplexer.GetEvents()[i].events = EPOLLOUT;
+					multiplexer.GetEvents()[i].events = EPOLLOUT;
+					if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]))
+					{
+						perror("epoll_ctl()_MOD");
+						return false;
+					}
 				}
 			}
 			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-			{
-				SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
-			}
+						GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
