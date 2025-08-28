@@ -241,7 +241,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	// Cgi cg(m.GetClient()[i].GetRequest());
 	// build the path std::string path = GetPath()
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
-
+	m.GetClient()[i].GetRequest().printRequestData();
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")

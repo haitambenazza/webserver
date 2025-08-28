@@ -126,7 +126,7 @@ void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 		size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
 		m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
 		m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
-		std::cout << m.GetClient()[i].getBuffer(true) << m.GetClient()[i].getBuffer(false);
+		std::cout << "BODYYYY == " << m.GetClient()[i].getBuffer(false);
 	}
 	m.GetClient()[i].SetReadSize(m.GetClient()[i].getBuffer(false).size());
 }
