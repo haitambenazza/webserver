@@ -11,3 +11,4 @@ void	ReadData(Multiplexer &m, int &i, Server &s);
 bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s);
 bool	SetEventEpoll(Multiplexer &multi);
 bool	InitServers(std::vector<Server> &servers, char *filename);
+void	disconnectClient(Multiplexer &m, int i);
