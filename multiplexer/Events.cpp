@@ -226,15 +226,11 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			{
 				if (ReadData(multiplexer, i) == 1)
 				{
-					if (GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i))
-						multiplexer.GetEvents()[i].events = EPOLLOUT;
+					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 				}
 			}
-			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-			{
-				SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
-			}
-			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
+			SendData(multiplexer, i, FullPath(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer.GetClient()[i].GetRequest().getUri()), multiplexer.GetClient()[i].GetRequest().getStatusCode());
+			if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
