@@ -105,3 +105,8 @@ bool            Client::getStatusRead() const
     return readDone;
 }
 
+void            Client::clearBuffer()
+{
+    headers = std::string();
+    body = std::string();
+}
