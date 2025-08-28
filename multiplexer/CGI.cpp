@@ -52,7 +52,6 @@ void    Cgi::ExecuteCgi(Request &req)
     } 
     else if (child_pid == 0)
     {
-        std::cout << "aaaaaaaaaaaah\n";
         close(fd[0]);
         dup2(fd[1] , STDOUT_FILENO);
         close(fd[1]);
@@ -70,7 +69,6 @@ void    Cgi::ExecuteCgi(Request &req)
     else
     {
         close(fd[1]);
-        std::cout << "aaaa00aah\n";
         char buffer[4096];
         ssize_t bytes_read;
         output.clear();
