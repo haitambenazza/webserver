@@ -121,12 +121,12 @@ std::string ReturnExtention(std::string s)
 
 bool ValidCgiExtention(std::string extention)
 {
-    return (extention == ".cgi" || 
-            extention == ".pl" || 
-            extention == ".py" || 
-            extention == ".php" || 
-            extention == ".sh" || 
-            extention == ".rb" || 
+    return (extention == ".cgi" ||
+            extention == ".pl" ||
+            extention == ".py" ||
+            extention == ".php" ||
+            extention == ".sh" ||
+            extention == ".rb" ||
             extention == ".exe" ||
             extention == ".out");
 }
@@ -146,7 +146,7 @@ bool Request::parseRequestLine(const std::string &line)
         status_code = BadRequest;
         return false;
     }
-    
+
     if (!temp_uri.empty())
     {
         std::cout << "URI == " << temp_uri << std::endl;
@@ -176,7 +176,7 @@ bool Request::parseRequestLine(const std::string &line)
         //         return (false);
         // }
     }
-    
+
     if (temp_version != "HTTP/1.0" && temp_version != "HTTP/1.1")
     {
         status_code = HttpVersionNotSupported;
@@ -203,25 +203,25 @@ void Request::parseHeaders(std::stringstream &str)
     while (std::getline(str, line))
     {
         stripCR(line);
-        if (line.empty()) 
+        if (line.empty())
         break; // end of headers
-        
+
         size_t colon = line.find(':');
         if (colon != std::string::npos)
         {
             std::string key = line.substr(0, colon);
             std::string value = line.substr(colon + 1);
-            
-            if (key.empty()) 
+
+            if (key.empty())
             {
                 status_code = BadRequest;
                 return;
             }
-            for (size_t i = 0; i < key.size(); ++i) 
+            for (size_t i = 0; i < key.size(); ++i)
             {
                 unsigned char c = key[i];
                 // allowed characters
-                if (!(std::isalnum(c) || c == '-')) 
+                if (!(std::isalnum(c) || c == '-'))
                 {
                     status_code = BadRequest;
                     return;
