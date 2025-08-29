@@ -27,11 +27,12 @@ class Location
         std::string&                                            GetUploadStatus();
         std::string&                                            GetCgiStatus();
         std::string&                                            GetAutoIndex();
-        void                                                    SetAutoIndex(std::string stat);
+        void                                                    SetAutoIndexStatus(bool stat);
         void                                                    SetUploadStatus( std::string s );
         void                                                    SetCgiStatus( std::string s );
         void                                                    SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map );
         std::vector< std::string>                               GetItemsFromServer( std::string s, Server& Serv );
         std::vector<std::string>                                GetValuesLocation(std::string key);
+        bool                                                    GetAutoIndexStatus() const;
 };
 #endif

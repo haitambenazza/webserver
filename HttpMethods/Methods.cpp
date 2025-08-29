@@ -41,11 +41,10 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 {
 	std::string path;
 	std::string root;
-	bool		is_root;
 
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-	is_root = true;
+	
 	mp = loc.GetCommands();
 	root = GetRoot(server, loc);
 	if (loc.GetPath() != "/")
@@ -54,18 +53,16 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 		path += "";
 	if ( MatchLocationWithUri(Uri, path) || (!MatchLocationWithUri(Uri, path) && loc.GetPath() == "/"))
 	{
+		std::cout << "uri == " << Uri << " path == " << path << std::endl;
 		it = mp.find("index");
 		if (it != mp.end())
 			path += "/" + it->second[0];
 		else
 		{
-			if (loc.GetAutoIndex() == "on")
-			{
-				loc.SetAutoIndex("off");
+			if (loc.GetAutoIndex() == "on" && Uri == path)
 				return (AutoIndex(root , path));
-
-				// return (root + path + '/');
-			}
+			else if (loc.GetAutoIndex() == "on" && Uri != path)
+				return (root + Uri);
 			else
 				return ("");
 		}

@@ -5,6 +5,7 @@ Location::Location(  )
     UploadEnable = "off";
     CgiEnabled = "off";
     AutoIndex = "off";
+    AutoIndexStatus = false;
 }
 
 Location::Location( const Location&  copy )
@@ -14,6 +15,7 @@ Location::Location( const Location&  copy )
     UploadEnable = copy.UploadEnable;
     CgiEnabled = copy.CgiEnabled;
     AutoIndex = copy.AutoIndex;
+    AutoIndexStatus = copy.AutoIndexStatus;  
 }
 
 Location&   Location::operator=( const Location&  copy )
@@ -25,6 +27,7 @@ Location&   Location::operator=( const Location&  copy )
         UploadEnable = copy.UploadEnable;
         CgiEnabled = copy.CgiEnabled;
         AutoIndex = copy.AutoIndex;
+        AutoIndexStatus = copy.AutoIndexStatus;
     }
     return (*this);
 }
@@ -114,14 +117,19 @@ void                 Location::SetPath( std::string& s )
     Path = s;
 }
 
-void                Location::SetAutoIndex(std::string stat)
+void                Location::SetAutoIndexStatus(bool stat)
 {
-	AutoIndex = stat;
+	AutoIndexStatus = stat;
 }
 
 std::map < std::string, std::vector< std::string > >    Location::GetCommands()
 {
     return (Commands);
+}
+
+bool     Location::GetAutoIndexStatus() const
+{
+    return (AutoIndexStatus);
 }
 
 Location::~Location()
