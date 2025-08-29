@@ -14,6 +14,7 @@ class Location
         std::string                                             UploadEnable;
         std::string                                             CgiEnabled;
         std::string                                             AutoIndex;
+        bool                                                    AutoIndexStatus;
     public :
         Location();
         Location( const Location&  copy );
@@ -26,6 +27,7 @@ class Location
         std::string&                                            GetUploadStatus();
         std::string&                                            GetCgiStatus();
         std::string&                                            GetAutoIndex();
+        void                                                    SetAutoIndex(std::string stat);
         void                                                    SetUploadStatus( std::string s );
         void                                                    SetCgiStatus( std::string s );
         void                                                    SetLocationStatus( std::map < std::string, std::vector< std::string > >& Map );

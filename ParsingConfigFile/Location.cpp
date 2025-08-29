@@ -114,6 +114,11 @@ void                 Location::SetPath( std::string& s )
     Path = s;
 }
 
+void                Location::SetAutoIndex(std::string stat)
+{
+	AutoIndex = stat;
+}
+
 std::map < std::string, std::vector< std::string > >    Location::GetCommands()
 {
     return (Commands);
