@@ -60,7 +60,12 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 		else
 		{
 			if (loc.GetAutoIndex() == "on")
-				return (root + path + '/');
+			{
+				loc.SetAutoIndex("off");
+				return (AutoIndex(root , path));
+
+				// return (root + path + '/');
+			}
 			else
 				return ("");
 		}
@@ -74,13 +79,14 @@ std::string	FullPath(Server &server, std::string Uri)
 {
 	std::vector<Location>	Tmp;
 	std::string				path;
-	(void)Uri;
+
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		if (!SetFullPath(server, Tmp[i], Uri).empty())
+		path = SetFullPath(server, Tmp[i], Uri);
+		if (!path.empty())
 		{
-			return (SetFullPath(server, Tmp[i], Uri));
+			return (path);
 		}
 	}
 	return (path);

@@ -19,6 +19,7 @@ void                        RemoveNewLine( std::string& s );
 void                        TrimSpaces( std::string& s );
 bool                        AllDigit( std::string s );
 bool                        CheckIp( std::string s );
+std::string                 AutoIndex( std::string root, std::string path );
 
 #endif
 
