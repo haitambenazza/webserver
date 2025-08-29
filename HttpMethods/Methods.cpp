@@ -248,6 +248,5 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 		return (Post(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		return(Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri())));
-	disconnectClient(m, i);
 	return true;
 }
