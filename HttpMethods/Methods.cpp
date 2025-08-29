@@ -78,12 +78,8 @@ std::string	FullPath(Server &server, std::string Uri)
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		// SetFullPath(server, Tmp[i], Uri);
 		if (!SetFullPath(server, Tmp[i], Uri).empty())
-		{
-			// std::cout << SetFullPath(server, Tmp[i], Uri) << std::endl;
 			return (SetFullPath(server, Tmp[i], Uri));
-		}
 	}
 	return (path);
 }
@@ -242,11 +238,7 @@ int		Delete(  std::string path  )
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	// Cgi cg(m.GetClient()[i].GetRequest());
-	// build the path std::string path = GetPath()
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
-
-	std::cout << path << '\n';
 
 	m.GetClient()[i].GetRequest().printRequestData();
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")

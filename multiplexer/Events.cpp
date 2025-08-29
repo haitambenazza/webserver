@@ -236,7 +236,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				}
 			}
 			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-						GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
