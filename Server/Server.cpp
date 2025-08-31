@@ -206,6 +206,10 @@ bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
     return (true);
 }
 
+bool CheckLocationKeys(std::string& s)
+{
+    return (s == "allowed_methods" || s == "root" || s == "autoindex" || s == "index" ||s == "cgi_enable");
+}
 bool CheckCommandLocation(Location& L)
 {
     std::map<std::string , std::vector<std::string> >mp = L.GetCommands();
@@ -214,13 +218,11 @@ bool CheckCommandLocation(Location& L)
     while (it != mp.end())
     {
         if (it->first != "allowed_methods" && it->second.size() != 1)
-        {
             return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
-        }
-        else if ((it->first == "cgi_enable" || it->first == "autoindex" || it->first == "upload_enable"))
+        else if ((it->first == "cgi_enable" || it->first == "autoindex"))
         {
             if (it->second[0] != "on" && it->second[0] != "off")
-                return (std::cerr<< "location00 " << L.GetPath() << " has invalid arguments\n", false);
+                return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
         }
         else if ( it->first == "allowed_methods" )
         {
