@@ -189,7 +189,7 @@ void	CheckTimeout(Multiplexer &m)
 		{
 			if (time(NULL) - m.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
 			{
-				std::cout << "\033[33mClient timeout" << "\033[0m\n";
+				std::cout << m.GetClient()[i].GetClientFd() << "\033[33mClient timeout" << "\033[0m\n";
 				close(m.GetClient()[i].GetClientFd());
 				m.RemoveClient(i);
 			}
@@ -244,7 +244,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
 			}
-			disconnectClient(multiplexer, i);
 		}
 	}
 	CheckTimeout(multiplexer);

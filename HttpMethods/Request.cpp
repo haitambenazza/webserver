@@ -149,7 +149,7 @@ bool Request::parseRequestLine(const std::string &line)
 
     if (!temp_uri.empty())
     {
-        std::cout << "URI == " << temp_uri << std::endl;
+        // std::cout << "URI == " << temp_uri << std::endl;
         if (temp_uri.size() > URI_MAX_LENGTH)
         {
             status_code = RequestUriTooLong;
