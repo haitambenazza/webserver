@@ -213,12 +213,19 @@ bool CheckCommandLocation(Location& L)
 
     while (it != mp.end())
     {
-        if (it->second.size() != 1)
+        if (it->first != "allowed_methods" && it->second.size() != 1)
+        {
             return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
+        }
         else if ((it->first == "cgi_enable" || it->first == "autoindex" || it->first == "upload_enable"))
         {
             if (it->second[0] != "on" && it->second[0] != "off")
                 return (std::cerr<< "location00 " << L.GetPath() << " has invalid arguments\n", false);
+        }
+        else if ( it->first == "allowed_methods" )
+        {
+            if (L.SetAllowedMethods(it->second) == false)
+                return (false);
         }
         it++;
     }
