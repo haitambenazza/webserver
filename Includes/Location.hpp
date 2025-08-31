@@ -15,6 +15,7 @@ class Location
         std::string                                             CgiEnabled;
         std::string                                             AutoIndex;
         bool                                                    AutoIndexStatus;
+        std::vector<std::string>                                AllowedMethods;
     public :
         Location();
         Location( const Location&  copy );
@@ -34,5 +35,7 @@ class Location
         std::vector< std::string>                               GetItemsFromServer( std::string s, Server& Serv );
         std::vector<std::string>                                GetValuesLocation(std::string key);
         bool                                                    GetAutoIndexStatus() const;
+        std::vector<std::string>                                GetAllowedMethods() const;
+        bool                                                    SetAllowedMethods( std::vector<std::string> s );    
 };
 #endif

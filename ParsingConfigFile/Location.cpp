@@ -37,6 +37,38 @@ void        Location::SetCommands( std::map < std::string, std::vector< std::str
     Commands = Ref;
 }
 
+std::vector<std::string>      Location::GetAllowedMethods() const
+{
+    return (AllowedMethods);
+}
+
+bool        Location::SetAllowedMethods( std::vector<std::string> s )
+{
+    int g = 0;
+    int p = 0;
+    int d = 0;
+
+    if (s.size() == 0 || s.size() > 3)
+        return (false);
+    for (size_t i = 0; i < s.size(); i++)
+    {
+        if (s[i] == "POST")
+            p++;
+        else if (s[i] == "GET")
+            g++;
+        else if (s[i] == "DELETE")
+            d++;
+        else
+            return (std::cerr<< "allowed methods : POST, GET, DELETE\n", false);
+    }
+    if (p < 2 && g < 2 && d < 2)
+    {
+        AllowedMethods = s;
+        return (true);
+    }
+    return (false);
+}
+
 std::string&       Location::GetUploadStatus()
 {
     return (UploadEnable);
