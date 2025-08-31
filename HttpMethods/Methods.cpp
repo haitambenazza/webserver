@@ -53,14 +53,15 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 		path += "";
 	if ( MatchLocationWithUri(Uri, path) || (!MatchLocationWithUri(Uri, path) && loc.GetPath() == "/"))
 	{
-		std::cout << "uri == " << Uri << " path == " << path << std::endl;
 		it = mp.find("index");
 		if (it != mp.end())
-			path += "/" + it->second[0];
+		path += "/" + it->second[0];
 		else
 		{
-			if (loc.GetAutoIndex() == "on" && Uri == path)
-				return (AutoIndex(root , path));
+			if (Uri[Uri.size() - 1] == '/')
+				Uri = Uri.substr(0, Uri.size() - 1);
+			if (loc.GetAutoIndex() == "on")
+				return (AutoIndex(root , Uri));
 			else if (loc.GetAutoIndex() == "on" && Uri != path)
 				return (root + Uri);
 			else
@@ -242,12 +243,13 @@ int		Delete(  std::string path  )
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
-	m.GetClient()[i].GetRequest().printRequestData();
+	// m.GetClient()[i].GetRequest().printRequestData();
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		return (Post(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest()));
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		return(Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri())));
+	disconnectClient(m, i);
 	return true;
 }

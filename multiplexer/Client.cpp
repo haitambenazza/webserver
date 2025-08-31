@@ -35,8 +35,8 @@ Client& Client::operator=( const Client& copy )
 Client::~Client()
 {
     //close (fd);
-    headers = std::string();
-    body = std::string();
+    // headers = std::string("0");
+    // body = std::string("0");
 }
 
 void	Client::SetClient(int16_t val)
