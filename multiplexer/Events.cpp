@@ -132,7 +132,7 @@ void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 
 void	disconnectClient(Multiplexer &m, int i)
 {
-	
+
 	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
@@ -143,6 +143,18 @@ void	disconnectClient(Multiplexer &m, int i)
 	close(m.GetEvents()[i].data.fd);
 	m.RemoveClient(i);
 }
+
+bool	isPostValid(Multiplexer &m, int &i)
+{
+	bool post = m.GetClient()[i].GetRequest().getMethod() == "POST";
+	bool contentlength = m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").empty();
+	if (contentlength)
+		return (false);
+	bool doneRead = atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) ==
+	(long long)m.GetClient()[i].GetReadSize();
+	return (doneRead && !contentlength && post);
+}
+
 int	ReadData(Multiplexer &m, int &i)
 {
 	char	tmp[BUFFER_SIZE];
@@ -161,8 +173,8 @@ int	ReadData(Multiplexer &m, int &i)
 		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
 			return (1);
 	}
-	if (m.GetClient()[i].GetRequest().getMethod() == "POST" && atoll(m.GetClient()[i].GetRequest().getHeaderValue("Content-Length").c_str()) == (long long)m.GetClient()[i].GetReadSize())
-		return (1);
+	if (isPostValid(m, i))
+		return (std::cout << "YAAAA\n", 1);
 	if (bytes_read == 0)
 	{
 		disconnectClient(m, i);
