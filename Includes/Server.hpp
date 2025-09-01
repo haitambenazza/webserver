@@ -7,6 +7,7 @@ class Server
 {
     private :
         std::vector <std::string>                               keys;
+        std::string                                             Args;
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
         int16_t	                                                fd;
@@ -47,8 +48,10 @@ class Server
         std::vector<int16_t>                                    GetClients() const;
         void                                                    SetMaxBodySize( std::string val );
         std::map<int , std::string>                             GetErrorMap() const;
-        void                                                    SetErrorMap( int key, std::string value );
+        void                                                    SetErrorMap();
         u_int64_t                                               GetMaxBodySize() const;
+        std::string                                             GetArgs() const;
+        void                                                    SetArgs(std::string s);
 };
 
 std::vector<std::string>	FillVector( std::vector<std::string> Src );

@@ -119,21 +119,11 @@ std::vector<Server>   GetFullServers( char* FileName )
 
 		x = 0;
 		y = 0;
-		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		NewServer.SetServers( NewBlock );
-		 std::map<int, std::string> map;
-		std::map<int, std::string>::iterator it;
 
-		map = NewServer.GetErrorMap();
-		it = map.begin();
-		while (it != map.end())
-		{
-			std::cout << it->first << " : "  << it->second << std::endl;
-			it++;
-		}
+		NewBlock.FillBlock( lst[i], NewBlock, x, y );
 		if (NewServer.SetServers( NewBlock ) == false)
 		{
-			lst.empty();
+			lst.clear();
 			return (srvs);
 		}
 		NewServer.SetStatus(NewBlock.GetStatus());
@@ -146,6 +136,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 		{
 			NewServer.SetStatus(false);
 		}
+		NewServer.SetArgs(NewBlock.GetBlocks()[i].GetArg());
+		NewServer.SetErrorMap();
 		srvs.push_back( NewServer );
 		i++;
 	}

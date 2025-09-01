@@ -138,9 +138,16 @@ bool SendData(Server&s ,Multiplexer &m, int i, int status)
 	std::stringstream response;
 	std::stringstream data;
     std::string path;
+	std::map<int, std::string> mp;
+	std::map<int, std::string>::iterator it;
 
-    (void)s;
-	if ( path.empty() || access(path.c_str(), R_OK) == -1)
+	mp = s.GetErrorMap();
+	if (mp.empty())
+		return (false);
+	it = mp.find(status);
+	if (it != mp.end())
+		path = it->second;
+	else
 	{
 		path = "error_pages/404.html";
 		status = NotFound;
@@ -248,13 +255,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
 
-    map = server.GetErrorMap();
-    it = map.begin();
-    while (it != map.end())
-    {
-        std::cout << it->first << " : "  << it->second << std::endl;
-        it++;
-    }
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(server, m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
