@@ -61,7 +61,7 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 			if (Uri[Uri.size() - 1] == '/')
 				Uri = Uri.substr(0, Uri.size() - 1);
 			if (loc.GetAutoIndex() == "on")
-				return (AutoIndex(root , Uri));
+				return (std::cout<< ">---------> " << AutoIndex(root , Uri)<< std::endl, AutoIndex(root , Uri));
 			else if (loc.GetAutoIndex() == "on" && Uri != path)
 				return (root + Uri);
 			else
@@ -113,7 +113,7 @@ std::string GetContentType(std::string file)
 	return ("application/octet-stream");
 }
 
-std::string	BuildResponse(std::string type, int size, int status)
+std::string	BuildResponse(std::string type, int size, int status, std::string method)
 {
 	std::string	response("HTTP/1.1");
 	std::stringstream sizefile;
@@ -122,12 +122,6 @@ std::string	BuildResponse(std::string type, int size, int status)
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
-	// if (status == 200)
-	// 	response += " OK\r\n";
-	// if (status == 201)
-	// 	response += " Created\r\n";
-	// else if (status == NotFound)
-	// 	response += " Not Found\r\n";
 	switch (status)
 	{
 		case 200:
@@ -138,8 +132,13 @@ std::string	BuildResponse(std::string type, int size, int status)
 			break;
 		case 404:
 			response += " Not Found\r\n";
+		case 501:
+			response += "Not Implemented\r\n";
 	}
-	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
+	if (method == "POST")
+		response += "\r\n\r\n";
+	else if (method == "GET")
+		response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
 
@@ -148,6 +147,10 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 	std::stringstream response;
 	std::stringstream data;
 
+	if (path.empty() && status == 501)
+	{
+		
+	}
 	if ( path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = "error_pages/404.html";
@@ -157,7 +160,7 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 	if ( !file.is_open() )
 		status = NotFound;
 	data << file.rdbuf();
-	response << BuildResponse(GetContentType(path), data.str().size(), status);
+	response << BuildResponse(GetContentType(path), data.str().size(), status, m.GetClient()[i].GetRequest().getMethod());
 	response << data.str();
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	return true;
@@ -224,20 +227,21 @@ std::string	GetFileName(Request&	req)
 	return FileName;
 }
 
-int		Post( std::string body,Request& req, std::string &path )
+int		Post(Multiplexer &m, int &i, std::string body,Request& req, std::string &path )
 {
 	std::ofstream 	file;
 
-
+	(void)path;
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
-	file.open((path.c_str() + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
+	file.open(("www/upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 	{
 		std::cerr << "file error" << std::endl;
 		return (InternalServerError);
 	}
 	file << body;
+	SendData(m, i, path, 201);
 	return (OK);
 }
 
@@ -251,15 +255,17 @@ int		Delete( std::string path)
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
-	// m.GetClient()[i].GetRequest().printRequestData();
-	std::cout << "i = " << i << "\n";
+
+
 	m.GetClient()[i].GetRequest().printRequestData();
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
-		return (Post(m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), path));
+		Post(m, i, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-		return(Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri())));
+		Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri()));
+	else
+		SendData(m, i, "", 501);
 	disconnectClient(m, i);
 	return true;
 }
