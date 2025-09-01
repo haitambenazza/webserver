@@ -120,7 +120,17 @@ std::vector<Server>   GetFullServers( char* FileName )
 		x = 0;
 		y = 0;
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		NewServer.SetServers( NewBlock ); 
+		NewServer.SetServers( NewBlock );
+		 std::map<int, std::string> map;
+		std::map<int, std::string>::iterator it;
+
+		map = NewServer.GetErrorMap();
+		it = map.begin();
+		while (it != map.end())
+		{
+			std::cout << it->first << " : "  << it->second << std::endl;
+			it++;
+		}
 		if (NewServer.SetServers( NewBlock ) == false)
 		{
 			lst.empty();
@@ -151,7 +161,7 @@ bool	IsPresent(const std::vector<std::string>& vctr, std::string s)
 	count = 0;
 	while (i < vctr.size())
 	{
-		if (vctr[i] == s)
+		if (vctr[i] == s )
 			count++;
 		i++;
 	}
