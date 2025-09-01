@@ -10,11 +10,11 @@ std::string    AutoIndex( std::string root, std::string path )
     if (!index.is_open())
         return("");
     if (path.empty() || root.empty())
-        return (index.close(), "");
+        return ( index.close(), "");
     Dir = opendir((root + path).c_str());
     if (Dir == NULL)
-        return (index.close(), "");
-    
+        return ( index.close(), root + path);
+
     index << "<!DOCTYPE html>" << std::endl;
     index << "<html lang=\"en\">" << std::endl;
     index << "<head>" << std::endl;
@@ -27,7 +27,7 @@ std::string    AutoIndex( std::string root, std::string path )
     index << "    <ul>" << std::endl;
     it = readdir(Dir);
     if (it == NULL)
-        return (index.close(), "");
+        return ( index.close(), "" );
     while (it != NULL)
     {
         index << "      <li><a href=\"" << path + '/' + it->d_name << "\">" << it->d_name <<"</a></li>" << std::endl;
