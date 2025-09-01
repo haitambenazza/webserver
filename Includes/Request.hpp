@@ -57,4 +57,5 @@ class Request
         void        SetHeaders( std::string s );
         void        SetStatusCode( HttpStatus val );
         void        SetScriptPath(std::string& val );
+        bool        IsValidReqLine( std::string s );
 };
