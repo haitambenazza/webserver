@@ -4,10 +4,14 @@
 
 enum HttpStatus {
     OK = 200,
+    Created = 201,
     BadRequest = 400,
+    Forbidden = 403,
     NotFound = 404,
     MethodNotAllowed = 405,
+    PayloadTooLarge = 413,
     RequestUriTooLong = 414,
+    UnsupportedMediaType = 415,
     InternalServerError = 500,
     NotImplemented = 501,
     HttpVersionNotSupported = 505
@@ -25,7 +29,7 @@ class Request
         std::string                         query_string;
         std::string                         ScriptName;
         std::string                         Scriptpath;
-        
+
 
     public:
         Request();
