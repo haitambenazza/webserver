@@ -117,17 +117,21 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-void	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
+bool	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 {
 	m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
+	if(m.GetClient()[i].GetRequest().parse(tmp) == false)
+		return false;
 	if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
 	{
 		m.GetClient()[i].changeStatusRead(true);
 		size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
 		m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
-		m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true));
+		if (m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true)) == false)
+			return (false);
 	}
 	m.GetClient()[i].SetReadSize(m.GetClient()[i].getBuffer(false).size());
+	return (true);
 }
 
 void	disconnectClient(Multiplexer &m, int i)
@@ -164,7 +168,10 @@ int	ReadData(Multiplexer &m, int &i)
 	if ((bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp))) > 0)
 	{
 		if (!m.GetClient()[i].getStatusRead())
-			appendToHeader(m, i, tmp, bytes_read);
+		{
+			if (appendToHeader(m, i, tmp, bytes_read) == false)
+				return (1);
+		}
 		else
 		{
 			m.GetClient()[i].SetReadSize(bytes_read);
@@ -174,7 +181,7 @@ int	ReadData(Multiplexer &m, int &i)
 			return (1);
 	}
 	if (isPostValid(m, i))
-		return (std::cout << "YAAAA\n", 1);
+		return (1);
 	if (bytes_read == 0)
 	{
 		disconnectClient(m, i);
@@ -242,6 +249,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				if (ReadData(multiplexer, i) == 1)
 				{
 					multiplexer.GetEvents()[i].events = EPOLLOUT;
+					
 					if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]))
 					{
 						perror("epoll_ctl()_MOD");
