@@ -269,25 +269,43 @@ void Request::parseBody(std::stringstream &str)
     }
 }
 
+// bool Request::IsValidReqLine( std::string s )
+// {
+//     std::vector<std::string> v
+//     if (s.empty())
+//         return (status_code = BadRequest, false);
+//     if (split(s, " ").size() != 3)
+//         return (status_code = BadRequest, false);
+//     else
+//     {
+//         if ()
+//     }
+// }
+
 void Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
 
     if (!std::getline(str, line))
+    {
+        status_code = BadRequest;
         return;
+    }
     stripCR(line);
     if (request_string.empty())
     {
         status_code = BadRequest;
+        return;
     }
 
-    if (!parseRequestLine(line))
+    if (!parseRequestLine(line) && status_code == OK)
     {
         body = request_string;
         std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
         return;
     }
+
     parseHeaders(str);
     parseBody(str);
 }
