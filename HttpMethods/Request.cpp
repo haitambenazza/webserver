@@ -139,7 +139,7 @@ bool Request::parseRequestLine(const std::string &line)
     if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
     {
         status_code = NotImplemented;
-        return(false);
+        return false;
     }
     std::string extra;
     if (ss >> extra) {
@@ -269,27 +269,42 @@ void Request::parseBody(std::stringstream &str)
     }
 }
 
-void Request::parse(const std::string& request_string)
+bool Request::IsValidReqLine( std::string s )
+{
+    std::vector<std::string> v;
+    if (s.empty())
+        return (status_code = BadRequest, false);
+    v = split(s, " ");
+    if (v.size() != 3)
+        return (status_code = BadRequest, false);
+    return (true);
+}
+
+bool Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
-
+    
     if (!std::getline(str, line))
-        return;
+    {
+        status_code = BadRequest;
+        return false;
+    }
+    if (IsValidReqLine( line ) == false)
+        return (status_code = BadRequest, false);
     stripCR(line);
     if (request_string.empty())
     {
         status_code = BadRequest;
+        return false;
     }
 
     if (!parseRequestLine(line))
-    {
-        body = request_string;
-        std::cout << "[INFO] Non-HTTP request detected, treating as raw data\n";
-        return;
-    }
+        return false;
+
     parseHeaders(str);
     parseBody(str);
+    return (true);
 }
 
 void Request::printRequestData() const
