@@ -4,6 +4,7 @@
 
 enum HttpStatus {
     OK = 200,
+    Created = 201,
     BadRequest = 400,
     Forbidden = 403,
     NotFound = 404,
@@ -28,7 +29,7 @@ class Request
         std::string                         query_string;
         std::string                         ScriptName;
         std::string                         Scriptpath;
-        
+
 
     public:
         Request();

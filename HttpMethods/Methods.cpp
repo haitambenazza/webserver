@@ -119,26 +119,24 @@ std::string	BuildResponse(std::string type, int size, int status, std::string me
 	std::stringstream sizefile;
 	std::stringstream code;
 
+	(void)method;
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
 	switch (status)
 	{
-		case 200:
+		case OK:
 			response += " OK\r\n";
 			break;
-		case 201:
+		case Created:
 			response += " Created\r\n";
 			break;
-		case 404:
+		case NotFound:
 			response += " Not Found\r\n";
-		case 501:
-			response += "Not Implemented\r\n";
+		case NotImplemented:
+			response += " Not Implemented\r\n";
 	}
-	if (method == "POST")
-		response += "\r\n\r\n";
-	else if (method == "GET")
-		response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
+	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
 
@@ -149,9 +147,9 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 
 	if (path.empty() && status == 501)
 	{
-		
+		path = "error_pages/501.html";
 	}
-	if ( path.empty() || access(path.c_str(), R_OK) == -1)
+	else if ( path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = "error_pages/404.html";
 		status = NotFound;
@@ -162,6 +160,8 @@ bool SendData(Multiplexer &m, int i, std::string path, int status)
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(path), data.str().size(), status, m.GetClient()[i].GetRequest().getMethod());
 	response << data.str();
+	std::cout << "RESPONSE ---------------------------------\n";
+	std::cout << response.str() << '\n';
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	return true;
 }
@@ -241,7 +241,7 @@ int		Post(Multiplexer &m, int &i, std::string body,Request& req, std::string &pa
 		return (InternalServerError);
 	}
 	file << body;
-	SendData(m, i, path, 201);
+	SendData(m, i, path, Created);
 	return (OK);
 }
 
@@ -257,15 +257,19 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
 
 
-	m.GetClient()[i].GetRequest().printRequestData();
+m.GetClient()[i].GetRequest().printRequestData();
+	std::cout << m.GetClient()[i].GetRequest().getStatusCode() << '\n';
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(m, i, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri()));
-	else
-		SendData(m, i, "", 501);
+	if (m.GetClient()[i].GetRequest().getStatusCode() != OK)
+	{
+		std::cout << "YAAAA\n";
+		SendData(m, i, "", NotImplemented);
+	}
 	disconnectClient(m, i);
 	return true;
 }
