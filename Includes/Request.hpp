@@ -38,7 +38,7 @@ class Request
         Request& operator=(const Request& other);
         ~Request();
 
-        void parse(const std::string& request_string);
+        bool parse(const std::string& request_string);
 
         std::string getMethod() ;
         std::string getUri() const;
