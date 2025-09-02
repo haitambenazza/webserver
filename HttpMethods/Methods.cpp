@@ -44,7 +44,7 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-
+	
 	mp = loc.GetCommands();
 	root = GetRoot(server, loc);
 	if (loc.GetPath() != "/")
@@ -61,7 +61,7 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 			if (Uri[Uri.size() - 1] == '/')
 				Uri = Uri.substr(0, Uri.size() - 1);
 			if (loc.GetAutoIndex() == "on")
-				return (std::cout<< ">---------> " << AutoIndex(root , Uri)<< std::endl, AutoIndex(root , Uri));
+				return (AutoIndex(root , Uri));
 			else if (loc.GetAutoIndex() == "on" && Uri != path)
 				return (root + Uri);
 			else
@@ -113,56 +113,51 @@ std::string GetContentType(std::string file)
 	return ("application/octet-stream");
 }
 
-std::string	BuildResponse(std::string type, int size, int status, std::string method)
+std::string	BuildResponse(std::string type, int size, int status)
 {
 	std::string	response("HTTP/1.1");
 	std::stringstream sizefile;
 	std::stringstream code;
 
-	(void)method;
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
-	switch (status)
-	{
-		case OK:
-			response += " OK\r\n";
-			break;
-		case Created:
-			response += " Created\r\n";
-			break;
-		case NotFound:
-			response += " Not Found\r\n";
-		case NotImplemented:
-			response += " Not Implemented\r\n";
-	}
+	if (status == 200)
+	response += " OK\r\n";
+	if (status == 201)
+	response += " Created\r\n";
+	else if (status == NotFound)
+		response += " Not Found\r\n";
+
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
 
-bool SendData(Server& s, Multiplexer &m, int i, int status)
+bool SendData(Server&s ,Multiplexer &m, int i, int status)
 {
 	std::stringstream response;
 	std::stringstream data;
-	std::string		  path;
+    std::string path;
+	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
-	std::map<int, std::string> map;
 
-	map = s.GetErrorMap();
-	it = s.GetErrorMap().find(status);
-	// exit(1);
-	if (it != map.end())
-	{
+	mp = s.GetErrorMap();
+	if (mp.empty())
+		return (false);
+	it = mp.find(status);
+	if (it != mp.end())
 		path = it->second;
+	else
+	{
+		path = "error_pages/404.html";
+		status = NotFound;
 	}
 	std::ifstream file(path.c_str());
 	if ( !file.is_open() )
 		status = NotFound;
 	data << file.rdbuf();
-	response << BuildResponse(GetContentType(path), data.str().size(), status, m.GetClient()[i].GetRequest().getMethod());
+	response << BuildResponse(GetContentType(path), data.str().size(), status);
 	response << data.str();
-	std::cout << "RESPONSE ---------------------------------\n";
-	// std::cout << response.str() << '\n';
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	return true;
 }
@@ -201,10 +196,14 @@ int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 	return (-1);
 }
 
-bool	RunGet(Server &s, Multiplexer &m, int &i, std::string location)
+bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 {
+	std::string error = "error_pages/404.html";
+
 	if (!location.empty() && location[location.size() - 1] != '/')
 			SendData(s, m, i, OK);
+	else if (location[location.length()] == '/')
+		std::cout << "autoindex\n";
 	else
 		SendData(s, m, i, NotFound);
 	return (true);
@@ -226,7 +225,7 @@ std::string	GetFileName(Request&	req)
 	return FileName;
 }
 
-int		Post(Server& s , Multiplexer &m, int &i, std::string body,Request& req)
+int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i )
 {
 	std::ofstream 	file;
 
@@ -239,11 +238,11 @@ int		Post(Server& s , Multiplexer &m, int &i, std::string body,Request& req)
 		return (InternalServerError);
 	}
 	file << body;
-	SendData(s, m, i, Created);
+    SendData(s, m, i, Created);
 	return (OK);
 }
 
-int		Delete( std::string path)
+int		Delete(  std::string path  )
 {
 	if (access(path.c_str(), F_OK) == -1)
 		return (NotFound);
@@ -252,23 +251,20 @@ int		Delete( std::string path)
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	// std::map<>
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
-	// m.GetClient()[i].GetRequest().printRequestData();
+    std::map<int, std::string> map;
+    std::map<int, std::string>::iterator it;
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(server, m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
-	{
-		Post(server, m, i, m.GetClient()[i].GetRequest().getBody(), m.GetClient()[i].GetRequest());
-
-	}
+		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri()));
-	else
-	{
-		SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode());
-	}
-	std::cout << "YAAAA =================  " <<  m.GetClient()[i].GetRequest().getStatusCode()<< "\n";
+    else
+    {
+        SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode());
+    }
 	disconnectClient(m, i);
 	return true;
 }

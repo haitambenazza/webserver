@@ -119,11 +119,11 @@ std::vector<Server>   GetFullServers( char* FileName )
 
 		x = 0;
 		y = 0;
+
 		NewBlock.FillBlock( lst[i], NewBlock, x, y );
-		NewServer.SetServers( NewBlock ); 
 		if (NewServer.SetServers( NewBlock ) == false)
 		{
-			lst.empty();
+			lst.clear();
 			return (srvs);
 		}
 		NewServer.SetStatus(NewBlock.GetStatus());
@@ -136,6 +136,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 		{
 			NewServer.SetStatus(false);
 		}
+		NewServer.SetArgs(NewBlock.GetBlocks()[i].GetArg());
+		NewServer.SetErrorMap();
 		srvs.push_back( NewServer );
 		i++;
 	}
@@ -151,7 +153,7 @@ bool	IsPresent(const std::vector<std::string>& vctr, std::string s)
 	count = 0;
 	while (i < vctr.size())
 	{
-		if (vctr[i] == s)
+		if (vctr[i] == s )
 			count++;
 		i++;
 	}

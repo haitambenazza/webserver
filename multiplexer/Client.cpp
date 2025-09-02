@@ -15,9 +15,6 @@ Client::Client( const Client& copy )
     ServerIndex = copy.ServerIndex;
     readDone = copy.readDone;
     readeSize = copy.readeSize;
-    // Req = copy.Req;
-    // headers = copy.headers;
-    // body = copy.body;
 }
 
 Client& Client::operator=( const Client& copy )
@@ -34,9 +31,6 @@ Client& Client::operator=( const Client& copy )
 
 Client::~Client()
 {
-    //close (fd);
-    // headers = std::string("0");
-    // body = std::string("0");
 }
 
 void	Client::SetClient(int16_t val)
