@@ -1,10 +1,62 @@
 #include "../headers/webserver.hpp"
 
-Cgi::Cgi(){}
-Cgi::Cgi( Request& Req ){
+Cgi::Cgi() : client_socket(-1), use_chunked(false){}
+
+Cgi::Cgi( Request& Req ) : client_socket(-1), use_chunked(false){
     SetEnv(  Req );
 }
+
+Cgi::Cgi(Request& req, int client_fd, bool chunked) 
+    : client_socket(client_fd), use_chunked(chunked) {
+    SetEnv(req);
+}
+
 Cgi::~Cgi(){}
+
+Cgi& Cgi::operator=(const Cgi &other) {}
+
+Cgi::Cgi(const Cgi &other) {}
+
+
+
+std::string Cgi::toHex(size_t value)
+{
+    std::ostringstream oss;
+
+    oss << std::hex << value;
+    return oss.str();
+}
+
+void Cgi::sendChunk(const std::string& data)
+{
+    if (data.empty() || client_socket == -1)
+        return;
+    std::string chunck_size = toHex(data.length());
+    std::string chunk = chunck_size + "\r\n" + data + "\r\n";
+
+    send(client_socket, chunk.c_str(), chunk.length(), 0);
+}
+
+void Cgi::sendChunkedHeaders()
+{
+    if (client_socket == -1)
+        return;
+    std::string headers = 
+    "HTTP/1.1 200 OK\r\n"
+    "Transfer-Encoding: chunked\r\n"
+    "\r\n";
+    
+    send(client_socket , headers.c_str() , headers.length() , 0);
+}
+void Cgi::endChunking()
+{
+    if (client_socket == -1) 
+        return;
+    
+    std::string final_chunk = "0\r\n\r\n";
+    send(client_socket, final_chunk.c_str(), final_chunk.length(), 0);
+}
+
 
 void    Cgi::SetEnv( Request& Req )
 {
@@ -19,7 +71,12 @@ void    Cgi::SetEnv( Request& Req )
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     // env.push_back("SERVER_SOFTWARE=YourServer/1.0");
     env.push_back("REQUEST_URI=" + Req.getUri());
-    ExecuteCgi(Req);
+
+
+    if (use_chunked && client_socket != -1)
+        ExecuteCgiChunked(Req);
+    else 
+        ExecuteCgi(Req);
 }
 
 std::vector<char *> Cgi::GetEnvCgi()
@@ -32,6 +89,11 @@ std::vector<char *> Cgi::GetEnvCgi()
     }
     EnvVars.push_back(NULL);
     return (EnvVars);
+}
+
+void    Cgi::ExecuteCgiChunked(Request &req)
+{
+    
 }
 
 void    Cgi::ExecuteCgi(Request &req)
