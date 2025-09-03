@@ -122,41 +122,79 @@ std::string	BuildResponse(std::string type, int size, int status)
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
-	if (status == 200)
-	response += " OK\r\n";
-	if (status == 201)
-	response += " Created\r\n";
-	else if (status == NotFound)
-		response += " Not Found\r\n";
 
+	switch (status)
+	{
+		case 200:
+			response += " OK\r\n";
+			break;
+		case 201:
+			response += " Created\r\n";
+			break;
+		case 400:
+			response += " Bad Request\r\n";
+			break;
+		case 403:
+			response += " Forbidden\r\n";
+			break;
+		case 404:
+			response += " Not Found\r\n";
+			break;
+		case 405:
+			response += " Method Not Allowed\r\n";
+			break;
+		case 413:
+			response += " Payload Too Large\r\n";
+			break;
+		case 414:
+			response += " URI Too Long\r\n";
+			break;
+		case 415:
+			response += " Unsupported Media Type\r\n";
+			break;
+		case 500:
+			response += " Internal Server Error\r\n";
+			break;
+		case 501:
+			response += " Not Implemented\r\n";
+			break;
+		case 505:
+			response += " HTTP Version Not Supported\r\n";
+			break;
+		default:
+			response += " Unknown Status\r\n";
+			break;
+	}
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
 
-bool SendData(Server&s ,Multiplexer &m, int i, int status)
+bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath )
 {
 	std::stringstream response;
 	std::stringstream data;
-    std::string path;
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
 	mp = s.GetErrorMap();
-	if (mp.empty())
-		return (false);
-	it = mp.find(status);
-	if (it != mp.end())
-		path = it->second;
-	else
+	if (status >= 400 )
 	{
-		path = "error_pages/404.html";
-		status = NotFound;
+		if (mp.empty())
+			return (false);
+		it = mp.find(status);
+		if (it != mp.end())
+			FullPath = it->second;
+		else
+		{
+			FullPath = "error_pages/404.html";
+			status = NotFound;
+		}
 	}
-	std::ifstream file(path.c_str());
+	std::ifstream file(FullPath.c_str());
 	if ( !file.is_open() )
 		status = NotFound;
 	data << file.rdbuf();
-	response << BuildResponse(GetContentType(path), data.str().size(), status);
+	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
 	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
 	return true;
@@ -201,11 +239,11 @@ bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 	std::string error = "error_pages/404.html";
 
 	if (!location.empty() && location[location.size() - 1] != '/')
-			SendData(s, m, i, OK);
+			SendData(s, m, i, OK, location);
 	else if (location[location.length()] == '/')
 		std::cout << "autoindex\n";
 	else
-		SendData(s, m, i, NotFound);
+		SendData(s, m, i, NotFound, location);
 	return (true);
 }
 
@@ -225,7 +263,7 @@ std::string	GetFileName(Request&	req)
 	return FileName;
 }
 
-int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i )
+int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std::string path)
 {
 	std::ofstream 	file;
 
@@ -238,7 +276,7 @@ int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i )
 		return (InternalServerError);
 	}
 	file << body;
-    SendData(s, m, i, Created);
+    SendData(s, m, i, Created, path);
 	return (OK);
 }
 
@@ -258,12 +296,12 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(server, m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
-		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i);
+		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri()));
     else
     {
-        SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode());
+        SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
     }
 	disconnectClient(m, i);
 	return true;
