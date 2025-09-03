@@ -13,9 +13,9 @@ Cgi::Cgi(Request& req, int client_fd, bool chunked)
 
 Cgi::~Cgi(){}
 
-Cgi& Cgi::operator=(const Cgi &other) {}
+// Cgi& Cgi::operator=(const Cgi &other) {}
 
-Cgi::Cgi(const Cgi &other) {}
+// Cgi::Cgi(const Cgi &other) {}
 
 
 
@@ -73,10 +73,10 @@ void    Cgi::SetEnv( Request& Req )
     env.push_back("REQUEST_URI=" + Req.getUri());
 
 
-    if (use_chunked && client_socket != -1)
-        ExecuteCgiChunked(Req);
-    else 
-        ExecuteCgi(Req);
+    // if (use_chunked && client_socket != -1)
+    //     ExecuteCgiChunked(Req);
+    // else 
+    //     ExecuteCgi(Req);
 }
 
 std::vector<char *> Cgi::GetEnvCgi()
@@ -91,10 +91,10 @@ std::vector<char *> Cgi::GetEnvCgi()
     return (EnvVars);
 }
 
-void    Cgi::ExecuteCgiChunked(Request &req)
-{
+// void    Cgi::ExecuteCgiChunked(Request &req)
+// {
     
-}
+// }
 
 void    Cgi::ExecuteCgi(Request &req)
 {
