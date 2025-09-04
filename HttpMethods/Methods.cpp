@@ -206,9 +206,7 @@ std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::s
     std::string                                   				values;
 
 	if (map.empty() || key.empty())
-	{
 		return "";
-	}
     it = map.find(key);
     if (it != map.end())
     {
@@ -292,6 +290,9 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
+	Cgi cg;
+	// exit(2);
+	cg.ExecuteCgi( m.GetClient()[i].GetRequest());
 
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(server, m, i,path);
