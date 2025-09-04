@@ -164,7 +164,7 @@ int	ReadData(Multiplexer &m, int &i)
 	char	tmp[BUFFER_SIZE];
 	int		bytes_read;
 
-
+	bzero(tmp, BUFFER_SIZE);
 	if ((bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp))) > 0)
 	{
 		if (!m.GetClient()[i].getStatusRead())

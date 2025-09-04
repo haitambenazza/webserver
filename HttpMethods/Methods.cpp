@@ -197,22 +197,12 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
 
-	size_t totalSize = 0;
-	size_t toSend = response.str().size();
-	while (true)
-	{
-		usleep(1000);
-		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + totalSize, toSend - totalSize, 0);
-		if (sent < 0)
-		{
-			perror ("send");
-			break ;
-		}
-		totalSize += sent;
-		if (totalSize >= toSend)
-			break;
-	}
-	std::cout << totalSize << std::endl;
+	m.GetClient()[i].SetFileSize(response.str().size());
+	// std::cout << " before send == " << m.GetClient()[i].GetSentSize() << std::endl;
+	ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), 4096 , 0);
+	// std::cout << "response == "<<response.str().c_str() + 40 << std::endl;
+	// std::cout << "sent == " << sent << " new size == " << m.GetClient()[i].GetSentSize() << " totalsize == " << m.GetClient()[i].GetFileSize() << std::endl;
+	m.GetClient()[i].SetSentSize((size_t) sent);//+=
 	return true;
 }
 
@@ -312,6 +302,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
+		// std::cout << "heeeeeeeeeeeeeeeey\n";
 	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
@@ -321,6 +312,10 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
     {
         SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
     }
-	disconnectClient(m, i);
+	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+	{
+		// std::cout << " new size0 == " << m.GetClient()[i].GetSentSize() << " totalsize0 == " << m.GetClient()[i].GetFileSize() << std::endl;
+		disconnectClient(m, i);
+	}
 	return true;
 }
