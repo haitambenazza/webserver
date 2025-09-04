@@ -14,6 +14,8 @@ class Client
         Request         Req;
         bool            readDone;
         size_t          readeSize;
+        size_t          FileSize;
+	    size_t          sent;
     public :
         Client();
         Client( const Client& copy );
@@ -34,4 +36,8 @@ class Client
         size_t          GetReadSize() const;
         void            SetReadSize( size_t val );
         void            clearBuffer();
+        void            SetFileSize( size_t size );
+        void            SetSentSize( size_t size );
+        size_t          GetFileSize() const;
+        size_t          GetSentSize() const;
 };
