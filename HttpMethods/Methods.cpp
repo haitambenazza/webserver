@@ -201,7 +201,6 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	size_t toSend = response.str().size();
 	while (true)
 	{
-		usleep(1000);
 		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + totalSize, toSend - totalSize, 0);
 		if (sent < 0)
 		{
@@ -282,7 +281,7 @@ std::string	GetFileName(Request&	req)
 int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std::string path)
 {
 	std::ofstream 	file;
-
+	std::cout << "testtt\n";
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
 	file.open(("www/upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
