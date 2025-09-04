@@ -237,7 +237,10 @@ bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 	std::string error = "error_pages/404.html";
 
 	if (!location.empty() && location[location.size() - 1] != '/')
-			SendData(s, m, i, OK, location);
+	{
+		
+		std::cout << "byte_send() == " << SendData(s, m, i, OK, location) << std::endl;
+	}
 	else if (location[location.length()] == '/')
 		std::cout << "autoindex\n";
 	else
@@ -290,12 +293,16 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
-	Cgi cg;
+	// Cgi cg;
 	// exit(2);
-	cg.ExecuteCgi( m.GetClient()[i].GetRequest());
-
+	// cg.ExecuteCgi( m.GetClient()[i].GetRequest());
+	// std::cout << m.GetClient()[i].GetRequest().getMethod() << std::endl;
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
+	{
+
+		std::cout << "kssss\n";
 		RunGet(server, m, i,path);
+	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
