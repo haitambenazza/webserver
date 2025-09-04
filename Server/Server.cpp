@@ -134,7 +134,7 @@ void      Server::SetErrorMap()
         return ;
     for (size_t i = 0; i < tmp.size(); i++)
     {
-        if ( tmp[i].find("error_map") == std::string::npos )
+        if ( tmp[i].find("error_map") != std::string::npos )
         {
             std::vector<std::string> tmp1;
             tmp1 = split(tmp[i], " ");

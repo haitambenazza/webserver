@@ -137,7 +137,7 @@ bool	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 void	disconnectClient(Multiplexer &m, int i)
 {
 
-	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
+	std::cerr << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
 	{
 		perror("epoll_ctl()_DEL");

@@ -10,7 +10,8 @@ class Cgi
         std::string                 output;
         pid_t                       child_pid;
         std::vector<std::string>    env;
-        int                         fd[2];
+        int                         ParentFd[2];
+         int                        ChildFd[2];
 
     public:
         Cgi();
