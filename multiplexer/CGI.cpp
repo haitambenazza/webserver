@@ -1,4 +1,5 @@
 #include "../headers/webserver.hpp"
+#include "../headers/webserver.hpp"
 
 Cgi::Cgi(){}
 Cgi::Cgi( Request& Req ){
@@ -83,8 +84,6 @@ void    Cgi::ExecuteCgi(Request &req)
         // std::cerr << "cmd[1] == " << req.GetScriptPath() << std::endl;
     
         // cmds[2] = NULL;
-
-        std::cerr << "CHild " << std::endl;
         char* cmds[3] = { (char *)"/bin/python3", (char *)"www/bin/hello.py", NULL };
         if (!access("www/bin/hello.py", F_OK)) {
             std::cerr << "aaaaaaaaaa" << std::endl;
