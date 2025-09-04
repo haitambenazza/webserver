@@ -163,7 +163,6 @@ bool Server::SetServers( Block& block )
         {
             if (StringToMap(children[i].GetArg(), Commands, 1) == false)
                 return (false);
-            // std::cout << Args << " == args " << std::endl;
         }
 		else if ( children[i].GetLvl() == 2 )
 		{
