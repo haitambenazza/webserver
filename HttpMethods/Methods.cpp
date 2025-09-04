@@ -196,19 +196,29 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
-	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
+
+	size_t totalSize = 0;
+	size_t toSend = response.str().size();
+	while (totalSize < toSend)
+	{
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + totalSize, toSend - totalSize, 0);
+		if (sent < 0)
+		{
+			perror ("send");
+			break ;
+		}
+		totalSize += sent;
+	}
 	return true;
 }
 
 std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::string key)
 {
-    std::map<std::string, std::string >::iterator  				it;
-    std::string                                   				values;
+    std::map<std::string, std::string >::iterator  	it;
+    std::string                                   	values;
 
 	if (map.empty() || key.empty())
-	{
 		return "";
-	}
     it = map.find(key);
     if (it != map.end())
     {
@@ -239,7 +249,10 @@ bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 	std::string error = "error_pages/404.html";
 
 	if (!location.empty() && location[location.size() - 1] != '/')
-			SendData(s, m, i, OK, location);
+	{
+		
+		std::cout << "byte_send() == " << SendData(s, m, i, OK, location) << std::endl;
+	}
 	else if (location[location.length()] == '/')
 		std::cout << "autoindex\n";
 	else
@@ -292,9 +305,14 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
-
+	// Cgi cg;
+	// exit(2);
+	// cg.ExecuteCgi( m.GetClient()[i].GetRequest());
+	// std::cout << m.GetClient()[i].GetRequest().getMethod() << std::endl;
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
+	{
 		RunGet(server, m, i,path);
+	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")

@@ -1,62 +1,11 @@
 #include "../headers/webserver.hpp"
+#include "../headers/webserver.hpp"
 
-Cgi::Cgi() : client_socket(-1), use_chunked(false){}
-
-Cgi::Cgi( Request& Req ) : client_socket(-1), use_chunked(false){
+Cgi::Cgi(){}
+Cgi::Cgi( Request& Req ){
     SetEnv(  Req );
 }
-
-Cgi::Cgi(Request& req, int client_fd, bool chunked) 
-    : client_socket(client_fd), use_chunked(chunked) {
-    SetEnv(req);
-}
-
 Cgi::~Cgi(){}
-
-// Cgi& Cgi::operator=(const Cgi &other) {}
-
-// Cgi::Cgi(const Cgi &other) {}
-
-
-
-std::string Cgi::toHex(size_t value)
-{
-    std::ostringstream oss;
-
-    oss << std::hex << value;
-    return oss.str();
-}
-
-void Cgi::sendChunk(const std::string& data)
-{
-    if (data.empty() || client_socket == -1)
-        return;
-    std::string chunck_size = toHex(data.length());
-    std::string chunk = chunck_size + "\r\n" + data + "\r\n";
-
-    send(client_socket, chunk.c_str(), chunk.length(), 0);
-}
-
-void Cgi::sendChunkedHeaders()
-{
-    if (client_socket == -1)
-        return;
-    std::string headers = 
-    "HTTP/1.1 200 OK\r\n"
-    "Transfer-Encoding: chunked\r\n"
-    "\r\n";
-    
-    send(client_socket , headers.c_str() , headers.length() , 0);
-}
-void Cgi::endChunking()
-{
-    if (client_socket == -1) 
-        return;
-    
-    std::string final_chunk = "0\r\n\r\n";
-    send(client_socket, final_chunk.c_str(), final_chunk.length(), 0);
-}
-
 
 void    Cgi::SetEnv( Request& Req )
 {
@@ -66,17 +15,9 @@ void    Cgi::SetEnv( Request& Req )
     env.push_back("QUERY_STRING=" + Req.getQueryString());
     env.push_back("CONTENT_TYPE=" + Req.getHeaderValue("Content-Type"));
     env.push_back("CONTENT_LENGTH=" + Req.getHeaderValue("Content-Length"));
-
-    env.push_back("GATEWAY_INTERFACE=CGI/1.1");
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
-    // env.push_back("SERVER_SOFTWARE=YourServer/1.0");
     env.push_back("REQUEST_URI=" + Req.getUri());
-
-
-    // if (use_chunked && client_socket != -1)
-    //     ExecuteCgiChunked(Req);
-    // else 
-    //     ExecuteCgi(Req);
+    ExecuteCgi(Req);
 }
 
 std::vector<char *> Cgi::GetEnvCgi()
@@ -91,64 +32,98 @@ std::vector<char *> Cgi::GetEnvCgi()
     return (EnvVars);
 }
 
-// void    Cgi::ExecuteCgiChunked(Request &req)
-// {
-    
-// }
-
 void    Cgi::ExecuteCgi(Request &req)
 {
-    if (pipe(fd) < 0)
+    if (pipe(ParentFd) < 0)
     {
-        std::cerr << "Pipe creation failed" << std::endl;
+        std::cerr << "Parent pipe creation failed" << std::endl;
         return;
     }
-    
+    if (pipe(ChildFd) < 0)
+    {
+        std::cerr << "Child Pipe creation failed" << std::endl;
+        return;
+    }
     child_pid = fork();
     if (child_pid == -1)
     {
         std::cerr << "Fork failed" << std::endl;
-        close(fd[0]);
-        close(fd[1]);
+        close(ParentFd[0]);
+        close(ParentFd[1]);
+        close(ChildFd[0]);
+        close(ChildFd[1]);
         return;
     } 
     else if (child_pid == 0)
     {
-        close(fd[0]);
-        dup2(fd[1] , STDOUT_FILENO);
-        close(fd[1]);
+        // std::cout << "YAAAAARBIIII" << std::endl;
+        close(ParentFd[0]); // close stdout parent
+        close(ChildFd[1]); // close stdin child
+        if (dup2(ParentFd[1] , STDOUT_FILENO) == -1)
+        {
+            perror("dup2_prnt");
+            exit(1);
+        }
+        close(ParentFd[1]);
 
+
+        if (dup2(ChildFd[0] , STDIN_FILENO) == -1)
+        {
+            perror("dup2_child");
+            exit(1);
+        }
+        close(ChildFd[0]);
+        
         std::vector<char *> envVars = GetEnvCgi();
-
-        char *cmds[3];
-        cmds[0] = (char *)req.GetScriptPath().c_str();
-        cmds[1] = (char *)req.GetScriptName().c_str();
-        cmds[2] = NULL;
-        if (execve(cmds[0] , cmds , envVars.data()) == -1)
+        
+        (void) req;
+        // char *cmds[3];
+        // cmds[0] = (char *)"/bin/python3";
+        // cmds[1] = (char *)req.GetScriptPath().c_str();
+        
+        // std::cerr << "cmd[1] == " << req.GetScriptPath() << std::endl;
+    
+        // cmds[2] = NULL;
+        char* cmds[3] = { (char *)"/bin/python3", (char *)"www/bin/hello.py", NULL };
+        if (!access("www/bin/hello.py", F_OK)) {
+            std::cerr << "aaaaaaaaaa" << std::endl;
+        }
+        if (execve(cmds[0] , cmds , NULL) == -1)
             perror("execve");
         exit(1);
     }
     else
     {
-        close(fd[1]);
+        close(ParentFd[1]);
+        close(ChildFd[0]);
+
+        output.clear();
+        output = "";
+
+        const char* input = "Hello\n";  // note newline
+        if (write(ChildFd[1], input, strlen(input)) == -1) {
+            perror("write");
+        }
+        close(ChildFd[1]);
+
         char buffer[4096];
         ssize_t bytes_read;
-        output.clear();
 
-        while ((bytes_read = read(fd[0] , buffer , sizeof(buffer) - 1)) > 0)
-        {
+        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
             buffer[bytes_read] = '\0';
+            std::cerr << "Bytes readed: " << bytes_read << std::endl;
+            std::cerr << "buffer: " << buffer << std::endl;
             output += buffer;
         }
-        close(fd[0]);
+        if (bytes_read == -1) {
+            perror("read");
+        }
+        close(ParentFd[0]);
 
         int status;
+        waitpid(child_pid, &status, 0);
 
-        waitpid(child_pid , &status , 0);
+        std::cerr << "Output from child :\n" << output << std::endl;
 
-        if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-            std::cerr << "CGI script execution failed" << std::endl;
-            output = "Content-Type: text/html\r\n\r\n<h1>500 Internal Server Error</h1>";
-        }
     }
 }

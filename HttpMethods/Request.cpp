@@ -21,6 +21,8 @@ Request& Request::operator=(const Request& other) {
         query_string = other.query_string;
         ScriptName = other.ScriptName;
         Scriptpath = other.Scriptpath;
+        headers.clear();
+        body.clear();
         status_code = other.status_code;
     }
     return *this;
