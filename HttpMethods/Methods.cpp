@@ -197,12 +197,30 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
 
+<<<<<<< Updated upstream
 	m.GetClient()[i].SetFileSize(response.str().size());
 	// std::cout << " before send == " << m.GetClient()[i].GetSentSize() << std::endl;
 	ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), 4096 , 0);
 	// std::cout << "response == "<<response.str().c_str() + 40 << std::endl;
 	// std::cout << "sent == " << sent << " new size == " << m.GetClient()[i].GetSentSize() << " totalsize == " << m.GetClient()[i].GetFileSize() << std::endl;
 	m.GetClient()[i].SetSentSize((size_t) sent);//+=
+=======
+	size_t totalSize = 0;
+	size_t toSend = response.str().size();
+	while (true)
+	{
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + totalSize, toSend - totalSize, 0);
+		if (sent < 0)
+		{
+			perror ("send");
+			break ;
+		}
+		totalSize += sent;
+		if (totalSize >= toSend)
+			break;
+	}
+	std::cout << totalSize << std::endl;
+>>>>>>> Stashed changes
 	return true;
 }
 
@@ -273,6 +291,7 @@ int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std
 {
 	std::ofstream 	file;
 	std::cout << "testtt\n";
+	std::cout << "testtt\n";
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
 	file.open(("www/upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
@@ -298,7 +317,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
-
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
