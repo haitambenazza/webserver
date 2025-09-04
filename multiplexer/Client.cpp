@@ -6,6 +6,8 @@ Client::Client()
     ServerIndex = -1;
     readDone = false;
     readeSize = 0;
+    FileSize = 0;
+    sent = 0;
 }
 
 Client::Client( const Client& copy )
@@ -15,6 +17,8 @@ Client::Client( const Client& copy )
     ServerIndex = copy.ServerIndex;
     readDone = copy.readDone;
     readeSize = copy.readeSize;
+    FileSize = copy.FileSize;
+    sent = copy.sent;
 }
 
 Client& Client::operator=( const Client& copy )
@@ -24,7 +28,9 @@ Client& Client::operator=( const Client& copy )
         fd = copy.fd;
         ServerIndex = copy.ServerIndex;
         connectedTime = copy.connectedTime;
-        readeSize = 0;
+        readeSize = copy.readeSize;
+        FileSize = copy.FileSize;
+        sent = copy.sent;
     }
     return (*this);
 }
@@ -49,6 +55,23 @@ Request&         Client::GetRequest()
 int16_t     Client::GetClientFd() const
 {
     return (fd);
+}
+
+void            Client::SetFileSize( size_t size )
+{
+    FileSize = size;
+}
+void            Client::SetSentSize( size_t size )
+{
+    sent += size;
+}
+size_t            Client::GetFileSize() const
+{
+    return (FileSize);
+}
+size_t            Client::GetSentSize() const
+{
+    return (sent);
 }
 
 size_t          Client::GetReadSize() const
