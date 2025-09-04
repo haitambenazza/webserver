@@ -308,10 +308,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
-	// Cgi cg;
-	// exit(2);
-	// cg.ExecuteCgi( m.GetClient()[i].GetRequest());
-	// std::cout << m.GetClient()[i].GetRequest().getMethod() << std::endl;
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
