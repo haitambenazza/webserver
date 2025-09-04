@@ -196,14 +196,26 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
-	send(m.GetEvents()[i].data.fd, response.str().c_str(), response.str().size(), 0);
+
+	size_t totalSize = 0;
+	size_t toSend = response.str().size();
+	while (totalSize < toSend)
+	{
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + totalSize, toSend - totalSize, 0);
+		if (sent < 0)
+		{
+			perror ("send");
+			break ;
+		}
+		totalSize += sent;
+	}
 	return true;
 }
 
 std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::string key)
 {
-    std::map<std::string, std::string >::iterator  				it;
-    std::string                                   				values;
+    std::map<std::string, std::string >::iterator  	it;
+    std::string                                   	values;
 
 	if (map.empty() || key.empty())
 		return "";
@@ -299,8 +311,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	// std::cout << m.GetClient()[i].GetRequest().getMethod() << std::endl;
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
-
-		std::cout << "kssss\n";
 		RunGet(server, m, i,path);
 	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
