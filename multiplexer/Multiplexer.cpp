@@ -2,7 +2,7 @@
 
 bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 {
-    EpollFd = epoll_create1(0);
+    EpollFd = epoll_create(1);
     if ( EpollFd == -1 )
     {
 		perror("Epoll_create");
@@ -11,7 +11,7 @@ bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 	for (int i = 0; i < (int)server.size(); i++)
 	{
 		struct epoll_event Event;
-		Event.events = EPOLLIN ;
+		Event.events = EPOLLIN;
 		Event.data.fd = server[i].Getfd();
     	if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
     	{
@@ -28,9 +28,17 @@ Multiplexer::Multiplexer()
     NumFds = -1;
     NewConnection = -1;
 }
+void                 Multiplexer::SetDataRead( const unsigned char *buff, size_t size )
+{
+    DataRead.assign(buff, buff + size);
+}
 
+std::vector<unsigned char>       Multiplexer::GetDataRead()
+{
+    return (DataRead);
+}
 
-Multiplexer::Multiplexer(std::vector<Server> &server)
+Multiplexer::Multiplexer( std::vector<Server> &server )
 {
     EpollFd = -1;
     NumFds = -1;
@@ -40,14 +48,18 @@ Multiplexer::Multiplexer(std::vector<Server> &server)
 
 Multiplexer::~Multiplexer()
 {
-    //std::cout << "CLIENT IS DEAD\n";
-    close(NewConnection);
     close(EpollFd);
 }
 
 int Multiplexer::GetClientFd() const
 {
     return (NewConnection);
+}
+
+Multiplexer& Multiplexer::operator=( const Multiplexer& copy )
+{
+    (void)copy;
+    return (*this);
 }
 
 int Multiplexer::GetEpollFd() const
@@ -78,3 +90,17 @@ struct epoll_event*      Multiplexer::GetEvents()
     return (Events);
 }
 
+void               Multiplexer::AddClient( Client& NewClient )
+{
+    Clients.push_back(NewClient);
+}
+
+void    Multiplexer::RemoveClient(int i)
+{
+    this->Clients.erase(this->Clients.begin() + i);
+}
+
+std::vector<Client>&	Multiplexer::GetClient()
+{
+	return Clients;
+}

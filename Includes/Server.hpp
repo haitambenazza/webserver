@@ -1,51 +1,66 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.hpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/12 03:12:13 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/25 05:26:12 by kbassim          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #pragma once
 #include "Includes.hpp"
 #include "../Includes/Block.hpp"
-#include "../headers/webserver.hpp"
 
+class Location;
 class Server
 {
     private :
-        std::vector <std::string>                               Data;
         std::vector <std::string>                               keys;
+        std::string                                             Args;
         std::map < std::string, std::vector< std::string > >    Commands;
         std::vector < Location >                                Locations;
-        int16_t	fd;
-		std::string	server_name;
-		std::string	port;
-		std::string	ip;
-		std::string root;
-		std::string index;
-		u_int64_t	max_body_size;
-		std::map<u_int16_t , std::string>error_map;
+        int16_t	                                                fd;
+		std::string	                                            server_name;
+		std::string	                                            port;
+		std::string	                                            ip;
+		std::string                                             root;
+		std::string                                             index;
+		u_int64_t	                                            max_body_size;
+		std::map<int , std::string>                             error_map;
+        bool                                                    status;
+        std::vector<int16_t>                                    ClientFd;
+
     public :
         Server();
         Server( const Server& copy );
         Server& operator=( const Server& copy );
         ~Server();
 
-        void            SetServer( Block& block);
+        bool                                                    SetServers( Block& block );
         std::map < std::string, std::vector< std::string > >    GetCommands();
         std::vector < Location >&                               GetLocations();
-        void	        StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
+        bool	                                                StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag );
         std::vector<std::string>                                GetKeys();
-        bool SetServer();
-        int Getfd() const;
-        std::string GetServerName()const;
-        int    InitializeServerSettings();
-        void    PrintData();
-        void    SetDefaultValue();
-        void	SetAddrServer(struct sockaddr_in *addr);
+        bool                                                    SetServer();
+        int                                                     Getfd() const;
+        std::string                                             GetServerName()const;
+        bool                                                    InitializeServerSettings();
+        void                                                    PrintData();
+        void                                                    SetDefaultValue();
+        bool	                                                SetAddrServer(struct sockaddr_in *addr);
+        std::string                                             GetIp() const;
+        std::string                                             GetPort() const;
+        bool                                                    GetStatus() const;
+        void                                                    SetStatus(bool stat);
+        std::string                                             GetRoot() const;
+        void                                                    AddNewClient(int16_t fd);
+        std::vector<int16_t>                                    GetClients() const;
+        void                                                    SetMaxBodySize( std::string val );
+        std::map<int , std::string>                             GetErrorMap() const;
+        void                                                    SetErrorMap();
+        u_int64_t                                               GetMaxBodySize() const;
+        std::string                                             GetArgs() const;
+        void                                                    SetArgs(std::string s);
 };
+
+std::vector<std::string>	FillVector( std::vector<std::string> Src );
+void	                    PrintMap(std::map<std::string , std::vector <std::string> > Commands);
+bool                        CheckBrackets( std::string s );
+void	                    PrintServer( Server& Serv );
+bool	                    CheckBrackets( std::string s );
+std::vector<std::string>    GetServers( std::string& s );
+std::vector<Server>         GetFullServers( char* FileName );
+bool	                    IsPresent(const std::vector<std::string>& vctr, std::string s);
+bool                        CheckValidKeys(const std::vector<std::string> str);
+bool	                    CheckLocationParams( Server &server );

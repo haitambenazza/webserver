@@ -1,20 +1,9 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: hbenazza <hbenazza@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/06/17 08:32:59 by hbenazza          #+#    #+#              #
-#    Updated: 2025/07/18 13:58:47 by hbenazza         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
 
 NAME = webserver
 
 CONFIG = lol.conf
 
-SRC = $(filter-out client.cpp, $(wildcard */*.cpp) $(wildcard *.cpp))
+SRC = $(wildcard */*.cpp) $(wildcard *.cpp)
 
 HEADER = $(wildcard */*.hpp)
 
@@ -22,14 +11,14 @@ OBJ = ${SRC:.cpp=.o}
 
 CC = c++
 
-CXXFLAGS = -std=c++98 -Wall -Wextra -Werror -g3
+CXXFLAGS = -std=c++98 -g3 -Wall -Wextra -Werror #-fsanitize=address
 
 %.o: %.cpp
-	echo $(SRC)
-	$(CC) $(CXXFLAGS) -c $^ -o $@
+	@$(CC) $(CXXFLAGS) -c $^ -o $@
 
 $(NAME): $(SRC) $(OBJ)
-	$(CC) $(CXXFLAGS) $(OBJ) -o $(NAME)
+	@$(CC) $(CXXFLAGS) $(OBJ) -o $(NAME)
+	@echo "the executable is ready"
 
 clean:
 	@rm -rf $(OBJ)
@@ -40,7 +29,7 @@ fclean:
 	@echo "objects and executable are removed"
 
 debugg: $(NAME)
-	@valgrind --track-fds=yes ./$(NAME) $(CONFIG)
+	@valgrind --leak-check=full --track-fds=yes ./$(NAME) $(CONFIG)
 
 
 re:fclean $(NAME)

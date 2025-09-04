@@ -1,24 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Block.cpp                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/04 22:41:19 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/25 00:47:23 by kbassim          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../headers/webserver.hpp"
 
-Block::Block() : Lvl(0), ArgStart(0), Parent(NULL)
+Block::Block() : Lvl(0), ArgStart(0), Parent(NULL), Status(true)
 {
 }
 
 Block::Block( const Block& copy )
 {
     Lvl = copy.Lvl;
+    Status = copy.Status;
     BlockName = copy.BlockName;
     Arg = copy.Arg;
     Blocks = copy.Blocks;
@@ -28,6 +17,7 @@ Block& Block::operator=( const Block& copy )
 {
     if (this != &copy)
     {
+        Status = copy.Status;
         Lvl = copy.Lvl;
         BlockName = copy.BlockName;
         Arg = copy.Arg;
@@ -75,8 +65,10 @@ void        Block::ArgEpur(std::string &s, Block& blk )
     GetNames( s,  blk );
     while ( c < (int)blk.Names.size() )
     {
+        if (blk.Names[c].find("server") == std::string::npos && blk.Names[c].find("location") == std::string::npos)
+            Status = false;
         Pos = blk.Arg.find(blk.Names[c]);
-        if ( Pos != std::string::npos && !s.find("server_name", Pos) )
+        if ( Pos != std::string::npos && s.find("server_name", Pos) == std::string::npos )
             blk.Arg.erase(Pos, blk.Names[c].length());
         c++;
     }
@@ -103,12 +95,13 @@ void     Block::InBrakects( std::string& s, size_t pos, Block &blk )
         pos++;
     }
     blk.Arg = NewString;
+    ArgEpur( s, blk );
     if (blk.Lvl > 2)
     {
-        std::cerr << "Nested Location detected" << std::endl;
+        std::cerr << "nested location detected" << std::endl;
+        Status = false;
         return ;
     }
-    ArgEpur( s, blk );
 }
 
 const std::string&   Block::GetName( ) const
@@ -120,6 +113,12 @@ int     Block::GetLvl()
 {
     return (Lvl);
 }
+
+bool         Block::GetStatus() const
+{
+    return (Status);
+}
+
 void    Block::SetBlockName( std::string& s, Block& block, size_t pos )
 {
     int         j;
@@ -161,7 +160,10 @@ std::string&    Block::GetArg()
     return (Arg);
 }
 
-
+void    Block::SetStatus( bool status )
+{
+    Status = status;
+}
 void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
 {
     Block   Child;
@@ -176,13 +178,14 @@ void    Block::FillBlock( std::string& s,Block& block, int& i, int& j )
             if (s[i] == '{')
             {
                 j++;
-                Child.Parent = &block;
                 Child.Lvl = j;
                 SetBlockName( s, Child, i );
                 block.Blocks.push_back(Child);
                 i++;
                 block.Blocks.back().Lvl = j;
                 InBrakects( s, Child.ArgStart, block.Blocks.back() );
+                if (block.Blocks.back().Status == false)
+                    return ;
                 FillBlock( s, block.Blocks.back(), i, j );
             }
             else if (s[i] == '}')

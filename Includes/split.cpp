@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   split.cpp                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: kbassim <kbassim@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/03 16:40:37 by kbassim           #+#    #+#             */
-/*   Updated: 2025/07/03 22:39:35 by kbassim          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "Includes.hpp"
 
@@ -58,6 +47,10 @@ std::vector<std::string> split( std::string s, std::string delimiter )
     std::vector<std::string>    lst;
     bool                        InQuote;
 
+    if (s.empty())
+    {
+        return std::vector<std::string>();
+    }
     end = 0;
     st = 0;
     InQuote = false;
