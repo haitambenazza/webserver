@@ -199,8 +199,9 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 
 	size_t totalSize = 0;
 	size_t toSend = response.str().size();
-	while (totalSize < toSend)
+	while (true)
 	{
+		usleep(1000);
 		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + totalSize, toSend - totalSize, 0);
 		if (sent < 0)
 		{
@@ -208,7 +209,10 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 			break ;
 		}
 		totalSize += sent;
+		if (totalSize >= toSend)
+			break;
 	}
+	std::cout << totalSize << std::endl;
 	return true;
 }
 
@@ -250,8 +254,7 @@ bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 
 	if (!location.empty() && location[location.size() - 1] != '/')
 	{
-		
-		std::cout << "byte_send() == " << SendData(s, m, i, OK, location) << std::endl;
+		SendData(s, m, i, OK, location);
 	}
 	else if (location[location.length()] == '/')
 		std::cout << "autoindex\n";
