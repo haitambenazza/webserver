@@ -198,11 +198,13 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	response << data.str();
 
 	m.GetClient()[i].SetFileSize(response.str().size());
-	// std::cout << " before send == " << m.GetClient()[i].GetSentSize() << std::endl;
-	ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), 4096 , 0);
-	// std::cout << "response == "<<response.str().c_str() + 40 << std::endl;
-	// std::cout << "sent == " << sent << " new size == " << m.GetClient()[i].GetSentSize() << " totalsize == " << m.GetClient()[i].GetFileSize() << std::endl;
-	m.GetClient()[i].SetSentSize((size_t) sent);//+=
+	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
+	if (toSend > 0)
+	{
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , MSG_NOSIGNAL);
+		if (sent >= 0)
+			m.GetClient()[i].SetSentSize((size_t) sent);
+	}
 	return true;
 }
 
