@@ -36,9 +36,9 @@ class Location
         bool                                                    GetAutoIndexStatus() const;
         std::vector<std::string>                                GetAllowedMethods() const;
         bool                                                    SetAllowedMethods( std::vector<std::string> s );
-        void                                                    SetCgiPathMap(std::string key, std::string value);
-        std::map<std::string, std::string>                      GetCgiPathMap() const;
         void                                                    SetRedirect(std::string s);
         std::string                                             GetRedirect() const;
+        void                                                    SetCgiPathMap( std::string &s );
+        std::map<std::string, std::string>                      GetCgiPathMap() const;
 };
 #endif

@@ -2,12 +2,63 @@
 #include "../headers/webserver.hpp"
 
 Cgi::Cgi(){}
-Cgi::Cgi( Request& Req ){
-    SetEnv(  Req );
+Cgi::Cgi( Request& Req , std::string& path, std::string& filepath ){
+    SetEnv( Req , path, filepath );
 }
 Cgi::~Cgi(){}
 
-void    Cgi::SetEnv( Request& Req )
+std::string ReturnExtention(std::string s)
+{
+    if (s.empty())
+        return "";
+    size_t i = s.size();
+    while (i > 0)
+    {
+        if (s[i] == '.')
+            return (s.substr(i));
+        i--;
+    }
+    return "";
+}
+
+bool ValidCgiExtention(std::string extention)
+{
+    return (extention == ".cgi" ||
+            extention == ".pl" ||
+            extention == ".py" ||
+            extention == ".php" ||
+            extention == ".sh" ||
+            extention == ".rb" ||
+            extention == ".exe" ||
+            extention == ".out");
+}
+
+std::string Matchkeytoextention(std::string& s)
+{
+    if (s == ".py")
+        return ("_py");
+    else if (s == ".pl")
+        return ("_pl");
+    else if (s == ".php")
+        return ("_php");
+    else if (s == ".sh")
+        return ("_sh");
+    else if (s == ".rb")
+        return ("_rb");
+    else if (s == ".exe")
+        return ("_exe");
+    else if (s == ".out")
+        return ("_out");
+    return ("");
+}
+
+std::string GetCgiPath(std::map<std::string, std::string>& mp, std::string& key)
+{
+    if (mp.find(key) != mp.end())
+        return (mp.find(key))->second;
+    return ("");
+}
+void    Cgi::SetEnv( Request& Req , std::string& path, std::string& filepath )
 {
     env.push_back("REQUEST_METHOD=" + Req.getMethod());
     env.push_back("SCRIPT_NAME=" + Req.GetScriptName());
@@ -17,7 +68,7 @@ void    Cgi::SetEnv( Request& Req )
     env.push_back("CONTENT_LENGTH=" + Req.getHeaderValue("Content-Length"));
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     env.push_back("REQUEST_URI=" + Req.getUri());
-    ExecuteCgi(Req);
+    ExecuteCgi(Req , path, filepath);
 }
 
 std::vector<char *> Cgi::GetEnvCgi()
@@ -32,8 +83,10 @@ std::vector<char *> Cgi::GetEnvCgi()
     return (EnvVars);
 }
 
-void    Cgi::ExecuteCgi(Request &req)
+void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath )
 {
+    std::vector<char *> envp = GetEnvCgi();
+
     if (pipe(ParentFd) < 0)
     {
         std::cerr << "Parent pipe creation failed" << std::endl;
@@ -65,8 +118,6 @@ void    Cgi::ExecuteCgi(Request &req)
             exit(1);
         }
         close(ParentFd[1]);
-
-
         if (dup2(ChildFd[0] , STDIN_FILENO) == -1)
         {
             perror("dup2_child");
@@ -76,20 +127,12 @@ void    Cgi::ExecuteCgi(Request &req)
         
         std::vector<char *> envVars = GetEnvCgi();
         
-        (void) req;
-        // char *cmds[3];
-        // cmds[0] = (char *)"/bin/python3";
-        // cmds[1] = (char *)req.GetScriptPath().c_str();
-        
-        // std::cerr << "cmd[1] == " << req.GetScriptPath() << std::endl;
-    
-        // cmds[2] = NULL;
-        char* cmds[3] = { (char *)"/bin/python3", (char *)"www/bin/hello.py", NULL };
-        if (!access("www/bin/hello.py", F_OK)) {
-            std::cerr << "aaaaaaaaaa" << std::endl;
+        char* cmds[3] = { (char *)path.c_str(), (char *)"www/bin/hello.py", NULL };
+        if (!access(path.c_str(), F_OK)) 
+        {
+            if (execve(cmds[0] , cmds , envp.data()) == -1)
+                perror("execve");
         }
-        if (execve(cmds[0] , cmds , NULL) == -1)
-            perror("execve");
         exit(1);
     }
     else
