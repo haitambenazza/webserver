@@ -5,6 +5,7 @@ Location::Location(  )
     CgiEnabled = "off";
     AutoIndex = "off";
     AutoIndexStatus = false;
+    Redirect = "";
 }
 
 Location::Location( const Location&  copy )
@@ -13,6 +14,7 @@ Location::Location( const Location&  copy )
     Commands = copy.Commands;
     CgiEnabled = copy.CgiEnabled;
     AutoIndex = copy.AutoIndex;
+    Redirect = copy.Redirect;
     AutoIndexStatus = copy.AutoIndexStatus;  
 }
 
@@ -23,6 +25,7 @@ Location&   Location::operator=( const Location&  copy )
         Path = copy.Path;
         Commands = copy.Commands;
         CgiEnabled = copy.CgiEnabled;
+        Redirect = copy.Redirect;
         AutoIndex = copy.AutoIndex;
         AutoIndexStatus = copy.AutoIndexStatus;
     }
@@ -136,6 +139,15 @@ std::string&         Location::GetPath()
 void                 Location::SetPath( std::string& s )
 {
     Path = s;
+}
+
+void            Location::SetRedirect(std::string s)
+{
+    Redirect = s;
+}                                        
+std::string        Location::GetRedirect() const
+{
+    return (Redirect);
 }
 
 void                Location::SetAutoIndexStatus(bool stat)
