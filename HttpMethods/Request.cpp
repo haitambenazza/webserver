@@ -105,31 +105,7 @@ void Request::stripCR(std::string &s)
         s.erase(s.size() - 1);
 }
 
-std::string ReturnExtention(std::string s)
-{
-    if (s.empty())
-        return "";
-    size_t i = s.size();
-    while (i > 0)
-    {
-        if (s[i] == '.')
-            return (s.substr(i));
-        i--;
-    }
-    return "";
-}
 
-bool ValidCgiExtention(std::string extention)
-{
-    return (extention == ".cgi" ||
-            extention == ".pl" ||
-            extention == ".py" ||
-            extention == ".php" ||
-            extention == ".sh" ||
-            extention == ".rb" ||
-            extention == ".exe" ||
-            extention == ".out");
-}
 bool Request::parseRequestLine(const std::string &line)
 {
     std::stringstream ss(line);

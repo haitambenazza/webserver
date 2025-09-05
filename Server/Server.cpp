@@ -178,6 +178,10 @@ bool Server::SetServers( Block& block )
                 NewLocation.SetPath( lst[1] );
             else
                 status = false;
+            if (NewLocation.GetCgiStatus() == "on")
+            {
+                NewLocation.SetCgiPathMap(children[i].GetArg());
+            }
 			Locations.push_back( NewLocation );
 		}
         SetServers( children[i] );
@@ -204,6 +208,12 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
         if (flag)
             keys.push_back(key);
         values = FillVector( split(tmp[i], " ") );
+        if (tmp[i][0] == '_' && flag == 0)
+        {
+            std::vector<std::string> lst = split(tmp[i], " ");
+
+            std::cout << tmp[i] << std::endl;
+        }
         Mp.insert(std::make_pair(key, values));
 		i++;
 	}

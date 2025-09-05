@@ -15,7 +15,8 @@ Location::Location( const Location&  copy )
     CgiEnabled = copy.CgiEnabled;
     AutoIndex = copy.AutoIndex;
     Redirect = copy.Redirect;
-    AutoIndexStatus = copy.AutoIndexStatus;  
+    AutoIndexStatus = copy.AutoIndexStatus;
+    PathsToCgi = copy.PathsToCgi;  
 }
 
 Location&   Location::operator=( const Location&  copy )
@@ -28,6 +29,7 @@ Location&   Location::operator=( const Location&  copy )
         Redirect = copy.Redirect;
         AutoIndex = copy.AutoIndex;
         AutoIndexStatus = copy.AutoIndexStatus;
+        PathsToCgi = copy.PathsToCgi;
     }
     return (*this);
 }
@@ -99,6 +101,26 @@ std::vector<std::string> Location::GetValuesLocation( std::string key)
     }
     else
         return std::vector<std::string>();
+}
+
+void        Location::SetCgiPathMap( std::string &s )
+{
+    std::vector<std::string> tmp;
+
+    tmp = split(s, ";");
+    for (size_t i = 0; i < tmp.size(); i++)
+    {
+        if (tmp[i][0] == '_')
+        {
+            std::vector<std::string> lst = split(tmp[i], " ");
+            PathsToCgi.insert(std::make_pair(lst[0], lst[1]));
+        }
+    }
+}
+
+std::map<std::string, std::string>             Location::GetCgiPathMap() const
+{
+    return (PathsToCgi);
 }
 
 
