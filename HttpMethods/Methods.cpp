@@ -47,10 +47,20 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	
 	mp = loc.GetCommands();
 	root = GetRoot(server, loc);
-	if (loc.GetPath() != "/")
+	it = mp.find("redirect");
+	if (it != mp.end())
+	{
+		path += it->second[0];
+		// std::cout << "root + path == " <<  root + path << std::endl;
+		return (root + path);
+	}
+	else if (loc.GetPath() != "/")
+	{
 		path += loc.GetPath();
+	}
 	else
 		path += "";
+	// std::cout << "path === " <<  path << std::endl;
 	if ( MatchLocationWithUri(Uri, path) || (!MatchLocationWithUri(Uri, path) && loc.GetPath() == "/"))
 	{
 		it = mp.find("index");
@@ -60,10 +70,14 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 		{
 			if (Uri[Uri.size() - 1] == '/')
 				Uri = Uri.substr(0, Uri.size() - 1);
-			if (loc.GetAutoIndex() == "on")
+			if (loc.GetAutoIndex() == "on" && loc.GetRedirect().empty())
+			{
 				return (AutoIndex(root , Uri));
-			else if (loc.GetAutoIndex() == "on" && Uri != path)
+			}
+			else if (loc.GetAutoIndex() == "on" && Uri != path && loc.GetRedirect().empty())
 				return (root + Uri);
+			else if (!loc.GetRedirect().empty())
+				return (root + loc.GetPath());
 			else
 				return ("");
 		}
@@ -176,6 +190,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
+	std::cout << "status == " << status << std::endl;
 	mp = s.GetErrorMap();
 	if (status >= 400 )
 	{
@@ -242,16 +257,7 @@ int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 
 bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 {
-	std::string error = "error_pages/404.html";
-
-	if (!location.empty() && location[location.size() - 1] != '/')
-	{
-		SendData(s, m, i, OK, location);
-	}
-	else if (location[location.length()] == '/')
-		std::cout << "autoindex\n";
-	else
-		SendData(s, m, i, NotFound, location);
+	SendData(s, m, i, m.GetClient()[i].GetRequest().getStatusCode(), location);
 	return (true);
 }
 
@@ -298,13 +304,14 @@ int		Delete(  std::string path  )
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
+	if (path.empty())
+		path = "error_pages/404.html";
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
 
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
-		// std::cout << "heeeeeeeeeeeeeeeey\n";
 	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
@@ -315,9 +322,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
         SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
     }
 	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-	{
-		// std::cout << " new size0 == " << m.GetClient()[i].GetSentSize() << " totalsize0 == " << m.GetClient()[i].GetFileSize() << std::endl;
 		disconnectClient(m, i);
-	}
 	return true;
 }

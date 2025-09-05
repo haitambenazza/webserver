@@ -14,7 +14,9 @@ class Location
         std::string                                             CgiEnabled;
         std::string                                             AutoIndex;
         bool                                                    AutoIndexStatus;
+        std::string                                             Redirect;
         std::vector<std::string>                                AllowedMethods;
+        std::map<std::string, std::string>                      PathsToCgi;
     public :
         Location();
         Location( const Location&  copy );
@@ -33,6 +35,10 @@ class Location
         std::vector<std::string>                                GetValuesLocation(std::string key);
         bool                                                    GetAutoIndexStatus() const;
         std::vector<std::string>                                GetAllowedMethods() const;
-        bool                                                    SetAllowedMethods( std::vector<std::string> s );    
+        bool                                                    SetAllowedMethods( std::vector<std::string> s );
+        void                                                    SetCgiPathMap(std::string key, std::string value);
+        std::map<std::string, std::string>                      GetCgiPathMap() const;
+        void                                                    SetRedirect(std::string s);
+        std::string                                             GetRedirect() const;
 };
 #endif
