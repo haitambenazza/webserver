@@ -178,6 +178,10 @@ bool Server::SetServers( Block& block )
                 NewLocation.SetPath( lst[1] );
             else
                 status = false;
+            if (NewLocation.GetCgiStatus() == "on")
+            {
+                NewLocation.SetCgiPathMap(children[i].GetArg());
+            }
 			Locations.push_back( NewLocation );
 		}
         SetServers( children[i] );
@@ -204,6 +208,12 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
         if (flag)
             keys.push_back(key);
         values = FillVector( split(tmp[i], " ") );
+        if (tmp[i][0] == '_' && flag == 0)
+        {
+            std::vector<std::string> lst = split(tmp[i], " ");
+
+            std::cout << tmp[i] << std::endl;
+        }
         Mp.insert(std::make_pair(key, values));
 		i++;
 	}
@@ -236,10 +246,6 @@ bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
     return (true);
 }
 
-bool CheckLocationKeys(std::string& s)
-{
-    return (s == "allowed_methods" || s == "root" || s == "autoindex" || s == "index" ||s == "cgi_enable");
-}
 bool CheckCommandLocation(Location& L)
 {
     std::map<std::string , std::vector<std::string> >mp = L.GetCommands();
@@ -247,6 +253,12 @@ bool CheckCommandLocation(Location& L)
 
     while (it != mp.end())
     {
+        if (it->first == "redirect")
+        {
+            std::cout << "path before: " << L.GetPath() << std::endl;
+            L.SetPath(it->second[0]);
+            std::cout << "path after: " << L.GetPath() << std::endl;
+        }
         if (it->first != "allowed_methods" && it->second.size() != 1)
             return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
         else if ((it->first == "cgi_enable" || it->first == "autoindex"))

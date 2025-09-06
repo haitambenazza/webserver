@@ -5,6 +5,7 @@ Location::Location(  )
     CgiEnabled = "off";
     AutoIndex = "off";
     AutoIndexStatus = false;
+    Redirect = "";
 }
 
 Location::Location( const Location&  copy )
@@ -13,7 +14,9 @@ Location::Location( const Location&  copy )
     Commands = copy.Commands;
     CgiEnabled = copy.CgiEnabled;
     AutoIndex = copy.AutoIndex;
-    AutoIndexStatus = copy.AutoIndexStatus;  
+    Redirect = copy.Redirect;
+    AutoIndexStatus = copy.AutoIndexStatus;
+    PathsToCgi = copy.PathsToCgi;  
 }
 
 Location&   Location::operator=( const Location&  copy )
@@ -23,8 +26,10 @@ Location&   Location::operator=( const Location&  copy )
         Path = copy.Path;
         Commands = copy.Commands;
         CgiEnabled = copy.CgiEnabled;
+        Redirect = copy.Redirect;
         AutoIndex = copy.AutoIndex;
         AutoIndexStatus = copy.AutoIndexStatus;
+        PathsToCgi = copy.PathsToCgi;
     }
     return (*this);
 }
@@ -98,6 +103,26 @@ std::vector<std::string> Location::GetValuesLocation( std::string key)
         return std::vector<std::string>();
 }
 
+void        Location::SetCgiPathMap( std::string &s )
+{
+    std::vector<std::string> tmp;
+
+    tmp = split(s, ";");
+    for (size_t i = 0; i < tmp.size(); i++)
+    {
+        if (tmp[i][0] == '_')
+        {
+            std::vector<std::string> lst = split(tmp[i], " ");
+            PathsToCgi.insert(std::make_pair(lst[0], lst[1]));
+        }
+    }
+}
+
+std::map<std::string, std::string>             Location::GetCgiPathMap() const
+{
+    return (PathsToCgi);
+}
+
 
 std::vector< std::string>      Location::GetItemsFromServer( std::string s, Server& Serv )
 {
@@ -136,6 +161,15 @@ std::string&         Location::GetPath()
 void                 Location::SetPath( std::string& s )
 {
     Path = s;
+}
+
+void            Location::SetRedirect(std::string s)
+{
+    Redirect = s;
+}                                        
+std::string        Location::GetRedirect() const
+{
+    return (Redirect);
 }
 
 void                Location::SetAutoIndexStatus(bool stat)
