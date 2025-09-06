@@ -193,7 +193,6 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
-	std::cout << "status == " << status << std::endl;
 	mp = s.GetErrorMap();
 	if (status >= 400 )
 	{
@@ -201,17 +200,21 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 			return (false);
 		it = mp.find(status);
 		if (it != mp.end())
+		{
 			FullPath = it->second;
+		}
 		else
 		{
 			FullPath = "error_pages/404.html";
 			status = NotFound;
 		}
 	}
+	
 	std::ifstream file(FullPath.c_str());
-	std::cout << "FULL PATH == " << FullPath << std::endl;
 	if ( !file.is_open() )
+	{
 		status = NotFound;
+	}
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
