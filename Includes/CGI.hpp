@@ -21,5 +21,5 @@ class Cgi
         Cgi& operator=(const Cgi &other);
         void        SetEnv( Request& Req );
         std::vector<char *> GetEnvCgi();
-        void            ExecuteCgi( Request& Req , Location& loc, std::string& filepath );
+        void            ExecuteCgi( Request& Req , Location& loc, std::string filepath );
 };

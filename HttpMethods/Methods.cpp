@@ -44,13 +44,10 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-	
-	std::cout << loc.GetCgiStatus() << std::endl;
+
 	if (loc.GetCgiStatus() == "on") 
 	{
-		std::cout << "aaaaaaa7\n";
 		return (root + Uri);
-
 	}
 	mp = loc.GetCommands();
 	root = GetRoot(server, loc);
@@ -313,9 +310,9 @@ int		Delete(  std::string path  )
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::vector<Location> locs = server.GetLocations();
-
+	
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
-	std::cout << "path == " << path << std::endl;
+
 	if (path.empty())
 		path = "error_pages/404.html";
     std::map<int, std::string> map;
@@ -325,8 +322,9 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	{
 		if (locs[j].GetCgiStatus() == "on")
 		{
-			// Request Req = 
-			Cgi cg(m.GetClient()[i].GetRequest(), locs[j], path);
+			std::string root = GetRoot(server, locs[j]);
+			root += path;
+			Cgi cg(m.GetClient()[i].GetRequest(), locs[j], root);
 		}
 	}
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")

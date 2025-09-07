@@ -99,7 +99,7 @@ std::string ReturnCgiPath(std::string s, std::map<std::string, std::string> mp)
     return (GetCgiPath(mp, Matchkeytoextention(ext)));
 }
 
-void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
+void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
 {
     SetEnv( Req );
     std::vector<char *> envp = GetEnvCgi();
@@ -110,7 +110,6 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
         std::cerr << "CGI path not found for file: " << filepath << std::endl;
         return;
     }
-    // (void) Req;
     if (pipe(ParentFd) < 0)
     {
         std::cerr << "Parent pipe creation failed" << std::endl;
@@ -137,7 +136,7 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
     {
         close(ParentFd[0]);
         close(ChildFd[1]);
-        // std::cout << "aaaaaaaaaaaaaaaaaaa7" <<  CgiPath.c_str() << std::endl;
+
         if (dup2(ParentFd[1] , STDOUT_FILENO) == -1)
         {
             perror("dup2_prnt");
@@ -150,15 +149,14 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
             exit(1);
         }
         close(ChildFd[0]);
-        
-        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)filepath.c_str(), NULL};
+        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
         execve(cmds[0] , cmds , envp.data());
         exit(1);
     }
     else
     {
-        // close(ParentFd[1]);
-        // close(ChildFd[0]);
+        close(ParentFd[1]);
+        close(ChildFd[0]);
         output.clear();
         output = "";
         const char* input = "Hello\n";
@@ -170,13 +168,12 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
         char buffer[4096];
         ssize_t bytes_read = 0;
 
-        if (ParentFd[0] != -1)
-        {
-            while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
-                buffer[bytes_read] = '\0';
-                output += buffer;
-            }
+        
+        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
+            buffer[bytes_read] = '\0';
+            output += buffer;
         }
+        
         if (bytes_read == -1) {
             perror("read");
         }
