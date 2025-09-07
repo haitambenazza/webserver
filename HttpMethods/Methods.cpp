@@ -200,9 +200,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 			return (false);
 		it = mp.find(status);
 		if (it != mp.end())
-		{
 			FullPath = it->second;
-		}
 		else
 		{
 			FullPath = "error_pages/404.html";
