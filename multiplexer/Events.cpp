@@ -35,6 +35,7 @@ bool	InitServers(std::vector<Server> &servers, char *filename)
 	{
 		if (servers[serv].GetStatus() == false)
 			return (false);
+		servers[serv].SetErrorMap();
 		servers[serv].PrintData();
 		std::cout << "------------------------\n";
 	}
@@ -249,7 +250,6 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				if (ReadData(multiplexer, i) == 1)
 				{
 					multiplexer.GetEvents()[i].events = EPOLLOUT;
-					
 					if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]))
 					{
 						perror("epoll_ctl()_MOD");

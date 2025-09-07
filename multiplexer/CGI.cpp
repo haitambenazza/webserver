@@ -1,9 +1,8 @@
 #include "../headers/webserver.hpp"
-#include "../headers/webserver.hpp"
 
 Cgi::Cgi(){}
-Cgi::Cgi( Request& Req , std::string& path, std::string& filepath ){
-    SetEnv( Req , path, filepath );
+Cgi::Cgi( Request Req , Location& loc, std::string& filepath ){
+    ExecuteCgi( Req , loc, filepath );
 }
 Cgi::~Cgi(){}
 
@@ -52,13 +51,13 @@ std::string Matchkeytoextention(std::string& s)
     return ("");
 }
 
-std::string GetCgiPath(std::map<std::string, std::string>& mp, std::string& key)
+std::string GetCgiPath(std::map<std::string, std::string>& mp, std::string key)
 {
     if (mp.find(key) != mp.end())
         return (mp.find(key))->second;
     return ("");
 }
-void    Cgi::SetEnv( Request& Req , std::string& path, std::string& filepath )
+void    Cgi::SetEnv( Request& Req )
 {
     env.push_back("REQUEST_METHOD=" + Req.getMethod());
     env.push_back("SCRIPT_NAME=" + Req.GetScriptName());
@@ -68,7 +67,6 @@ void    Cgi::SetEnv( Request& Req , std::string& path, std::string& filepath )
     env.push_back("CONTENT_LENGTH=" + Req.getHeaderValue("Content-Length"));
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     env.push_back("REQUEST_URI=" + Req.getUri());
-    ExecuteCgi(Req , path, filepath);
 }
 
 std::vector<char *> Cgi::GetEnvCgi()
@@ -77,16 +75,33 @@ std::vector<char *> Cgi::GetEnvCgi()
     for (size_t i = 0; i < env.size(); i++)
     {
         EnvVars.push_back((char *)env[i].c_str());
-        std::cout << EnvVars.back() << std::endl;
+        // std::cout << EnvVars.back() << std::endl;
     }
     EnvVars.push_back(NULL);
     return (EnvVars);
 }
 
-void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath )
+std::string ReturnCgiPath(std::string s, std::map<std::string, std::string> mp)
 {
-    std::vector<char *> envp = GetEnvCgi();
+    std::string ext = ReturnExtention(s);
 
+    if (ext.empty())
+        return ("");
+    if (!ValidCgiExtention(ext))
+        return ("");
+    if (Matchkeytoextention(ext).empty())
+        return ("");
+    return (GetCgiPath(mp, Matchkeytoextention(ext)));
+}
+
+void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
+{
+    SetEnv( Req );
+    std::vector<char *> envp = GetEnvCgi();
+    
+    std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
+    if (CgiPath.empty())
+    // (void) Req;
     if (pipe(ParentFd) < 0)
     {
         std::cerr << "Parent pipe creation failed" << std::endl;
@@ -94,7 +109,7 @@ void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath
     }
     if (pipe(ChildFd) < 0)
     {
-        std::cerr << "Child Pipe creation failed" << std::endl;
+        std::cerr << "Child pipe creation failed" << std::endl;
         return;
     }
     child_pid = fork();
@@ -109,13 +124,13 @@ void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath
     } 
     else if (child_pid == 0)
     {
-        // std::cout << "YAAAAARBIIII" << std::endl;
-        close(ParentFd[0]); // close stdout parent
-        close(ChildFd[1]); // close stdin child
+        close(ParentFd[0]);
+        close(ChildFd[1]);
+        // std::cout << "aaaaaaaaaaaaaaaaaaa7" <<  CgiPath.c_str() << std::endl;
         if (dup2(ParentFd[1] , STDOUT_FILENO) == -1)
         {
             perror("dup2_prnt");
-            exit(1);
+            exit(1); 
         }
         close(ParentFd[1]);
         if (dup2(ChildFd[0] , STDIN_FILENO) == -1)
@@ -127,23 +142,17 @@ void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath
         
         std::vector<char *> envVars = GetEnvCgi();
         
-        char* cmds[3] = { (char *)path.c_str(), (char *)"www/bin/hello.py", NULL };
-        if (!access(path.c_str(), F_OK)) 
-        {
-            if (execve(cmds[0] , cmds , envp.data()) == -1)
-                perror("execve");
-        }
+        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)filepath.c_str(), (char *)envp.data()};
+        execve(cmds[0] , cmds , envp.data());
         exit(1);
     }
     else
     {
         close(ParentFd[1]);
         close(ChildFd[0]);
-
         output.clear();
         output = "";
-
-        const char* input = "Hello\n";  // note newline
+        const char* input = "Hello\n";
         if (write(ChildFd[1], input, strlen(input)) == -1) {
             perror("write");
         }
@@ -154,19 +163,13 @@ void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath
 
         while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
             buffer[bytes_read] = '\0';
-            std::cerr << "Bytes readed: " << bytes_read << std::endl;
-            std::cerr << "buffer: " << buffer << std::endl;
             output += buffer;
         }
         if (bytes_read == -1) {
             perror("read");
         }
         close(ParentFd[0]);
-
         int status;
         waitpid(child_pid, &status, 0);
-
-        std::cerr << "Output from child :\n" << output << std::endl;
-
     }
 }

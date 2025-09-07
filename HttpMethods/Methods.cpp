@@ -9,7 +9,7 @@ bool	MatchLocationWithUri(std::string Uri, std::string Loc)
 		return (false);
 	Loc = Loc.substr(1, Loc.size());
 	vec = split(Uri, "/");
-	if (vec[0] == Loc)
+	if (!vec.empty() && vec[0] == Loc)
 	{
 		return (true);
 	}
@@ -45,6 +45,13 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 	
+	std::cout << loc.GetCgiStatus() << std::endl;
+	if (loc.GetCgiStatus() == "on") 
+	{
+		std::cout << "aaaaaaa7\n";
+		return (root + Uri);
+
+	}
 	mp = loc.GetCommands();
 	root = GetRoot(server, loc);
 	it = mp.find("redirect");
@@ -60,7 +67,6 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	}
 	else
 		path += "";
-	// std::cout << "path === " <<  path << std::endl;
 	if ( MatchLocationWithUri(Uri, path) || (!MatchLocationWithUri(Uri, path) && loc.GetPath() == "/"))
 	{
 		it = mp.find("index");
@@ -109,6 +115,7 @@ std::string GetContentType(std::string file)
 	std::string type;
 	size_t	pos = file.find('.');
 
+	// std::cout << file << std::endl;
 	type = file.substr(pos + 1);
 	if (type == "html")
 		return ("text/html");
@@ -133,6 +140,7 @@ std::string	BuildResponse(std::string type, int size, int status)
 	std::stringstream sizefile;
 	std::stringstream code;
 
+	// std::cout << "status == " << status << std::endl;
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
@@ -190,7 +198,6 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
-	std::cout << "status == " << status << std::endl;
 	mp = s.GetErrorMap();
 	if (status >= 400 )
 	{
@@ -208,6 +215,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::ifstream file(FullPath.c_str());
 	if ( !file.is_open() )
 		status = NotFound;
+	// std::cout << "status == " << status << std::endl;
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
@@ -220,6 +228,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 		if (sent >= 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
 	}
+	// std::cout << response.str() << std::endl;
 	return true;
 }
 
@@ -303,12 +312,23 @@ int		Delete(  std::string path  )
 }
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
+	std::vector<Location> locs = server.GetLocations();
+
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
+	std::cout << "path == " << path << std::endl;
 	if (path.empty())
 		path = "error_pages/404.html";
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
-
+	
+	for(size_t i = 0; i < locs.size(); i++)
+	{
+		if (locs[i].GetCgiStatus() == "on")
+		{
+			// Request Req = 
+			Cgi cg(m.GetClient()[i].GetRequest(), locs[i], path);
+		}
+	}
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);

@@ -137,8 +137,8 @@ std::vector<Server>   GetFullServers( char* FileName )
 			NewServer.SetStatus(false);
 		}
 		NewServer.SetArgs(NewBlock.GetBlocks()[i].GetArg());
-		NewServer.SetErrorMap();
 		srvs.push_back( NewServer );
+		srvs.back().SetErrorMap();
 		i++;
 	}
 	return (srvs);
