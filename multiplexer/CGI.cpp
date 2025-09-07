@@ -1,8 +1,15 @@
 #include "../headers/webserver.hpp"
 
-Cgi::Cgi(){}
+Cgi::Cgi()
+{
+    ParentFd[0] = ParentFd[1] = -1;
+    ChildFd[0] = ChildFd[1] = -1;
+}
 Cgi::Cgi( Request Req , Location& loc, std::string& filepath ){
+    ParentFd[0] = ParentFd[1] = -1;
+    ChildFd[0] = ChildFd[1] = -1;
     ExecuteCgi( Req , loc, filepath );
+
 }
 Cgi::~Cgi(){}
 
@@ -109,6 +116,10 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
     }
     if (pipe(ChildFd) < 0)
     {
+        if (ParentFd[0] != -1)
+            close(ParentFd[0]);
+        if (ParentFd[1] != -1)
+            close(ParentFd[1]);
         std::cerr << "Child pipe creation failed" << std::endl;
         return;
     }
@@ -140,16 +151,14 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
         }
         close(ChildFd[0]);
         
-        std::vector<char *> envVars = GetEnvCgi();
-        
-        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)filepath.c_str(), (char *)envp.data()};
+        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)filepath.c_str(), NULL};
         execve(cmds[0] , cmds , envp.data());
         exit(1);
     }
     else
     {
-        close(ParentFd[1]);
-        close(ChildFd[0]);
+        // close(ParentFd[1]);
+        // close(ChildFd[0]);
         output.clear();
         output = "";
         const char* input = "Hello\n";
@@ -159,11 +168,14 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
         close(ChildFd[1]);
 
         char buffer[4096];
-        ssize_t bytes_read;
+        ssize_t bytes_read = 0;
 
-        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
-            buffer[bytes_read] = '\0';
-            output += buffer;
+        if (ParentFd[0] != -1)
+        {
+            while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
+                buffer[bytes_read] = '\0';
+                output += buffer;
+            }
         }
         if (bytes_read == -1) {
             perror("read");
