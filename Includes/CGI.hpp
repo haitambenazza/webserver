@@ -15,11 +15,11 @@ class Cgi
 
     public:
         Cgi();
-        Cgi( Request& Req , std::string& path, std::string& filepath );
+        Cgi(  Request Req , Location& loc, std::string& filepath  );
         ~Cgi();
         Cgi(const Cgi &other);
         Cgi& operator=(const Cgi &other);
-        void        SetEnv( Request& Req , std::string& path, std::string& filepath );
+        void        SetEnv( Request& Req );
         std::vector<char *> GetEnvCgi();
-        void            ExecuteCgi( Request& Req , std::string& path, std::string& filepath );
+        void            ExecuteCgi( Request& Req , Location& loc, std::string& filepath );
 };

@@ -8,22 +8,25 @@ Request::Request(const std::string& request_string) {
 }
 
 Request::Request(const Request& other)
-    : method(other.method), uri(other.uri), version(other.version), headers(other.headers), body(other.body), status_code(other.status_code), query_string (other.query_string),
-        ScriptName(other.ScriptName), Scriptpath(other.Scriptpath) {}
+{
+    uri = other.uri;
+    method = other.method;
+    version = other.version;
+    body = other.body;
+    query_string = other.query_string;
+    ScriptName = other.ScriptName;
+    Scriptpath = other.Scriptpath;
+}
 
 Request& Request::operator=(const Request& other) {
     if (this != &other) {
         method = other.method;
         uri = other.uri;
         version = other.version;
-        headers = other.headers;
         body = other.body;
         query_string = other.query_string;
         ScriptName = other.ScriptName;
         Scriptpath = other.Scriptpath;
-        headers.clear();
-        body.clear();
-        status_code = other.status_code;
     }
     return *this;
 }

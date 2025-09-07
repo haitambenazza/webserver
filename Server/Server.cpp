@@ -131,10 +131,12 @@ void      Server::SetErrorMap()
 
     tmp = split(Args, ";");
     if (tmp.empty())
+    {
         return ;
+    }
     for (size_t i = 0; i < tmp.size(); i++)
     {
-        if ( tmp[i].find("error_map") != std::string::npos )
+        if ( tmp[i].find("error_page") != std::string::npos )
         {
             std::vector<std::string> tmp1;
             tmp1 = split(tmp[i], " ");
@@ -208,12 +210,6 @@ bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std
         if (flag)
             keys.push_back(key);
         values = FillVector( split(tmp[i], " ") );
-        if (tmp[i][0] == '_' && flag == 0)
-        {
-            std::vector<std::string> lst = split(tmp[i], " ");
-
-            std::cout << tmp[i] << std::endl;
-        }
         Mp.insert(std::make_pair(key, values));
 		i++;
 	}
@@ -255,9 +251,7 @@ bool CheckCommandLocation(Location& L)
     {
         if (it->first == "redirect")
         {
-            std::cout << "path before: " << L.GetPath() << std::endl;
             L.SetPath(it->second[0]);
-            std::cout << "path after: " << L.GetPath() << std::endl;
         }
         if (it->first != "allowed_methods" && it->second.size() != 1)
             return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
