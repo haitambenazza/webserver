@@ -1,7 +1,15 @@
 #include "../headers/webserver.hpp"
 
-Cgi::Cgi(){}
-Cgi::Cgi( Request Req , Location& loc, std::string& filepath ){
+Cgi::Cgi(){
+    ParentFd[0] = ParentFd[1] = -1;
+    ChildFd[0] = ChildFd[1] = -1;
+    child_pid = -1;
+}
+Cgi::Cgi( Request Req , Location& loc, std::string& filepath )
+{
+    ParentFd[0] = ParentFd[1] = -1;
+    ChildFd[0] = ChildFd[1] = -1;
+    child_pid = -1;
     ExecuteCgi( Req , loc, filepath );
 }
 Cgi::~Cgi(){}
@@ -10,13 +18,9 @@ std::string ReturnExtention(std::string s)
 {
     if (s.empty())
         return "";
-    size_t i = s.size();
-    while (i > 0)
-    {
-        if (s[i] == '.')
-            return (s.substr(i));
-        i--;
-    }
+    size_t pos = s.find_last_of('.');
+    if (pos != std::string::npos)
+        return s.substr(pos);
     return "";
 }
 
@@ -101,6 +105,10 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
     
     std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
     if (CgiPath.empty())
+    {
+        std::cerr << "CGI path not found for file: " << filepath << std::endl;
+        return;
+    }
     // (void) Req;
     if (pipe(ParentFd) < 0)
     {
@@ -109,6 +117,8 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
     }
     if (pipe(ChildFd) < 0)
     {
+        close(ParentFd[0]);
+        close(ParentFd[1]);
         std::cerr << "Child pipe creation failed" << std::endl;
         return;
     }
@@ -140,9 +150,7 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string& filepath )
         }
         close(ChildFd[0]);
         
-        std::vector<char *> envVars = GetEnvCgi();
-        
-        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)filepath.c_str(), (char *)envp.data()};
+        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)filepath.c_str(), NULL};
         execve(cmds[0] , cmds , envp.data());
         exit(1);
     }

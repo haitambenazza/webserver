@@ -321,12 +321,12 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
 	
-	for(size_t i = 0; i < locs.size(); i++)
+	for(size_t j = 0; j < locs.size(); j++)
 	{
-		if (locs[i].GetCgiStatus() == "on")
+		if (locs[j].GetCgiStatus() == "on")
 		{
 			// Request Req = 
-			Cgi cg(m.GetClient()[i].GetRequest(), locs[i], path);
+			Cgi cg(m.GetClient()[i].GetRequest(), locs[j], path);
 		}
 	}
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
