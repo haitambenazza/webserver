@@ -45,7 +45,9 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 
-	if (loc.GetCgiStatus() == "on") 
+
+	
+	if (loc.GetCgiStatus() == "on" && ValidCgiExtention(ReturnExtention(Uri)) ) 
 	{
 		return (root + Uri);
 	}
@@ -199,10 +201,12 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	if (status >= 400 )
 	{
 		if (mp.empty())
-			return (false);
+		return (false);
 		it = mp.find(status);
 		if (it != mp.end())
+		{
 			FullPath = it->second;
+		}
 		else
 		{
 			FullPath = "error_pages/404.html";

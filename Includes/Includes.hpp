@@ -20,6 +20,9 @@ void                        TrimSpaces( std::string& s );
 bool                        AllDigit( std::string s );
 bool                        CheckIp( std::string s );
 std::string                 AutoIndex( std::string root, std::string path );
+std::string                 ReturnExtention(std::string s);
+bool                        ValidCgiExtention(std::string extention);
+std::string                 Matchkeytoextention(std::string& s);
 
 #endif
 

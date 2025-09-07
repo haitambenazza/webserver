@@ -173,7 +173,6 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
             buffer[bytes_read] = '\0';
             output += buffer;
         }
-        
         if (bytes_read == -1) {
             perror("read");
         }
