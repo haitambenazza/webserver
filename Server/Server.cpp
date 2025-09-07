@@ -130,12 +130,11 @@ void      Server::SetErrorMap()
     std::vector<std::string> tmp;
 
     tmp = split(Args, ";");
-    // std::cout << "Args: " << Args << std::endl;
     if (tmp.empty())
         return ;
     for (size_t i = 0; i < tmp.size(); i++)
     {
-        if ( tmp[i].find("error_page") != std::string::npos )
+        if ( tmp[i].find("error_map") != std::string::npos )
         {
             std::vector<std::string> tmp1;
             tmp1 = split(tmp[i], " ");
@@ -145,7 +144,7 @@ void      Server::SetErrorMap()
             }
             error_map.insert(std::make_pair(atoi(tmp1[1].c_str()), tmp1[2]));
         }
-    }
+    } 
 }
 
 void       Server::SetArgs(std::string s)

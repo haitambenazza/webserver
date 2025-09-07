@@ -3,4 +3,3 @@ config file:
 	enable_cgi;
 	max_body_size;
 	
-need to send location where the file is saved..

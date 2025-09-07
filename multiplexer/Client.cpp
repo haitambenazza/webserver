@@ -13,16 +13,12 @@ Client::Client()
 Client::Client( const Client& copy )
 {
     fd = copy.fd;
-    ServerIndex = copy.ServerIndex;
     connectedTime = copy.connectedTime;
-    headers = copy.headers;
-    body = copy.body;
-    Req = copy.Req;
+    ServerIndex = copy.ServerIndex;
     readDone = copy.readDone;
     readeSize = copy.readeSize;
     FileSize = copy.FileSize;
     sent = copy.sent;
-
 }
 
 Client& Client::operator=( const Client& copy )
@@ -32,14 +28,9 @@ Client& Client::operator=( const Client& copy )
         fd = copy.fd;
         ServerIndex = copy.ServerIndex;
         connectedTime = copy.connectedTime;
-        headers = copy.headers;
-        body = copy.body;
-        Req = copy.Req;
-        readDone = copy.readDone;
         readeSize = copy.readeSize;
         FileSize = copy.FileSize;
         sent = copy.sent;
-
     }
     return (*this);
 }

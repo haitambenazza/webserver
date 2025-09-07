@@ -85,9 +85,6 @@ std::vector<char *> Cgi::GetEnvCgi()
 
 void    Cgi::ExecuteCgi( Request& Req , std::string& path, std::string& filepath )
 {
-
-    (void)Req;
-    (void)filepath;
     std::vector<char *> envp = GetEnvCgi();
 
     if (pipe(ParentFd) < 0)

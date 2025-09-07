@@ -180,9 +180,6 @@ std::string	BuildResponse(std::string type, int size, int status)
 			break;
 	}
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
-
-	//need to send location where the file is saved..
-
 	return (response);
 }
 
@@ -193,6 +190,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
+	std::cout << "status == " << status << std::endl;
 	mp = s.GetErrorMap();
 	if (status >= 400 )
 	{
@@ -207,12 +205,9 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 			status = NotFound;
 		}
 	}
-	
 	std::ifstream file(FullPath.c_str());
 	if ( !file.is_open() )
-	{
 		status = NotFound;
-	}
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
@@ -221,7 +216,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 	if (toSend > 0)
 	{
-		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , 0);
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , MSG_NOSIGNAL);
 		if (sent >= 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
 	}
@@ -285,6 +280,7 @@ std::string	GetFileName(Request&	req)
 int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std::string path)
 {
 	std::ofstream 	file;
+
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
 		return (BadRequest);
 	file.open(("www/upload/" + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
@@ -312,6 +308,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 		path = "error_pages/404.html";
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
