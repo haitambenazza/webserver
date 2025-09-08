@@ -11,7 +11,7 @@ class Cgi
         pid_t                       child_pid;
         std::vector<std::string>    env;
         int                         ParentFd[2];
-         int                        ChildFd[2];
+        int                         ChildFd[2];
 
     public:
         Cgi();
@@ -21,5 +21,7 @@ class Cgi
         Cgi& operator=(const Cgi &other);
         void        SetEnv( Request& Req );
         std::vector<char *> GetEnvCgi();
+
+        std::string     GetOutput();
         void            ExecuteCgi( Request& Req , Location& loc, std::string filepath );
 };

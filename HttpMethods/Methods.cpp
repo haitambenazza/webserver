@@ -189,6 +189,32 @@ std::string	BuildResponse(std::string type, int size, int status)
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
+bool SendCgiData(Server& s, Multiplexer& m, int i, Cgi& cgi)
+{
+	(void)s;
+    std::stringstream response;
+    std::string cgi_output = cgi.GetOutput();
+    
+    // Check if CGI output la deja endo HTTP headers
+    if (cgi_output.find("Content-Type:") != std::string::npos) {
+     
+        response << "HTTP/1.1 200 OK\r\n" << cgi_output; // add status;
+    } else {
+        // Ila makanoch lheaders foutput zidhum
+        response << BuildResponse("text/html", cgi_output.size(), 200);
+        response << cgi_output;
+    }
+
+    m.GetClient()[i].SetFileSize(response.str().size());
+    size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
+    if (toSend > 0)
+    {
+        ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
+        if (sent >= 0)
+            m.GetClient()[i].SetSentSize((size_t) sent);
+    }
+    return true;
+}
 
 bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath )
 {
@@ -323,14 +349,23 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
     std::map<int, std::string>::iterator it;
 	
 	for(size_t j = 0; j < locs.size(); j++)
-	{
-		if (locs[j].GetCgiStatus() == "on")
-		{
-			std::string root = GetRoot(server, locs[j]);
-			root += path;
-			Cgi cg(m.GetClient()[i].GetRequest(), locs[j], root);
-		}
-	}
+    {
+        if (locs[j].GetCgiStatus() == "on")
+        {
+            std::string root = GetRoot(server, locs[j]);
+            std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
+            
+            if (ValidCgiExtention(ReturnExtention(cgi_path))) {
+                // hna tatexecuti cgi
+                Cgi cgi(m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+                SendCgiData(server, m, i, cgi);
+                
+                if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+                    disconnectClient(m, i);
+                return true;
+            }
+        }
+    }
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);

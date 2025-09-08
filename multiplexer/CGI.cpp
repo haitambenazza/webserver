@@ -15,6 +15,10 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath )
 }
 Cgi::~Cgi(){}
 
+std::string Cgi::GetOutput() {
+    return output;
+}
+
 std::string ReturnExtention(std::string s)
 {
     if (s.empty())
@@ -105,6 +109,8 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
     std::vector<char *> envp = GetEnvCgi();
     
     std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
+    std::cout << "CGII PAATHH === " << CgiPath << std::endl;
+    std::cout << "FILEPAATHH === " << filepath << std::endl;
     if (CgiPath.empty())
     {
         std::cerr << "CGI path not found for file: " << filepath << std::endl;
@@ -150,7 +156,7 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
         }
         close(ChildFd[0]);
         char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
-        execve(cmds[0] , cmds , envp.data());
+        execve(cmds[0] , cmds , &envp[0]);
         exit(1);
     }
     else
@@ -159,10 +165,7 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
         close(ChildFd[0]);
         output.clear();
         output = "";
-        const char* input = "Hello\n";
-        if (write(ChildFd[1], input, strlen(input)) == -1) {
-            perror("write");
-        }
+        
         close(ChildFd[1]);
 
         char buffer[4096];
@@ -178,6 +181,13 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
         }
         close(ParentFd[0]);
         int status;
-        waitpid(child_pid, &status, 0);
+        if (waitpid(child_pid, &status, 0) == -1)
+            perror("waitpid");
+        
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) 
+        {
+            std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
+            output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+        }
     }
 }
