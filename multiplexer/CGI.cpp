@@ -143,7 +143,7 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         close(ChildFd[0]);
         close(ChildFd[1]);
         return;
-    } 
+    }
     else if (child_pid == 0)
     {
         close(ParentFd[0]);
@@ -152,7 +152,7 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         if (dup2(ParentFd[1] , STDOUT_FILENO) == -1)
         {
             perror("dup2_prnt");
-            exit(1); 
+            exit(1);
         }
         close(ParentFd[1]);
         if (dup2(ChildFd[0] , STDIN_FILENO) == -1)
@@ -171,7 +171,7 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         close(ChildFd[0]);
         output.clear();
         output = "";
-        
+
         ev.events = EPOLLIN;
         ev.data.fd = ParentFd[0];
         if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_ADD, ev.data.fd, &ev) == false)
@@ -182,14 +182,19 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         }
         char buffer[4096];
         ssize_t bytes_read = 0;
-        bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1);
-        if (bytes_read > 0)
+        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0)
         {
             buffer[bytes_read] = '\0';
             std::string tmp(buffer);
             SetOutput(tmp);
         }
-        else if (bytes_read == 0)
+        close(ParentFd[0]);
+        close(ChildFd[1]);
+        int status;
+        if (waitpid(child_pid, &status, 0) == -1)
+            perror("waitpid");
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
         {
             close(ParentFd[0]);
             close(ChildFd[1]);

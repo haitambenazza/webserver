@@ -8,6 +8,7 @@ Client::Client()
     readeSize = 0;
     FileSize = 0;
     sent = 0;
+    IsCgi = false;
 }
 
 Client::Client( const Client& copy )
@@ -22,6 +23,7 @@ Client::Client( const Client& copy )
     Req = copy.Req;
     headers = copy.headers;
     body = copy.body;
+    IsCgi = copy.IsCgi;
 }
 
 Client& Client::operator=( const Client& copy )
@@ -38,6 +40,7 @@ Client& Client::operator=( const Client& copy )
         Req = copy.Req;
         headers = copy.headers;
         body = copy.body;
+        IsCgi = copy.IsCgi;
     }
     return (*this);
 }
@@ -133,4 +136,14 @@ void            Client::clearBuffer()
 {
     headers = std::string();
     body = std::string();
+}
+
+void            Client::SetCgiStatus(bool stat)
+{
+    IsCgi = stat;
+}
+
+bool            Client::GetCgiStatus() const
+{
+    return IsCgi;
 }

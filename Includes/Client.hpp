@@ -16,6 +16,7 @@ class Client
         size_t          readeSize;
         size_t          FileSize;
 	    size_t          sent;
+        bool            IsCgi;
     public :
         Client();
         Client( const Client& copy );
@@ -40,4 +41,6 @@ class Client
         void            SetSentSize( size_t size );
         size_t          GetFileSize() const;
         size_t          GetSentSize() const;
+        void            SetCgiStatus(bool stat);
+        bool            GetCgiStatus() const;
 };

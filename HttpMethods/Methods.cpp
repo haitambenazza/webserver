@@ -46,8 +46,8 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> >::iterator it;
 
 
-	
-	if (loc.GetCgiStatus() == "on" && ValidCgiExtention(ReturnExtention(Uri)) ) 
+
+	if (loc.GetCgiStatus() == "on" && ValidCgiExtention(ReturnExtention(Uri)) )
 	{
 		return (root + Uri);
 	}
@@ -194,10 +194,10 @@ bool SendCgiData(Server& s, Multiplexer& m, int i, Cgi& cgi)
 	(void)s;
     std::stringstream response;
     std::string cgi_output = cgi.GetOutput();
-    
+
     // Check if CGI output la deja endo HTTP headers
     if (cgi_output.find("Content-Type:") != std::string::npos) {
-     
+
         response << "HTTP/1.1 200 OK\r\n" << cgi_output; // add status;
     } else {
         // Ila makanoch lheaders foutput zidhum
@@ -346,17 +346,17 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i )
         {
             std::string root = GetRoot(server, locs[j]);
             std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
-            
-            if (ValidCgiExtention(ReturnExtention(cgi_path))) 
+
+            if (ValidCgiExtention(ReturnExtention(cgi_path)))
 			{
                 // hna tatexecuti cgi
                 Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
 				// {
-					
+
 				// }
 				// std::cout << "00 := " << cgi.GetOutput() << std::endl;
                 SendCgiData(server, m, i, cgi);
-                
+
                 if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
                     disconnectClient(m, i);
                 return ;
@@ -367,16 +367,13 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i )
 
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
-	
-	
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
 
 	if (path.empty())
 		path = "error_pages/404.html";
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
-	
-	
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
