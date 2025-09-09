@@ -12,6 +12,7 @@ class Cgi
         std::vector<std::string>    env;
         int                         ParentFd[2];
         int                         ChildFd[2];
+        bool                        IsExecuted;
 
     public:
         Cgi();
@@ -25,5 +26,10 @@ class Cgi
         std::string     GetOutput();
         void            ExecuteCgi( Multiplexer& m, Request& Req , Location& loc, std::string filepath );
         void            SetOutput(std::string& s);
+        bool            PipePipes();
+        bool            CgiFork();
+        void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
+        bool            AddToEpollCgi(Multiplexer& m);
+        bool            CheckExitStatus();
 };
 void	HandleCgi( Server& server, Multiplexer& m, int &i );

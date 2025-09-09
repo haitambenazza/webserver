@@ -4,15 +4,46 @@ Cgi::Cgi(){
     ParentFd[0] = ParentFd[1] = -1;
     ChildFd[0] = ChildFd[1] = -1;
     child_pid = -1;
+    IsExecuted = false;
 }
 Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath )
 {
     ParentFd[0] = ParentFd[1] = -1;
     ChildFd[0] = ChildFd[1] = -1;
     child_pid = -1;
+    IsExecuted = false;
     ExecuteCgi( m, Req , loc, filepath );
 
 }
+
+Cgi::Cgi(const Cgi &other)
+{
+    script_path = other.script_path;
+    script_name = other.script_name;
+    output = other.output;
+    child_pid = other.child_pid;
+    env = other.env;
+    ParentFd[2] = other.ParentFd[2];
+    ChildFd[2] = other.ChildFd[2];
+    IsExecuted = other.IsExecuted;
+}
+
+Cgi&    Cgi::operator=(const Cgi &other)
+{
+    if (this != &other)
+    {
+        script_path = other.script_path;
+        script_name = other.script_name;
+        output = other.output;
+        child_pid = other.child_pid;
+        env = other.env;
+        ParentFd[2] = other.ParentFd[2];
+        ChildFd[2] = other.ChildFd[2];
+        IsExecuted = other.IsExecuted;
+    }
+    return (*this);
+}
+
 Cgi::~Cgi(){}
 
 std::string Cgi::GetOutput() {
@@ -108,32 +139,25 @@ void            Cgi::SetOutput(std::string& s)
     output += s;
 }
 
-void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath )
+bool Cgi::PipePipes()
 {
-    SetEnv( Req );
-    std::vector<char *> envp = GetEnvCgi();
-    struct epoll_event ev;
-
-    std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
-    // std::cout << "CGII PAATHH === " << CgiPath << std::endl;
-    // std::cout << "FILEPAATHH === " << filepath << std::endl;
-    if (CgiPath.empty())
-    {
-        std::cerr << "CGI path not found for file: " << filepath << std::endl;
-        return;
-    }
-    if (pipe(ParentFd) < 0)
+   if (pipe(ParentFd) < 0)
     {
         std::cerr << "Parent pipe creation failed" << std::endl;
-        return;
+        return false;
     }
     if (pipe(ChildFd) < 0)
     {
         close(ParentFd[0]);
         close(ParentFd[1]);
         std::cerr << "Child pipe creation failed" << std::endl;
-        return;
+        return false;
     }
+    return (true);
+}
+
+bool Cgi::CgiFork()
+{
     child_pid = fork();
     if (child_pid == -1)
     {
@@ -142,62 +166,101 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         close(ParentFd[1]);
         close(ChildFd[0]);
         close(ChildFd[1]);
-        return;
+        return false;
     }
-    else if (child_pid == 0)
-    {
-        close(ParentFd[0]);
-        close(ChildFd[1]);
+    return (true);
+}
 
-        if (dup2(ParentFd[1] , STDOUT_FILENO) == -1)
-        {
-            perror("dup2_prnt");
-            exit(1);
-        }
-        close(ParentFd[1]);
-        if (dup2(ChildFd[0] , STDIN_FILENO) == -1)
-        {
-            perror("dup2_child");
-            exit(1);
-        }
-        close(ChildFd[0]);
-        char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
-        execve(cmds[0] , cmds , &envp[0]);
+void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
+{
+    close(ParentFd[0]);
+    close(ChildFd[1]);
+
+    if (dup2(ParentFd[1] , STDOUT_FILENO) == -1)
+    {
+        perror("dup2_prnt");
         exit(1);
     }
-    else
+    close(ParentFd[1]);
+    if (dup2(ChildFd[0] , STDIN_FILENO) == -1)
     {
-        close(ParentFd[1]);
-        close(ChildFd[0]);
-        output.clear();
-        output = "";
+        perror("dup2_child");
+        exit(1);
+    }
+    close(ChildFd[0]);
+    char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
+    execve(cmds[0] , cmds , &envp[0]);
+    exit(1);
+}
 
-        ev.events = EPOLLIN;
-        ev.data.fd = ParentFd[0];
-        if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_ADD, ev.data.fd, &ev) == false)
-        {
-            close(ParentFd[0]);
-            close(ChildFd[1]);
-            return;
-        }
-        char buffer[4096];
-        ssize_t bytes_read = 0;
-        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0)
-        {
-            buffer[bytes_read] = '\0';
-            std::string tmp(buffer);
-            SetOutput(tmp);
-        }
+bool    Cgi::AddToEpollCgi(Multiplexer& m)
+{
+    struct epoll_event ev;
+    close(ParentFd[1]);
+    close(ChildFd[0]);
+    output.clear();
+    output = "";
+
+    ev.events = EPOLLIN;
+    ev.data.fd = ParentFd[0];
+    if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_ADD, ev.data.fd, &ev) == false)
+    {
         close(ParentFd[0]);
         close(ChildFd[1]);
-        int status;
-        if (waitpid(child_pid, &status, 0) == -1)
-            perror("waitpid");
+        return (false);
+    }
+    return (true);
+}
 
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+bool Cgi::CheckExitStatus()
+{
+    int status;
+
+    close(ParentFd[0]);
+    close(ChildFd[1]);
+    if (waitpid(child_pid, &status, 0) == -1)
+        perror("waitpid");
+    if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+    {
+        std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
+        output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+        return (false);
+    }
+    return (true);
+}
+void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath )
+{
+    SetEnv( Req );
+    std::vector<char *> envp = GetEnvCgi();
+
+    std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
+    if (CgiPath.empty())
+    {
+        std::cerr << "CGI path not found for file: " << filepath << std::endl;
+        return;
+    }
+    if (!PipePipes() && !IsExecuted)
+        return ;
+    if (!CgiFork() && !IsExecuted)
+        return ;
+    else if (child_pid == 0 && !IsExecuted)
+        ExecCgiChild(envp, CgiPath , filepath);
+    else
+    {
+        if (!AddToEpollCgi(m) && !IsExecuted)
+            return ;
+        // char buffer[4096] = {0};
+        ssize_t bytes_read = 0;
+
+        // if ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0)
+        // {
+        //    output += buffer;
+        // }
+        if (bytes_read == 0)
         {
-            std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
-            output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+            if (!CheckExitStatus())
+                return ;
         }
+        IsExecuted = true;
     }
 }
