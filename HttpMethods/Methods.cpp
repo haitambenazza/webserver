@@ -337,9 +337,37 @@ int		Delete(  std::string path  )
 	std::remove(path.c_str());
 	return (OK);
 }
-bool	GetRequest(Server &server, Multiplexer &m, int &i)
+void	HandleCgi( Server& server, Multiplexer& m, int &i )
 {
 	std::vector<Location> locs = server.GetLocations();
+	for(size_t j = 0; j < locs.size(); j++)
+    {
+        if (locs[j].GetCgiStatus() == "on")
+        {
+            std::string root = GetRoot(server, locs[j]);
+            std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
+            
+            if (ValidCgiExtention(ReturnExtention(cgi_path))) 
+			{
+                // hna tatexecuti cgi
+                Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+				// {
+					
+				// }
+				// std::cout << "00 := " << cgi.GetOutput() << std::endl;
+                SendCgiData(server, m, i, cgi);
+                
+                if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+                    disconnectClient(m, i);
+                return ;
+            }
+        }
+    }
+}
+
+bool	GetRequest(Server &server, Multiplexer &m, int &i)
+{
+	
 	
 	std::string path = FullPath(server, m.GetClient()[i].GetRequest().getUri());
 
@@ -348,30 +376,16 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
     std::map<int, std::string> map;
     std::map<int, std::string>::iterator it;
 	
-	for(size_t j = 0; j < locs.size(); j++)
-    {
-        if (locs[j].GetCgiStatus() == "on")
-        {
-            std::string root = GetRoot(server, locs[j]);
-            std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
-            
-            if (ValidCgiExtention(ReturnExtention(cgi_path))) {
-                // hna tatexecuti cgi
-                Cgi cgi(m.GetClient()[i].GetRequest(), locs[j], cgi_path);
-                SendCgiData(server, m, i, cgi);
-                
-                if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-                    disconnectClient(m, i);
-                return true;
-            }
-        }
-    }
+	
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		RunGet(server, m, i,path);
 	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
+	{
+
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
+	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		Delete(FullPath(server, m.GetClient()[i].GetRequest().getUri()));
     else

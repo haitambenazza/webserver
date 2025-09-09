@@ -5,12 +5,12 @@ Cgi::Cgi(){
     ChildFd[0] = ChildFd[1] = -1;
     child_pid = -1;
 }
-Cgi::Cgi( Request Req , Location& loc, std::string& filepath )
+Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath )
 {
     ParentFd[0] = ParentFd[1] = -1;
     ChildFd[0] = ChildFd[1] = -1;
     child_pid = -1;
-    ExecuteCgi( Req , loc, filepath );
+    ExecuteCgi( m, Req , loc, filepath );
 
 }
 Cgi::~Cgi(){}
@@ -103,14 +103,20 @@ std::string ReturnCgiPath(std::string s, std::map<std::string, std::string> mp)
     return (GetCgiPath(mp, Matchkeytoextention(ext)));
 }
 
-void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
+void            Cgi::SetOutput(std::string& s)
+{
+    output += s;
+}
+
+void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath )
 {
     SetEnv( Req );
     std::vector<char *> envp = GetEnvCgi();
-    
+    struct epoll_event ev;
+
     std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
-    std::cout << "CGII PAATHH === " << CgiPath << std::endl;
-    std::cout << "FILEPAATHH === " << filepath << std::endl;
+    // std::cout << "CGII PAATHH === " << CgiPath << std::endl;
+    // std::cout << "FILEPAATHH === " << filepath << std::endl;
     if (CgiPath.empty())
     {
         std::cerr << "CGI path not found for file: " << filepath << std::endl;
@@ -166,20 +172,24 @@ void    Cgi::ExecuteCgi( Request& Req , Location& loc, std::string filepath )
         output.clear();
         output = "";
         
-        close(ChildFd[1]);
-
+        ev.events = EPOLLIN;
+        ev.data.fd = ParentFd[0];
+        if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_ADD, ev.data.fd, &ev) == false)
+        {
+            close(ParentFd[0]);
+            close(ChildFd[1]);
+            return;
+        }
         char buffer[4096];
         ssize_t bytes_read = 0;
-
-        
-        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) {
+        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) 
+        {
             buffer[bytes_read] = '\0';
-            output += buffer;
-        }
-        if (bytes_read == -1) {
-            perror("read");
+            std::string tmp(buffer);
+            SetOutput(tmp);
         }
         close(ParentFd[0]);
+        close(ChildFd[1]);
         int status;
         if (waitpid(child_pid, &status, 0) == -1)
             perror("waitpid");

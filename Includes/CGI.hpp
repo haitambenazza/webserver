@@ -15,7 +15,7 @@ class Cgi
 
     public:
         Cgi();
-        Cgi(  Request Req , Location& loc, std::string& filepath  );
+        Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath  );
         ~Cgi();
         Cgi(const Cgi &other);
         Cgi& operator=(const Cgi &other);
@@ -23,5 +23,7 @@ class Cgi
         std::vector<char *> GetEnvCgi();
 
         std::string     GetOutput();
-        void            ExecuteCgi( Request& Req , Location& loc, std::string filepath );
+        void            ExecuteCgi( Multiplexer& m, Request& Req , Location& loc, std::string filepath );
+        void            SetOutput(std::string& s);
 };
+void	HandleCgi( Server& server, Multiplexer& m, int &i );
