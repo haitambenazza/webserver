@@ -1,5 +1,14 @@
 #include "../headers/webserver.hpp"
 
+bool AddToEpoll(int epfd, int op, int fd, epoll_event *ev)
+{
+    if (-1 == epoll_ctl(epfd, op, fd, ev))
+    {
+        perror("epoll_ctl()");
+        return false;
+    }
+    return (true);
+}
 bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 {
     EpollFd = epoll_create(1);
@@ -13,11 +22,8 @@ bool        Multiplexer::InitMultiplexer( const std::vector<Server>& server )
 		struct epoll_event Event;
 		Event.events = EPOLLIN;
 		Event.data.fd = server[i].Getfd();
-    	if (epoll_ctl(EpollFd, EPOLL_CTL_ADD, Event.data.fd, &Event) == -1)
-    	{
-    	    perror("Epoll_ctl");
-    	    return (false);
-    	}
+        if (AddToEpoll(EpollFd,  EPOLL_CTL_ADD, Event.data.fd, &Event) == false)
+            return (std::cout << "03\n",false);
 	}
     return (true);
 }

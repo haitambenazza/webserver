@@ -109,11 +109,9 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	}
 	epoll_client.data.fd = m.GetClientFd();
 	epoll_client.events = EPOLLIN;
-	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_ADD, m.GetClientFd(), &epoll_client))
-	{
-		perror("epoll_ctl()_ADD");
-		return (false);
-	}
+
+	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_ADD,  m.GetClientFd(), &epoll_client) == false)
+        return (std::cout << "00", false);
 	std::cout << "\033[32mNew client [" << m.GetClientFd() << "] connected to " << GetAddrServer(m,s,fd) << "\033[0m\n";
 	return true;
 }
@@ -139,10 +137,10 @@ void	disconnectClient(Multiplexer &m, int i)
 {
 
 	std::cerr << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
-	if (-1 == epoll_ctl(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetEvents()[i].data.fd, &m.GetEvents()[i]))
-	{
-		perror("epoll_ctl()_DEL");
+	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_DEL,  m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
+    {
 		close(m.GetEvents()[i].data.fd);
+		std::cout << "01\n";
 		return ;
 	}
 	close(m.GetEvents()[i].data.fd);
@@ -160,7 +158,7 @@ bool	isPostValid(Multiplexer &m, int &i)
 	return (doneRead && !contentlength && post);
 }
 
-int	ReadData(Multiplexer &m, int &i)
+int	ReadData(Multiplexer &m, int &i, bool& is_cgi)
 {
 	char	tmp[BUFFER_SIZE];
 	int		bytes_read;
@@ -172,6 +170,10 @@ int	ReadData(Multiplexer &m, int &i)
 		{
 			if (appendToHeader(m, i, tmp, bytes_read) == false)
 				return (1);
+			if (ValidCgiExtention((ReturnExtention(m.GetClient()[i].GetRequest().getUri()))))
+			{
+				is_cgi = true;
+			}
 		}
 		else
 		{
@@ -231,6 +233,7 @@ void	registerTime(Multiplexer &m, int i)
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 	int	isServer = 0;
+	bool is_cgi = false;
 
 	if (SetEventEpoll(multiplexer) == false)
 		return (false);
@@ -247,23 +250,25 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 			{
-				if (ReadData(multiplexer, i) == 1)
+				if (ReadData(multiplexer, i, is_cgi) == 1)
 				{
 					multiplexer.GetEvents()[i].events = EPOLLOUT;
-					if (-1 == epoll_ctl(multiplexer.GetEpollFd(), EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]))
-					{
-						perror("epoll_ctl()_MOD");
-						return false;
-					}
+					if (AddToEpoll(multiplexer.GetEpollFd(),  EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]) == false)
+						return (false);
 				}
 			}
-			if (multiplexer.GetEvents()[i].events & EPOLLOUT)
-					GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+			// std::cout << "00 : "  << is_cgi << std::endl;
+			if ((multiplexer.GetEvents()[i].events & EPOLLOUT))
+				GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
 			}
+			// else
+			// {
+			// 	HandleCgi( server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i );
+			// }
 		}
 	}
 	CheckTimeout(multiplexer);

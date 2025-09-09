@@ -23,6 +23,8 @@ std::string                 AutoIndex( std::string root, std::string path );
 std::string                 ReturnExtention(std::string s);
 bool                        ValidCgiExtention(std::string extention);
 std::string                 Matchkeytoextention(std::string& s);
+bool                        AddToEpoll(int epfd, int op, int fd, epoll_event *ev);
+
 
 #endif
 
