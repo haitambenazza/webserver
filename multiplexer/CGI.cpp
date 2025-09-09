@@ -182,22 +182,26 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         }
         char buffer[4096];
         ssize_t bytes_read = 0;
-        while ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0) 
+        bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1);
+        if (bytes_read > 0)
         {
             buffer[bytes_read] = '\0';
             std::string tmp(buffer);
             SetOutput(tmp);
         }
-        close(ParentFd[0]);
-        close(ChildFd[1]);
-        int status;
-        if (waitpid(child_pid, &status, 0) == -1)
-            perror("waitpid");
-        
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) 
+        else if (bytes_read == 0)
         {
-            std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
-            output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+            close(ParentFd[0]);
+            close(ChildFd[1]);
+            int status;
+            if (waitpid(child_pid, &status, 0) == -1)
+                perror("waitpid");
+            
+            if (WIFEXITED(status) && WEXITSTATUS(status) != 0) 
+            {
+                std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
+                output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+            }
         }
     }
 }
