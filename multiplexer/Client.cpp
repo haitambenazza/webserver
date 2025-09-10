@@ -16,7 +16,7 @@ Client::Client( const Client& copy )
     fd = copy.fd;
     connectedTime = copy.connectedTime;
     ServerIndex = copy.ServerIndex;
-    readDone = copy.readDone;
+    readDone = false;
     readeSize = copy.readeSize;
     FileSize = copy.FileSize;
     sent = copy.sent;
@@ -33,7 +33,7 @@ Client& Client::operator=( const Client& copy )
         fd = copy.fd;
         connectedTime = copy.connectedTime;
         ServerIndex = copy.ServerIndex;
-        readDone = copy.readDone;
+        readDone = false;
         readeSize = copy.readeSize;
         FileSize = copy.FileSize;
         sent = copy.sent;

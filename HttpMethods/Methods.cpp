@@ -337,6 +337,7 @@ int		Delete(  std::string path  )
 	std::remove(path.c_str());
 	return (OK);
 }
+
 void	HandleCgi( Server& server, Multiplexer& m, int &i )
 {
 	std::vector<Location> locs = server.GetLocations();
@@ -357,8 +358,11 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i )
 				// std::cout << "00 := " << cgi.GetOutput() << std::endl;
                 SendCgiData(server, m, i, cgi);
 
-                if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-                    disconnectClient(m, i);
+                // if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+				// {
+				// 	std::cout << "WALO\n";
+                //     disconnectClient(m, i);
+				// }
                 return ;
             }
         }
