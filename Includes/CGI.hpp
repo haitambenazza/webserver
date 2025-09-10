@@ -13,6 +13,7 @@ class Cgi
         int                         ParentFd[2];
         int                         ChildFd[2];
         bool                        IsExecuted;
+        ssize_t                     ByteRead;
 
     public:
         Cgi();
@@ -31,5 +32,7 @@ class Cgi
         void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
         bool            AddToEpollCgi(Multiplexer& m);
         bool            CheckExitStatus();
+        ssize_t         GetbyteRead() const;
+        void            SetByteRead( ssize_t val );
 };
 void	HandleCgi( Server& server, Multiplexer& m, int &i );

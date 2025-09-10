@@ -5,6 +5,7 @@ Cgi::Cgi(){
     ChildFd[0] = ChildFd[1] = -1;
     child_pid = -1;
     IsExecuted = false;
+    ByteRead = -1;
 }
 Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath)
 {
@@ -25,6 +26,7 @@ Cgi::Cgi(const Cgi &other)
     ParentFd[2] = other.ParentFd[2];
     ChildFd[2] = other.ChildFd[2];
     IsExecuted = other.IsExecuted;
+    ByteRead = other.ByteRead;
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -39,8 +41,18 @@ Cgi&    Cgi::operator=(const Cgi &other)
         ParentFd[2] = other.ParentFd[2];
         ChildFd[2] = other.ChildFd[2];
         IsExecuted = other.IsExecuted;
+        ByteRead = other.ByteRead;
     }
     return (*this);
+}
+
+ssize_t         Cgi::GetbyteRead() const
+{
+    return (ByteRead);
+}
+void            Cgi::SetByteRead( ssize_t val )
+{
+    ByteRead = val;
 }
 
 Cgi::~Cgi(){}
@@ -215,10 +227,10 @@ bool Cgi::CheckExitStatus()
 {
     int status;
 
-    if (waitpid(child_pid, &status, WNOHANG) == -1)
-        perror("waitpid");
     close(ParentFd[0]);
     close(ChildFd[1]);
+    if (waitpid(child_pid, &status, WNOHANG) == -1)
+        perror("waitpid");
     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
     {
         std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
@@ -256,6 +268,7 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         {
            output += buffer;
         }
+        SetByteRead(bytes_read);
         if (!bytes_read && !CheckExitStatus())
         {
             std::cout << "ayyy\n";

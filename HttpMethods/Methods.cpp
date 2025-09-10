@@ -351,16 +351,17 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i )
 			{
                 // hna tatexecuti cgi
 				Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+				std::cout << cgi.GetOutput();
 				m.GetEvents()->events = EPOLLOUT;
 				if (epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetClient()[i].GetClientFd(), m.GetEvents()))
 				{
 					perror("epoll_ctl");
 				}
                 SendCgiData(server, m, i, cgi);
-				std::cout << m.GetClient()[i].GetFileSize() << "<= SIZE  SENT DZB => "<< m.GetClient()[i].GetSentSize() << '\n';
-                if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+				std::cout << "byte_read " << cgi.GetbyteRead() << '\n';
+					m.GetClient()[i].SetCgiStatus(false);
                     disconnectClient(m, i);
-                return ;
+                // return ;
             }
         }
     }

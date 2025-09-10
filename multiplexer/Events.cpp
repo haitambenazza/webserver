@@ -174,6 +174,7 @@ int	ReadData(Multiplexer &m, int &i)
 			if (ValidCgiExtention((ReturnExtention(m.GetClient()[i].GetRequest().getUri()))))
 			{
 				m.GetClient()[i].SetCgiStatus(true);
+				return (0);
 			}
 		}
 		else
@@ -247,6 +248,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		}
 		else if (isServer == -1)
 		{
+			std::cout << "ONCE\n";
 			registerTime(multiplexer, i);
 			if (multiplexer.GetEvents()[i].events & EPOLLIN)
 			{
@@ -257,10 +259,10 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 						return (false);
 				}
 			}
+			if (multiplexer.GetClient()[i].GetCgiStatus())
+				HandleCgi(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 			else if ((multiplexer.GetEvents()[i].events & EPOLLOUT) && multiplexer.GetClient()[i].GetCgiStatus() == false)
 				GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
-			else if (multiplexer.GetClient()[i].GetCgiStatus())
-				HandleCgi(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
