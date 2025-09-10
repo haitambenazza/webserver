@@ -204,14 +204,13 @@ bool SendCgiData(Server& s, Multiplexer& m, int i, Cgi& cgi)
         response << BuildResponse("text/html", cgi_output.size(), 200);
         response << cgi_output;
     }
-
     m.GetClient()[i].SetFileSize(response.str().size());
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
     if (toSend > 0)
     {
-        ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
-        if (sent >= 0)
-            m.GetClient()[i].SetSentSize((size_t) sent);
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
+        if (sent > 0)
+			m.GetClient()[i].SetSentSize((size_t) sent);
     }
     return true;
 }
@@ -351,18 +350,16 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i )
             if (ValidCgiExtention(ReturnExtention(cgi_path)))
 			{
                 // hna tatexecuti cgi
-                Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
-				// {
-
-				// }
-				// std::cout << "00 := " << cgi.GetOutput() << std::endl;
+				Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+				m.GetEvents()->events = EPOLLOUT;
+				if (epoll_ctl(m.GetEpollFd(), EPOLL_CTL_MOD, m.GetClient()[i].GetClientFd(), m.GetEvents()))
+				{
+					perror("epoll_ctl");
+				}
                 SendCgiData(server, m, i, cgi);
-
-                // if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-				// {
-				// 	std::cout << "WALO\n";
-                //     disconnectClient(m, i);
-				// }
+				std::cout << m.GetClient()[i].GetFileSize() << "<= SIZE  SENT DZB => "<< m.GetClient()[i].GetSentSize() << '\n';
+                if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+                    disconnectClient(m, i);
                 return ;
             }
         }

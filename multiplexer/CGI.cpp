@@ -6,14 +6,13 @@ Cgi::Cgi(){
     child_pid = -1;
     IsExecuted = false;
 }
-Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath )
+Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath)
 {
     ParentFd[0] = ParentFd[1] = -1;
     ChildFd[0] = ChildFd[1] = -1;
     child_pid = -1;
     IsExecuted = false;
-    ExecuteCgi( m, Req , loc, filepath );
-
+    ExecuteCgi( m, Req , loc, filepath);
 }
 
 Cgi::Cgi(const Cgi &other)
@@ -216,10 +215,10 @@ bool Cgi::CheckExitStatus()
 {
     int status;
 
+    if (waitpid(child_pid, &status, WNOHANG) == -1)
+        perror("waitpid");
     close(ParentFd[0]);
     close(ChildFd[1]);
-    if (waitpid(child_pid, &status, 0) == -1)
-        perror("waitpid");
     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
     {
         std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
@@ -228,7 +227,8 @@ bool Cgi::CheckExitStatus()
     }
     return (true);
 }
-void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath )
+
+void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath)
 {
     SetEnv( Req );
     std::vector<char *> envp = GetEnvCgi();
@@ -249,17 +249,17 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
     {
         if (!AddToEpollCgi(m) && !IsExecuted)
             return ;
-        // char buffer[4096] = {0};
+        char buffer[4096] = {0};
         ssize_t bytes_read = 0;
 
-        // if ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0)
-        // {
-        //    output += buffer;
-        // }
-        if (bytes_read == 0)
+        if ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0)
         {
-            if (!CheckExitStatus())
-                return ;
+           output += buffer;
+        }
+        if (!bytes_read && !CheckExitStatus())
+        {
+            std::cout << "ayyy\n";
+            return ;
         }
         IsExecuted = true;
     }
