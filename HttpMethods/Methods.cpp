@@ -359,8 +359,11 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i )
 				}
                 SendCgiData(server, m, i, cgi);
 				std::cout << "byte_read " << cgi.GetbyteRead() << '\n';
+                if (cgi.GetbyteRead() == 0)
+				{
 					m.GetClient()[i].SetCgiStatus(false);
                     disconnectClient(m, i);
+				}
                 // return ;
             }
         }
