@@ -76,7 +76,7 @@ int16_t		GetServerIndex(std::vector<Server> &s, int fd)
 void	SetNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 {
 	Client NewClient;
-	int val = accept4(m.GetEvents()[fd].data.fd, NULL, NULL, SOCK_NONBLOCK);
+	int val = accept(m.GetEvents()[fd].data.fd, NULL, NULL);
 
 	if (val == -1)
 	{
@@ -259,16 +259,16 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 			}
 			// std::cout << "00 : "  << is_cgi << std::endl;
 			if ((multiplexer.GetEvents()[i].events & EPOLLOUT))
-				GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+				return (GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
 			else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
 			{
 				std::cout << "client disconnected\n";
 				close(multiplexer.GetEvents()[i].data.fd);
 			}
-			// else
-			// {
-			// 	HandleCgi( server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i );
-			// }
+			else
+			{
+				HandleCgi( server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i );
+			}
 		}
 	}
 	CheckTimeout(multiplexer);

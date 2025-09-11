@@ -44,6 +44,10 @@ Client& Client::operator=( const Client& copy )
 
 Client::~Client()
 {
+    std::cout << headers << '\n';
+    std::cout << body << '\n';
+    headers = std::string();
+    body = std::string();
 }
 
 void	Client::SetClient(int16_t val)
