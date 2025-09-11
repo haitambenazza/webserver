@@ -208,9 +208,9 @@ bool SendCgiData(Server& s, Multiplexer& m, int i, Cgi& cgi)
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
     if (toSend > 0)
     {
-		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
-        if (sent > 0)
-			m.GetClient()[i].SetSentSize((size_t) sent);
+        ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, 0);
+        if (sent >= 0)
+            m.GetClient()[i].SetSentSize((size_t) sent);
     }
     return true;
 }
@@ -250,7 +250,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 	if (toSend > 0)
 	{
-		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , MSG_NOSIGNAL);
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , 0);
 		if (sent >= 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
 	}
