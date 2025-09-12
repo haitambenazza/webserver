@@ -189,11 +189,12 @@ std::string	BuildResponse(std::string type, int size, int status)
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
-bool SendCgiData(Server& s, Multiplexer& m, int i, Cgi& cgi)
+bool SendCgiData(Server& s, Multiplexer& m, int i)
 {
 	(void)s;
+	
     std::stringstream response;
-    std::string cgi_output = cgi.GetOutput();
+    std::string cgi_output = m.GetClient()[i].GetCgi().GetOutput();
 
     // Check if CGI output la deja endo HTTP headers
     if (cgi_output.find("Content-Type:") != std::string::npos) {
@@ -204,14 +205,14 @@ bool SendCgiData(Server& s, Multiplexer& m, int i, Cgi& cgi)
         response << BuildResponse("text/html", cgi_output.size(), 200);
         response << cgi_output;
     }
-
+	// std::cout << response.str() << std::endl;
     m.GetClient()[i].SetFileSize(response.str().size());
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
     if (toSend > 0)
     {
-        ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, 0);
-        if (sent >= 0)
-            m.GetClient()[i].SetSentSize((size_t) sent);
+		ssize_t sent = send(m.GetClient()[i].GetClientFd(), response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
+        if (sent > 0)
+			m.GetClient()[i].SetSentSize((size_t) sent);	
     }
     return true;
 }
@@ -251,7 +252,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 	if (toSend > 0)
 	{
-		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , 0);
+		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , MSG_NOSIGNAL);
 		if (sent >= 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
 	}
@@ -338,35 +339,27 @@ int		Delete(  std::string path  )
 	return (OK);
 }
 
-void	HandleCgi( Server& server, Multiplexer& m, int &i )
+void	HandleCgi( Server& server, Multiplexer& m, int &i)
 {
-	std::vector<Location> locs = server.GetLocations();
-	for(size_t j = 0; j < locs.size(); j++)
-    {
-        if (locs[j].GetCgiStatus() == "on")
-        {
-            std::string root = GetRoot(server, locs[j]);
-            std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
-
-            if (ValidCgiExtention(ReturnExtention(cgi_path)))
+	if (!m.GetClient()[i].GetCgiflag())
+	{
+		std::cout << "aaaa7\n";
+		std::vector<Location> locs = server.GetLocations();
+		for(size_t j = 0; j < locs.size(); j++)
+		{
+			if (locs[j].GetCgiStatus() == "on")
 			{
-                // hna tatexecuti cgi
-                Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
-				// {
-
-				// }
-				// std::cout << "00 := " << cgi.GetOutput() << std::endl;
-                SendCgiData(server, m, i, cgi);
-
-                // if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-				// {
-				// 	std::cout << "WALO\n";
-                //     disconnectClient(m, i);
-				// }
-                return ;
-            }
-        }
-    }
+				std::string root = GetRoot(server, locs[j]);
+				std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
+				if (ValidCgiExtention(ReturnExtention(cgi_path)))
+				{
+					Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+					m.GetClient()[i].SetCgi(cgi);
+					m.GetClient()[i].SetCgiFlag(true);
+				}
+			}
+		}
+	}
 }
 
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
@@ -394,6 +387,8 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
         SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
     }
 	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+	{
 		disconnectClient(m, i);
+	}
 	return true;
 }

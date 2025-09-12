@@ -1,31 +1,45 @@
 #include "../headers/webserver.hpp"
 
-Cgi::Cgi(){
-    ParentFd[0] = ParentFd[1] = -1;
-    ChildFd[0] = ChildFd[1] = -1;
-    child_pid = -1;
-    IsExecuted = false;
-}
-Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath )
+Cgi::Cgi()
+    : script_path(""),
+      script_name(""),
+      output(""),
+      child_pid(-1),
+      IsExecuted(false)
 {
-    ParentFd[0] = ParentFd[1] = -1;
-    ChildFd[0] = ChildFd[1] = -1;
+    ParentFd[0] = -1;
+    ParentFd[1] = -1;
+    ChildFd[0] = -1;
+    ChildFd[1] = -1;
+}
+
+Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath)
+{
+    ParentFd[0] = -1;
+    ParentFd[1] = -1;
+    ChildFd[0] = -1;
+    ChildFd[1] = -1;
     child_pid = -1;
     IsExecuted = false;
-    ExecuteCgi( m, Req , loc, filepath );
-
+    script_name = "";
+    script_path = "";
+    output = "";
+    ExecuteCgi( m, Req , loc, filepath);
 }
 
 Cgi::Cgi(const Cgi &other)
+    : script_path(other.script_path),
+      script_name(other.script_name),
+      output(other.output),
+      child_pid(other.child_pid),
+      env(other.env),
+      IsExecuted(other.IsExecuted)
 {
-    script_path = other.script_path;
-    script_name = other.script_name;
-    output = other.output;
-    child_pid = other.child_pid;
-    env = other.env;
-    ParentFd[2] = other.ParentFd[2];
-    ChildFd[2] = other.ChildFd[2];
-    IsExecuted = other.IsExecuted;
+    // Initialize arrays first to ensure no garbage values
+    ParentFd[0] = other.ParentFd[0];
+    ParentFd[1] = other.ParentFd[1];
+    ChildFd[0] = other.ChildFd[0];
+    ChildFd[1] = other.ChildFd[1];
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -37,8 +51,10 @@ Cgi&    Cgi::operator=(const Cgi &other)
         output = other.output;
         child_pid = other.child_pid;
         env = other.env;
-        ParentFd[2] = other.ParentFd[2];
-        ChildFd[2] = other.ChildFd[2];
+        ParentFd[0] = other.ParentFd[0];
+        ParentFd[1] = other.ParentFd[1];
+        ChildFd[0] = other.ChildFd[0];
+        ChildFd[1] = other.ChildFd[1];
         IsExecuted = other.IsExecuted;
     }
     return (*this);
@@ -97,6 +113,7 @@ std::string GetCgiPath(std::map<std::string, std::string>& mp, std::string key)
         return (mp.find(key))->second;
     return ("");
 }
+
 void    Cgi::SetEnv( Request& Req )
 {
     env.push_back("REQUEST_METHOD=" + Req.getMethod());
@@ -115,7 +132,6 @@ std::vector<char *> Cgi::GetEnvCgi()
     for (size_t i = 0; i < env.size(); i++)
     {
         EnvVars.push_back((char *)env[i].c_str());
-        // std::cout << EnvVars.back() << std::endl;
     }
     EnvVars.push_back(NULL);
     return (EnvVars);
@@ -193,6 +209,11 @@ void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , st
     exit(1);
 }
 
+int             Cgi::Getpipefd() const
+{
+    return (this->ParentFd[0]);
+}
+
 bool    Cgi::AddToEpollCgi(Multiplexer& m)
 {
     struct epoll_event ev;
@@ -216,10 +237,10 @@ bool Cgi::CheckExitStatus()
 {
     int status;
 
+    if (waitpid(child_pid, &status, WNOHANG) == -1)
+        perror("waitpid");
     close(ParentFd[0]);
     close(ChildFd[1]);
-    if (waitpid(child_pid, &status, 0) == -1)
-        perror("waitpid");
     if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
     {
         std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
@@ -228,7 +249,8 @@ bool Cgi::CheckExitStatus()
     }
     return (true);
 }
-void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath )
+
+void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath)
 {
     SetEnv( Req );
     std::vector<char *> envp = GetEnvCgi();
@@ -249,18 +271,6 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
     {
         if (!AddToEpollCgi(m) && !IsExecuted)
             return ;
-        // char buffer[4096] = {0};
-        ssize_t bytes_read = 0;
-
-        // if ((bytes_read = read(ParentFd[0], buffer, sizeof(buffer) - 1)) > 0)
-        // {
-        //    output += buffer;
-        // }
-        if (bytes_read == 0)
-        {
-            if (!CheckExitStatus())
-                return ;
-        }
         IsExecuted = true;
     }
 }

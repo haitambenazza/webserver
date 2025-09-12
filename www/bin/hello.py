@@ -8,6 +8,8 @@ print("<body>")
 print("<h1>Hello from CGI!</h1>")
 print("<p>This is a Python CGI script working correctly.</p>")
 print("</body>")
-print("</html>")
-for i in range(0, 500000):
+for i in range(0, 50000000):
     print('a7777', end="\n")
+# while():
+#     print('a7777', end="\n")
+print("</html>")

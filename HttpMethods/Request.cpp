@@ -1,7 +1,17 @@
 #include "../headers/webserver.hpp"
 
 
-Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK),query_string(""), ScriptName(""), Scriptpath(""){}
+Request::Request()
+{
+    method = "";
+    uri = "";
+    version = "";
+    body = "";
+    status_code = OK;
+    query_string = "";
+    ScriptName = "";
+    Scriptpath = "";
+}
 
 Request::Request(const std::string& request_string) {
     this->parse(request_string);

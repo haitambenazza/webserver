@@ -1,6 +1,7 @@
 
 #pragma once
 #include "Request.hpp"
+#include "CGI.hpp"
 
 class Client
 {
@@ -17,6 +18,8 @@ class Client
         size_t          FileSize;
 	    size_t          sent;
         bool            IsCgi;
+        Cgi             cgi;
+        bool            CgiExecuted;
     public :
         Client();
         Client( const Client& copy );
@@ -43,4 +46,9 @@ class Client
         size_t          GetSentSize() const;
         void            SetCgiStatus(bool stat);
         bool            GetCgiStatus() const;
+        void            SetCgi( Cgi tmp );
+        Cgi&            GetCgi();
+        const Cgi&      GetCgi() const;
+        bool            GetCgiflag() const;
+        void            SetCgiFlag(bool flag);
 };
