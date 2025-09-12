@@ -37,5 +37,6 @@ class Cgi
         pid_t           GetChildPid() const;
         void            SetChildPid(pid_t child);
         time_t          GetForkTime() const;
+        bool            GetExecutedStatus()const;
 };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);

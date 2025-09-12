@@ -258,20 +258,37 @@ bool    Cgi::AddToEpollCgi(Multiplexer& m)
 bool Cgi::CheckExitStatus()
 {
     int status;
+    pid_t state = waitpid(child_pid, &status, WNOHANG);
 
-    if (waitpid(child_pid, &status, WNOHANG) == -1)
-        perror("waitpid");
-    close(ParentFd[0]);
-    close(ChildFd[1]);
-    if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-    {
-        std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
-        output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
-        return (false);
+
+    if (state == -1) {
+        close(ParentFd[0]);
+        close(ChildFd[1]);
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+        {
+            std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
+            output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+        }
+        return true;
     }
-    return (true);
+    else if (state == child_pid) {
+        // close(ParentFd[0]);
+        // close(ChildFd[1]);
+        // if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+        // {
+        //     std::cerr << "CGI script exited with status: " << WEXITSTATUS(status) << std::endl;
+        //     output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
+        //     return (true);
+        // }
+        // check the status code of the child if success 200 else error 
+        return true;
+    }
+    return (false);
 }
-
+bool           Cgi::GetExecutedStatus()const
+{
+    return IsExecuted;
+}
 void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::string filepath)
 {
     SetEnv( Req );
@@ -283,15 +300,15 @@ void    Cgi::ExecuteCgi( Multiplexer& m, Request & Req , Location& loc, std::str
         std::cerr << "CGI path not found for file: " << filepath << std::endl;
         return;
     }
-    if (!PipePipes() && !IsExecuted)
+    if (!IsExecuted && !PipePipes())
         return ;
-    if (!CgiFork() && !IsExecuted)
+    if (!IsExecuted && !CgiFork())
         return ;
     else if (child_pid == 0 && !IsExecuted)
         ExecCgiChild(envp, CgiPath , filepath);
     else
     {
-        if (!AddToEpollCgi(m) && !IsExecuted)
+        if (!IsExecuted && !AddToEpollCgi(m))
             return ;
         IsExecuted = true;
     }

@@ -303,6 +303,8 @@ void	ExecCgi(Multiplexer &m, Server& s, int S)
 	// For byte_read < 0, just return and wait for next event
 	return;
 }
+bool gci_working = false;
+
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 	int	isServer = 0;
@@ -331,10 +333,27 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 							return (false);
 					}
 				}
+				// client 3ndo cgi => check if is done or timeout
+				if (multiplexer.GetClient()[i].GetCgiStatus() && multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
+				{
+					if (multiplexer.GetClient()[i].GetCgi().CheckExitStatus()) {
+						std::cout << "salit akhouya gha sift data" << std::endl;
+					} else {
+						std::cout << "ba9i khdam ana gha chof chno dir" << std::endl;
+						// handel the timeout
+						if (time(NULL) - multiplexer.GetClient()[i].GetCgi().GetForkTime() >= TIMEOUT_CLIENT)
+						{
+							close(multiplexer.GetClient()[i].GetCgi().Getpipefd());
+							kill(multiplexer.GetClient()[i].GetCgi().GetChildPid() , SIGKILL);
+							std::cout << "inaaa lilah" << std::endl;
+							multiplexer.RemoveClient(i); // khasna nsendiw
+						}
+					}
+				}
 				
 				if ((multiplexer.GetEvents()[i].events & EPOLLOUT))
 					return(GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
-				else if (multiplexer.GetClient()[i].GetCgiStatus())
+				else if (multiplexer.GetClient()[i].GetCgiStatus() && !multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
 				{
 					std::cout <<"WAAAA  " <<  multiplexer.GetEvents()->data.fd << i<<'\n'; 
 					ExecCgi(multiplexer, server[multiplexer.GetClient()[i].GetserverIndex()], i);

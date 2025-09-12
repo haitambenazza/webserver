@@ -58,8 +58,8 @@ Client& Client::operator=(const Client& copy)
 
 Client::~Client()
 {
-    if (IsCgi)
-        cgi.CheckExitStatus();
+    // if (IsCgi)
+    //     cgi.CheckExitStatus();
 }
 
 void            Client::SetCgi( Cgi tmp )
