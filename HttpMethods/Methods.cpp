@@ -122,6 +122,8 @@ std::string GetContentType(std::string file)
 		return ("application/pdf");
 	else if (type == "jpeg")
 		return ("image/jpeg");
+	else if (type == "png")
+		return ("image/png");
 	else if (type == "javascript")
 		return ("text/javascript");
 	else if (type == "mp4")

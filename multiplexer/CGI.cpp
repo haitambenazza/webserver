@@ -11,6 +11,7 @@ Cgi::Cgi()
     ParentFd[1] = -1;
     ChildFd[0] = -1;
     ChildFd[1] = -1;
+    ForkTime = 0;
 }
 
 Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath)
@@ -24,6 +25,7 @@ Cgi::Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath)
     script_name = "";
     script_path = "";
     output = "";
+    ForkTime = 0;
     ExecuteCgi( m, Req , loc, filepath);
 }
 
@@ -40,6 +42,7 @@ Cgi::Cgi(const Cgi &other)
     ParentFd[1] = other.ParentFd[1];
     ChildFd[0] = other.ChildFd[0];
     ChildFd[1] = other.ChildFd[1];
+    ForkTime = other.ForkTime;
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -56,6 +59,7 @@ Cgi&    Cgi::operator=(const Cgi &other)
         ChildFd[0] = other.ChildFd[0];
         ChildFd[1] = other.ChildFd[1];
         IsExecuted = other.IsExecuted;
+        ForkTime = other.ForkTime;
     }
     return (*this);
 }
@@ -66,6 +70,14 @@ std::string Cgi::GetOutput() {
     return output;
 }
 
+pid_t           Cgi::GetChildPid() const
+{
+    return child_pid;
+}
+void            Cgi::SetChildPid(pid_t child)
+{
+    child_pid = child;
+}
 std::string ReturnExtention(std::string s)
 {
     if (s.empty())
@@ -150,7 +162,7 @@ std::string ReturnCgiPath(std::string s, std::map<std::string, std::string> mp)
     return (GetCgiPath(mp, Matchkeytoextention(ext)));
 }
 
-void            Cgi::SetOutput(std::string& s)
+void            Cgi::SetOutput(std::string s)
 {
     output += s;
 }
@@ -169,12 +181,22 @@ bool Cgi::PipePipes()
         std::cerr << "Child pipe creation failed" << std::endl;
         return false;
     }
+    // fcntl(ParentFd[0], F_SETFL, O_NONBLOCK);
+    // fcntl(ChildFd[1], F_SETFL, O_NONBLOCK);
     return (true);
+}
+
+time_t        Cgi::GetForkTime() const
+{
+    return (ForkTime);
 }
 
 bool Cgi::CgiFork()
 {
     child_pid = fork();
+    std::cout << "CHILD PID == " << child_pid << std::endl;
+    SetChildPid(child_pid);
+    ForkTime = time(NULL);
     if (child_pid == -1)
     {
         std::cerr << "Fork failed" << std::endl;

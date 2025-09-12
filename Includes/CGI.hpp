@@ -14,6 +14,7 @@ class Cgi
         int                         ParentFd[2];
         int                         ChildFd[2];
         bool                        IsExecuted;
+        time_t                      ForkTime;
 
     public:
         Cgi();
@@ -26,12 +27,15 @@ class Cgi
 
         std::string     GetOutput();
         void            ExecuteCgi( Multiplexer& m, Request& Req , Location& loc, std::string filepath);
-        void            SetOutput(std::string& s);
+        void            SetOutput(std::string s);
         bool            PipePipes();
         bool            CgiFork();
         void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
         bool            AddToEpollCgi(Multiplexer& m);
         bool            CheckExitStatus();
         int             Getpipefd() const;
+        pid_t           GetChildPid() const;
+        void            SetChildPid(pid_t child);
+        time_t          GetForkTime() const;
 };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);
