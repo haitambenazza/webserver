@@ -126,7 +126,8 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 	std::vector<Location>	Tmp;
 	std::string				path;
 	(void) status;
-	(void)Uri;
+	
+	std::string root ;
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
@@ -141,7 +142,8 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 		}
 		//return (ReturnErrorPath(server, status));
 	}
-	return (path);
+	root = GetRoot(server, Tmp[0]);
+	return (root + Uri);
 }
 
 std::string GetContentType(std::string file)
