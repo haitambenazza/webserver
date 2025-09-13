@@ -147,18 +147,6 @@ Client	*GetClientFdFromEpoll(Multiplexer &m , int fd)
 }
 void	disconnectClient(Multiplexer &m, int i)
 {	
-	Client	*client = GetClientFdFromEpoll(m , m.GetEvents()[i].data.fd);
-	if (!client)
-		return;
-	pid_t pid = client->GetCgi().GetChildPid();
-
-	std::cout << "PID == " << client->GetCgi().GetChildPid() << std::endl;
-	if (pid > 0)
-    {
-        kill(pid, SIGKILL);              // terminate CGI child
-        waitpid(pid, NULL, WNOHANG);     // reap zombie
-    }
-
 	std::cerr << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_DEL,  m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
     {
@@ -236,22 +224,6 @@ void	CheckTimeout(Multiplexer &m)
 	{
 		for (int i = 0; i < (int)m.GetClient().size(); i++)
 		{
-			// if (m.GetClient()[i].GetCgiStatus())
-			// {
-			// 	std::cout << m.GetClient()[i].GetCgi().GetForkTime() << "  aaaaaaaaaaaaa7\n";
-			// 	if (time(NULL) - m.GetClient()[i].GetCgi().GetForkTime() >= TIMEOUT_CLIENT)
-			// 	{
-			// 		std::cout << "\033[33mClient timeout" << "\033[0m\n";
-			// 		pid_t pid = m.GetClient()[i].GetCgi().GetChildPid();
-			// 		if (pid > 0)
-			// 		{
-			// 			kill(pid, SIGKILL);
-			// 			waitpid(pid, NULL, WNOHANG);
-			// 		}
-			// 		close(m.GetClient()[i].GetClientFd());
-			// 		m.RemoveClient(i);
-			// 	}
-			// }
 			if (time(NULL) - m.GetClient()[i].GetTime() >= TIMEOUT_CLIENT)
 			{
 				close(m.GetClient()[i].GetClientFd());
@@ -336,16 +308,18 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				// client 3ndo cgi => check if is done or timeout
 				if (multiplexer.GetClient()[i].GetCgiStatus() && multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
 				{
-					if (multiplexer.GetClient()[i].GetCgi().CheckExitStatus()) {
+					if (multiplexer.GetClient()[i].GetCgi().CheckExitStatus()) 
+					{
+						// SendCgiData(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 						std::cout << "salit akhouya gha sift data" << std::endl;
 					} else {
 						std::cout << "ba9i khdam ana gha chof chno dir" << std::endl;
 						// handel the timeout
-						if (time(NULL) - multiplexer.GetClient()[i].GetCgi().GetForkTime() >= TIMEOUT_CLIENT)
+						if (time(NULL) - multiplexer.GetClient()[i].GetCgi().GetForkTime() >= 20)
 						{
 							close(multiplexer.GetClient()[i].GetCgi().Getpipefd());
 							kill(multiplexer.GetClient()[i].GetCgi().GetChildPid() , SIGKILL);
-							std::cout << "inaaa lilah" << std::endl;
+							std::cout << "TIMEOUT" << std::endl;
 							multiplexer.RemoveClient(i); // khasna nsendiw
 						}
 					}
@@ -353,7 +327,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				
 				if ((multiplexer.GetEvents()[i].events & EPOLLOUT))
 					return(GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
-				else if (multiplexer.GetClient()[i].GetCgiStatus() && !multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
+				if (multiplexer.GetClient()[i].GetCgiStatus() && !multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
 				{
 					std::cout <<"WAAAA  " <<  multiplexer.GetEvents()->data.fd << i<<'\n'; 
 					ExecCgi(multiplexer, server[multiplexer.GetClient()[i].GetserverIndex()], i);

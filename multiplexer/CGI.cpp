@@ -194,7 +194,7 @@ time_t        Cgi::GetForkTime() const
 bool Cgi::CgiFork()
 {
     child_pid = fork();
-    std::cout << "CHILD PID == " << child_pid << std::endl;
+    // std::cout << "CHILD PID == " << child_pid << std::endl;
     SetChildPid(child_pid);
     ForkTime = time(NULL);
     if (child_pid == -1)
@@ -261,7 +261,8 @@ bool Cgi::CheckExitStatus()
     pid_t state = waitpid(child_pid, &status, WNOHANG);
 
 
-    if (state == -1) {
+    if (state == -1) 
+    {
         close(ParentFd[0]);
         close(ChildFd[1]);
         if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
@@ -271,7 +272,8 @@ bool Cgi::CheckExitStatus()
         }
         return true;
     }
-    else if (state == child_pid) {
+    else if (state == child_pid) 
+    {
         // close(ParentFd[0]);
         // close(ChildFd[1]);
         // if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
