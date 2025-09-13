@@ -251,6 +251,7 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	response << data.str();
 
 	m.GetClient()[i].SetFileSize(response.str().size());
+	// std::cout << "haaaaa == " <<m.GetClient()[i].GetFileSize() <<;
 	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 	if (toSend > 0)
 	{

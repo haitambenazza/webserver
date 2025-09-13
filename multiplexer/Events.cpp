@@ -135,16 +135,17 @@ bool	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 }
 
 
-Client	*GetClientFdFromEpoll(Multiplexer &m , int fd)
-{
-	std::vector<Client> vec = m.GetClient();
-	for (size_t i = 0; i < vec.size(); i++)
-	{
-		if (m.GetClient()[i].GetClientFd() == fd)
-			return (&m.GetClient()[i]);
-	}
-	return NULL;
-}
+// Client	*GetClientFdFromEpoll(Multiplexer &m , int fd)
+// {
+// 	std::vector<Client> vec = m.GetClient();
+// 	for (size_t i = 0; i < vec.size(); i++)
+// 	{
+// 		if (m.GetClient()[i].GetClientFd() == fd)
+// 			return (&m.GetClient()[i]);
+// 	}
+// 	return NULL;
+// }
+
 void	disconnectClient(Multiplexer &m, int i)
 {	
 	std::cerr << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
@@ -196,6 +197,7 @@ int	ReadData( Multiplexer &m, int &i)
 		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
 			return (1);
 	}
+	
 	if (bytes_read == -1)
 		std::cout << "YAAAA\n";
 	if (isPostValid(m, i))
