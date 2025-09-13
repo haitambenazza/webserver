@@ -434,6 +434,9 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
 		std::cout << "00\n" ;
+		path = ReturnErrorPath(server, m.GetClient()[i].GetRequest().getStatusCode());
+		if (path.empty())
+			path = ReturnErrorPath(server, NotFound);
 		RunGet(server, m, i,path);
 	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
