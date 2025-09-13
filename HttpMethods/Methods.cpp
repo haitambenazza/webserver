@@ -424,39 +424,17 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
-	{
-		// m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
 		path = ReturnErrorPath(server, m.GetClient()[i].GetRequest().getStatusCode());
-	}
-	// std::cout << "akfjdsfhsd == " << status <<'\n';
-	std::cout << "path  =|= " << path << std::endl;
-	// SendData(server, m, i, 404, path);
+
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
-	{
-		std::cout << "00\n" ;
-		path = ReturnErrorPath(server, m.GetClient()[i].GetRequest().getStatusCode());
-		if (path.empty())
-			path = ReturnErrorPath(server, NotFound);
 		RunGet(server, m, i,path);
-	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
-	{
-		std::cout << "01\n" ;
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
-	}
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-	{
-		std::cout << "02\n" ;
 		Delete(FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri()));
-	}
     else
-    {
-		std::cout << "03 path == " << path  << std::endl;
         SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
-    }
 	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-	{
 		disconnectClient(m, i);
-	}
 	return true;
 }
