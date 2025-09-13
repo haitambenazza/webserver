@@ -47,7 +47,6 @@ std::string    AutoIndex( std::string root, std::string path )
                 path = "";
             href = path + "/" + it->d_name;
         }
-        std::cout << "href == " << href << std::endl;
         index << "      <li><a href=\"" << href << "\">" << it->d_name <<"</a></li>" << std::endl;
     }
     index << "     </ul>" << std::endl;

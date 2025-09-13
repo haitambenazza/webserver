@@ -5,6 +5,7 @@ bool	MatchLocationWithUri(std::string Uri, std::string Loc)
 {
 	std::vector<std::string> vec;
 
+	
 	if (Uri.empty() || Loc.empty())
 		return (false);
 	Loc = Loc.substr(1, Loc.size());
@@ -67,7 +68,7 @@ std::string HandleRootLocation(Server &server, Location loc, std::string Uri)
 	std::string root;
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-	(void)Uri;
+
 	root = GetRoot(server, loc);
 	mp = loc.GetCommands();
 	it = mp.find("index");
@@ -94,6 +95,7 @@ std::string HandleOtherLocation(Server &server, Location loc, std::string Uri)
 		path = root + loc.GetPath()+ "/" + it->second[0] ;
 	else
 		path = root + Uri;
+	
 	if ( loc.GetAutoIndex() == "on" )
 		return (AutoIndex(root , Uri));
 	return (path);
@@ -107,9 +109,11 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 	
+	
 	if (MatchLocationWithUri(Uri, loc.GetPath()))
 	{
-		if (Uri == "/")
+		
+		if (loc.GetPath() == "/")
 			return (HandleRootLocation(server, loc, Uri));
 		else
 			return HandleOtherLocation(server,loc, Uri);
@@ -122,13 +126,18 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 	std::vector<Location>	Tmp;
 	std::string				path;
 	(void) status;
+	(void)Uri;
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		path = SetFullPath(server, Tmp[i], Uri);
-		if (!path.empty())
+		std::cout << "path == " << Tmp[i].GetPath() << " uri " << Uri << std::endl;
+		if (Tmp[i].GetPath() ==  Uri )
 		{
-			return (path);
+			path = SetFullPath(server, Tmp[i], Uri);
+			if (!path.empty())
+			{
+				return (path);
+			}
 		}
 		//return (ReturnErrorPath(server, status));
 	}
@@ -410,13 +419,13 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
-	int status = m.GetClient()[i].GetRequest().getStatusCode();
+	// int status = m.GetClient()[i].GetRequest().getStatusCode();
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
 		path = ReturnErrorPath(server, m.GetClient()[i].GetRequest().getStatusCode());
 	}
-	std::cout << "akfjdsfhsd == " << status <<'\n';
+	// std::cout << "akfjdsfhsd == " << status <<'\n';
 	// SendData(server, m, i, 404, path);
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
