@@ -421,7 +421,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
-	// int status = m.GetClient()[i].GetRequest().getStatusCode();
+	std::cout << "path  == " << path << std::endl;
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
