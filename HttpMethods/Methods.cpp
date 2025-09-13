@@ -143,7 +143,9 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 		//return (ReturnErrorPath(server, status));
 	}
 	root = GetRoot(server, Tmp[0]);
-	return (root + Uri);
+	if (!Uri.empty())
+		return (root + Uri);
+	return "";
 }
 
 std::string GetContentType(std::string file)
@@ -421,13 +423,13 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
-	std::cout << "path  == " << path << std::endl;
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
-		m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
+		// m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
 		path = ReturnErrorPath(server, m.GetClient()[i].GetRequest().getStatusCode());
 	}
 	// std::cout << "akfjdsfhsd == " << status <<'\n';
+	std::cout << "path  =|= " << path << std::endl;
 	// SendData(server, m, i, 404, path);
 	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 	{
