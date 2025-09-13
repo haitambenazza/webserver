@@ -124,6 +124,7 @@ bool Request::parseRequestLine(const std::string &line)
     std::stringstream ss(line);
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
+    std::string s(ALLOWED_CHAR_URI);
 
     if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
     {
@@ -138,6 +139,15 @@ bool Request::parseRequestLine(const std::string &line)
 
     if (!temp_uri.empty())
     {
+        std::string tmp = temp_uri;
+        for (size_t i = 0; i < tmp.size(); i++)
+        {
+            if (s.find(tmp[i]) == std::string::npos)
+            {
+                status_code = BadRequest;
+                return(false);
+            }
+        }
         // std::cout << "URI == " << temp_uri << std::endl;
         if (temp_uri.size() > URI_MAX_LENGTH)
         {
@@ -149,21 +159,21 @@ bool Request::parseRequestLine(const std::string &line)
             status_code = BadRequest;
             return false;
         }
-        // if (!ReturnExtention(temp_uri).empty() && ReturnExtention(temp_uri) != ".html")
-        // {
-        //     if (temp_uri.find("?") != std::string::npos)
-        //     {
-        //         if (!split(temp_uri, "?")[0].empty())
-        //             ScriptName = split(temp_uri, "?")[0];
-        //         if (!split(temp_uri, "?")[1].empty())
-        //             query_string = split(temp_uri, "?")[1];
-        //     }
-        //     else
-        //         ScriptName = temp_uri;
-        //     Scriptpath = "/www" + ScriptName;
-        //     if (ValidCgiExtention(ReturnExtention(ScriptName)) == false)
-        //         return (false);
-        // }
+        if (!ReturnExtention(temp_uri).empty() && ValidCgiExtention(ReturnExtention(temp_uri)))
+        {
+            if (temp_uri.find("?") != std::string::npos)
+            {
+                if (!split(temp_uri, "?")[0].empty())
+                    ScriptName = split(temp_uri, "?")[0];
+                if (!split(temp_uri, "?")[1].empty())
+                    query_string = split(temp_uri, "?")[1];
+            }
+            else
+                ScriptName = temp_uri;
+            Scriptpath = "/www" + ScriptName;
+            if (ValidCgiExtention(ReturnExtention(ScriptName)) == false)
+                return (false);
+        }
     }
 
     if (temp_version != "HTTP/1.0" && temp_version != "HTTP/1.1")
@@ -201,7 +211,7 @@ void Request::parseHeaders(std::stringstream &str)
             std::string key = line.substr(0, colon);
             std::string value = line.substr(colon + 1);
 
-            if (key.empty())
+            if (key.empty() || value.empty())
             {
                 status_code = BadRequest;
                 return;
@@ -216,6 +226,18 @@ void Request::parseHeaders(std::stringstream &str)
                     return;
                 }
             }
+            for (size_t i = 0; i < key.size(); i++)
+            {
+                if (key.find("Content-Length") != std::string::npos)
+                {
+                    if (!AllDigit(value))
+                    {
+                        status_code = BadRequest;
+                        return;/* code */
+                    }
+                    
+                }
+            }
             if (key.find(' ') != std::string::npos || key.find('\t') != std::string::npos)
             {
                 status_code = BadRequest;
@@ -224,7 +246,7 @@ void Request::parseHeaders(std::stringstream &str)
 
             while (!value.empty() && (value[0] == ' ' || value[0] == '\t'))
                 value.erase(0, 1);
-
+            
             headers[key] = value;
         }
         else
@@ -308,8 +330,8 @@ void Request::printRequestData() const
         if (!it->second.empty())
             std::cout << it->first << ": " << it->second << std::endl;
     }
-    std::cout << "--- BODY ---" << std::endl;
-    std::cout << this->body << std::endl;
+    // std::cout << "--- BODY ---" << std::endl;
+    // std::cout << this->body << std::endl;
 
 }
 

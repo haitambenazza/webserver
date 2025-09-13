@@ -10,9 +10,9 @@ print("<body>")
 print("<h1>Hello from CGI!</h1>")
 print("<p>This is a Python CGI script working correctly.</p>")
 print("</body>")
-for i in range(0, 500):
-    print('a7777', end="\n")
-# while(1):
-#     print('yarbi', end="\n")
+# for i in range(0, 500):
+#     print('a7777', end="\n")
+while(1):
+    print('yarbi', end="\n")
 print("</html>")
 

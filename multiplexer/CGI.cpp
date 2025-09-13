@@ -226,6 +226,7 @@ void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , st
         exit(1);
     }
     close(ChildFd[0]);
+    
     char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
     execve(cmds[0] , cmds , &envp[0]);
     exit(1);

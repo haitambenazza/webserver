@@ -263,8 +263,7 @@ void	ExecCgi(Multiplexer &m, Server& s, int S)
 	}
 	if (byte_read == 0)
 	{
-		// End of CGI output
-		SendCgiData(s, m, S);
+		// SendCgiData(s, m, S);
 		close(tcg.Getpipefd());
 		std::cerr << "\033[33mClient disconnected from " << m.GetClient()[S].GetClientFd() << "\033[0m\n";
 		if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetClient()[S].GetClientFd(), &m.GetEvents()[S]) == false)
@@ -313,6 +312,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 					if (multiplexer.GetClient()[i].GetCgi().CheckExitStatus()) 
 					{
 						// SendCgiData(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
+						SendCgiData(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i);
 						std::cout << "salit akhouya gha sift data" << std::endl;
 					} else {
 						std::cout << "ba9i khdam ana gha chof chno dir" << std::endl;
@@ -322,14 +322,14 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 							close(multiplexer.GetClient()[i].GetCgi().Getpipefd());
 							kill(multiplexer.GetClient()[i].GetCgi().GetChildPid() , SIGKILL);
 							std::cout << "TIMEOUT" << std::endl;
-							multiplexer.RemoveClient(i); // khasna nsendiw
+							multiplexer.RemoveClient(i);
 						}
 					}
 				}
 				
 				if ((multiplexer.GetEvents()[i].events & EPOLLOUT))
 					return(GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
-				if (multiplexer.GetClient()[i].GetCgiStatus() && !multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
+				else if (multiplexer.GetClient()[i].GetCgiStatus() && !multiplexer.GetClient()[i].GetCgi().GetExecutedStatus())
 				{
 					std::cout <<"WAAAA  " <<  multiplexer.GetEvents()->data.fd << i<<'\n'; 
 					ExecCgi(multiplexer, server[multiplexer.GetClient()[i].GetserverIndex()], i);
