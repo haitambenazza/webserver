@@ -135,7 +135,7 @@ bool	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 
 void	disconnectClient(Multiplexer &m, int i)
 {
-	std::cerr << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
+	std::cout << "\033[33mClient disconnected from " << m.GetEvents()[i].data.fd << "\033[0m\n";
 	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_DEL,  m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
     {
 		close(m.GetEvents()[i].data.fd);
@@ -314,11 +314,11 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 				{
 					ExecCgi(multiplexer, server[multiplexer.GetClient()[i].GetserverIndex()], i);
 				}
-				else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
-				{
-					std::cout << "client disconnected\n";
-					close (multiplexer.GetEvents()[i].data.fd);
-				}
+				// else if (multiplexer.GetEvents()[i].events & (EPOLLHUP | EPOLLERR))
+				// {
+				// 	std::cout << "client disconnected\n";
+				// 	close (multiplexer.GetEvents()[i].data.fd);
+				// }
 			}
 		}
 	}

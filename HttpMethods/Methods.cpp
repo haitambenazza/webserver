@@ -258,7 +258,10 @@ bool SendCgiData(Server& s, Multiplexer& m, int i)
         if (sent > 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
     }
-    return true;
+	// disconnect client
+	std::cout << "\033[33mClient disconnected from " << m.GetClient()[i].GetClientFd() << "\033[0m\n";
+	close (m.GetClient()[i].GetClientFd());
+	return true;
 }
 
 

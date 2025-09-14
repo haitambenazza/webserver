@@ -226,7 +226,8 @@ void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , st
         exit(1);
     }
     close(ChildFd[0]);
-    
+
+    std::cerr << "cgi == = == == = " << filepath.c_str() << std::endl;
     char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
     execve(cmds[0] , cmds , &envp[0]);
     exit(1);
@@ -258,11 +259,11 @@ bool    Cgi::AddToEpollCgi(Multiplexer& m)
 
 bool Cgi::CheckExitStatus()
 {
-    int status;
+    int status = 0;
     pid_t state = waitpid(child_pid, &status, WNOHANG);
 
 
-    if (state == -1) 
+    if (state == -1)
     {
         close(ParentFd[0]);
         close(ChildFd[1]);
@@ -273,7 +274,7 @@ bool Cgi::CheckExitStatus()
         }
         return true;
     }
-    else if (state == child_pid) 
+    else if (state == child_pid)
     {
         // close(ParentFd[0]);
         // close(ChildFd[1]);
@@ -283,7 +284,7 @@ bool Cgi::CheckExitStatus()
         //     output = "Status: 500 Internal Server Error\r\n\r\nCGI execution failed";
         //     return (true);
         // }
-        // check the status code of the child if success 200 else error 
+        // check the status code of the child if success 200 else error
         return true;
     }
     return (false);
