@@ -259,8 +259,16 @@ bool SendCgiData(Server& s, Multiplexer& m, int i)
 			m.GetClient()[i].SetSentSize((size_t) sent);
     }
 	// disconnect client
-	std::cout << "\033[33mClient disconnected from " << m.GetClient()[i].GetClientFd() << "\033[0m\n";
-	close (m.GetClient()[i].GetClientFd());
+	else
+	{
+		std::cout << "\033[33mClient disconnected from " << m.GetClient()[i].GetClientFd() << "\033[0m\n";
+		if(AddToEpoll(m.GetEpollFd() , EPOLL_CTL_DEL , m.GetClient()[i].GetClientFd(), m.GetEvents()) == false)
+		{
+			perror("EPOLL CGI");
+		}
+		close(m.GetClient()[i].GetClientFd());
+        m.RemoveClient(i);
+	}
 	return true;
 }
 
@@ -466,7 +474,7 @@ bool	checkAllowedMethods(Client &c, Server &s)
 
 	if (Uri != "/" && Uri[Uri.size() - 1] == '/')
 	{
-		std::cout << "ljakjhkjh\n\n\n\n";
+		// std::cout << "ljakjhkjh\n\n\n\n";
 		Uri = Uri.substr(0, Uri.size() - 1);
 	}
 
@@ -501,7 +509,9 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
-		path = ReturnErrorPath(server, NotFound);
+	{
+		path = ReturnErrorPath(server, NotImplemented);
+	}
 
 	if (!checkAllowedMethods(m.GetClient()[i], server))
 	{

@@ -249,12 +249,12 @@ void	ExecCgi(Multiplexer &m, Server& s, int S)
 	if (byte_read == 0)
 	{
 		close(tcg.Getpipefd());
-		std::cerr << "\033[33mClient disconnected from " << m.GetClient()[S].GetClientFd() << "\033[0m\n";
-		if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetClient()[S].GetClientFd(), &m.GetEvents()[S]) == false)
-			close(m.GetClient()[S].GetClientFd());
-		else
-			close(m.GetClient()[S].GetClientFd());
-		m.RemoveClient(S);
+		// std::cerr << "\033[33mClient disconnected from " << m.GetClient()[S].GetClientFd() << "\033[0m\n";
+		// if (AddToEpoll(m.GetEpollFd(), EPOLL_CTL_DEL, m.GetClient()[S].GetClientFd(), &m.GetEvents()[S]) == false)
+		// 	close(m.GetClient()[S].GetClientFd());
+		// else
+		// 	close(m.GetClient()[S].GetClientFd());
+		// m.RemoveClient(S);
 		return;
 	}
 	return;

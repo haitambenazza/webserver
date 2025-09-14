@@ -1,48 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>505 Http Version Not Supported</title>
-  <style>
-    body {
-      background-color: #1e1e2f;
-      color: #f2f2f2;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-    h1 {
-      font-size: 5rem;
-      margin-bottom: 0.5em;
-    }
-    p {
-      font-size: 1.5rem;
-      margin-bottom: 2em;
-    }
-    a {
-      color: #00bfff;
-      text-decoration: none;
-      font-weight: bold;
-      border: 2px solid #00bfff;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    a:hover {
-      background-color: #00bfff;
-      color: #1e1e2f;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>505 - HTTP Version Not Supported</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .error-code {
+            font-size: 12rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: version-glitch 3s ease-in-out infinite;
+            text-shadow: 0 0 50px rgba(0, 212, 255, 0.5);
+        }
+
+        @keyframes version-glitch {
+            0%, 100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+            10% { 
+                transform: translate(-3px, 3px);
+                filter: hue-rotate(90deg);
+            }
+            20% { 
+                transform: translate(3px, -3px);
+                filter: hue-rotate(180deg);
+            }
+            30% { 
+                transform: translate(-3px, -3px);
+                filter: hue-rotate(270deg);
+            }
+            40% { 
+                transform: translate(3px, 3px);
+                filter: hue-rotate(360deg);
+            }
+            50% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+        }
+
+        .version-icon {
+            font-size: 5rem;
+            color: #00d4ff;
+            animation: version-spin 4s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes version-spin {
+            0% { transform: rotateY(0deg) scale(1); }
+            25% { transform: rotateY(90deg) scale(1.1); }
+            50% { transform: rotateY(180deg) scale(1); }
+            75% { transform: rotateY(270deg) scale(1.1); }
+            100% { transform: rotateY(360deg) scale(1); }
+        }
+
+        .version-message {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: digital-flicker 2s ease-in-out infinite;
+        }
+
+        @keyframes digital-flicker {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px #00d4ff; }
+            50% { opacity: 0.8; text-shadow: 0 0 20px #00d4ff, 0 0 30px #0099cc; }
+        }
+
+        .version-info {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid #00d4ff;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(15px);
+            animation: pulse-border 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+            50% { border-color: #0099cc; box-shadow: 0 0 40px rgba(0, 153, 204, 0.5); }
+        }
+
+        .btn-upgrade {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 1s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-upgrade::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-upgrade:hover::before {
+            left: 100%;
+        }
+
+        .btn-upgrade:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+            color: white;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .digital-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.1;
+        }
+
+        .version-numbers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .version-number {
+            position: absolute;
+            color: rgba(0, 212, 255, 0.3);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            animation: float-version 10s linear infinite;
+        }
+
+        @keyframes float-version {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .protocol-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00d4ff;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #00d4ff;
+            animation: protocol-blink 2s ease-in-out infinite;
+        }
+
+        @keyframes protocol-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
 </head>
 <body>
-  <h1>404</h1>
-  <p>Oops! The page you're looking for doesn't exist.</p>
-  <a href="/">Go back to home</a>
+    <canvas class="digital-rain" id="digitalRain"></canvas>
+    
+    <div class="version-numbers" id="versionNumbers"></div>
+
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+        <div class="text-center" style="z-index: 10; position: relative;">
+            <i class="fas fa-code-branch version-icon"></i>
+            <div class="error-code">505</div>
+            <h1 class="version-message">VERSION NOT SUPPORTED</h1>
+            
+            <div class="protocol-display">
+                <div>Current: HTTP/3.0</div>
+                <div>Supported: HTTP/1.1, HTTP/2.0</div>
+            </div>
+            
+            <div class="version-info">
+                <h4 class="text-info mb-3">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    HTTP Version Mismatch
+                </h4>
+                <p class="text-white mb-0">
+                    The HTTP protocol version used in the request is not supported by this server.<br>
+                    Please use a supported HTTP version.
+                </p>
+            </div>
+            
+            <button class="btn btn-upgrade btn-lg" onclick="checkVersion()">
+                <i class="fas fa-sync-alt me-2"></i>
+                Check Compatibility
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function checkVersion() {
+            alert('Checking HTTP version compatibility...');
+        }
+
+        // Digital rain effect
+        const canvas = document.getElementById('digitalRain');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const versions = "1.0 1.1 2.0 3.0 HTTP HTTPS";
+        const versionArray = versions.split(" ");
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function drawRain() {
+            ctx.fillStyle = 'rgba(26, 26, 46, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = versionArray[Math.floor(Math.random() * versionArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawRain, 50);
+
+        // Floating version numbers
+        function createVersionNumber() {
+            const versions = ['HTTP/1.0', 'HTTP/1.1', 'HTTP/2.0', 'HTTP/3.0', 'HTTPS', 'SSL', 'TLS'];
+            const versionEl = document.createElement('div');
+            versionEl.className = 'version-number';
+            versionEl.textContent = versions[Math.floor(Math.random() * versions.length)];
+            versionEl.style.left = Math.random() * 100 + '%';
+            versionEl.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
+            versionEl.style.animationDelay = Math.random() * -10 + 's';
+            
+            document.getElementById('versionNumbers').appendChild(versionEl);
+            
+            setTimeout(() => {
+                versionEl.remove();
+            }, 10000);
+        }
+
+        setInterval(createVersionNumber, 2000);
+
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ print("<body>")
 print("<h1>Hello from CGI!</h1>")
 print("<p>This is a Python CGI script working correctly.</p>")
 print("</body>")
-print('a7777', end="\n")
+for i in range(50000):
+    print('a7777', end="\n")
 print("</html>")
 

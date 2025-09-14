@@ -49,8 +49,14 @@ bool    Server::SetServer()
     fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (fd == -1)
         return false;
-    if (setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
-		return false;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+    {
+        return false;
+    }
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+    {
+        return false;
+    }
 	if (SetAddrServer(&addr) == false)
         return (false);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)

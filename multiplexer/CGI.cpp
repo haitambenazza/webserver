@@ -169,7 +169,7 @@ void            Cgi::SetOutput(std::string s)
 
 bool Cgi::PipePipes()
 {
-   if (pipe(ParentFd) < 0)
+    if (pipe(ParentFd) < 0)
     {
         std::cerr << "Parent pipe creation failed" << std::endl;
         return false;
@@ -227,7 +227,7 @@ void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , st
     }
     close(ChildFd[0]);
 
-    std::cerr << "cgi == = == == = " << filepath.c_str() << std::endl;
+    std::cerr << "cgi ======= " << filepath.c_str() << std::endl;
     char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
     execve(cmds[0] , cmds , &envp[0]);
     exit(1);
