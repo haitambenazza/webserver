@@ -148,7 +148,6 @@ bool Request::parseRequestLine(const std::string &line)
                 return(false);
             }
         }
-        // std::cout << "URI == " << temp_uri << std::endl;
         if (temp_uri.size() > URI_MAX_LENGTH)
         {
             status_code = RequestUriTooLong;
@@ -226,18 +225,15 @@ void Request::parseHeaders(std::stringstream &str)
                     return;
                 }
             }
-            for (size_t i = 0; i < key.size(); i++)
-            {
-                if (key.find("Content-Length") != std::string::npos)
-                {
-                    if (!AllDigit(value))
-                    {
-                        status_code = BadRequest;
-                        return;/* code */
-                    }
-                    
-                }
-            }
+            // if (key == "Content-Length")
+            // {
+            //     if (!AllDigit(value))
+            //     {
+            //         std::cout << "KAYN\n";
+            //         status_code = BadRequest;
+            //         return;/* code */
+            //     }
+            // }
             if (key.find(' ') != std::string::npos || key.find('\t') != std::string::npos)
             {
                 status_code = BadRequest;
@@ -246,7 +242,7 @@ void Request::parseHeaders(std::stringstream &str)
 
             while (!value.empty() && (value[0] == ' ' || value[0] == '\t'))
                 value.erase(0, 1);
-            
+
             headers[key] = value;
         }
         else
@@ -295,7 +291,7 @@ bool Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
-    
+
     if (!std::getline(str, line))
     {
         status_code = BadRequest;

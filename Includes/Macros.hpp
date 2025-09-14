@@ -1,7 +1,7 @@
 
 #pragma once
 
-#define MAX_CLIENT_BODY 30000
+#define MAX_CLIENT_BODY 3000000
 #define PORT "8080"
 #define IP "0.0.0.0"
 #define ROOT "/"

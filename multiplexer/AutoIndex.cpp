@@ -6,9 +6,6 @@ std::string    AutoIndex( std::string root, std::string path )
     struct dirent   *it;
     std::ofstream   index("www/AutoIndex.html");
 
-    // if (path == "/")
-    //     path = "";
-
     if (!index.is_open())
         return("");
     if (path.empty() || root.empty())
@@ -41,7 +38,7 @@ std::string    AutoIndex( std::string root, std::string path )
             else
                 href = path + it->d_name;
         }
-        else 
+        else
         {
             if (path == "/")
                 path = "";

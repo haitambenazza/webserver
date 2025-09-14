@@ -5,7 +5,7 @@ bool	MatchLocationWithUri(std::string Uri, std::string Loc)
 {
 	std::vector<std::string> vec;
 
-	
+
 	if (Uri.empty() || Loc.empty())
 		return (false);
 	Loc = Loc.substr(1, Loc.size());
@@ -39,7 +39,7 @@ std::string ReturnErrorPath(Server &server, int code)
 			path = it->second;
 	}
 	return (path);
-} 
+}
 
 std::string	GetRoot(Server &server, Location loc)
 {
@@ -87,7 +87,7 @@ std::string HandleOtherLocation(Server &server, Location loc, std::string Uri)
 	std::string root;
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-	
+
 	root = GetRoot(server, loc);
 	mp = loc.GetCommands();
 	it = mp.find("index");
@@ -95,7 +95,7 @@ std::string HandleOtherLocation(Server &server, Location loc, std::string Uri)
 		path = root + loc.GetPath()+ "/" + it->second[0] ;
 	else
 		path = root + Uri;
-	
+
 	if ( loc.GetAutoIndex() == "on" )
 		return (AutoIndex(root , Uri));
 	return (path);
@@ -108,11 +108,11 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
-	
-	
+
+
 	if (MatchLocationWithUri(Uri, loc.GetPath()))
 	{
-		
+
 		if (loc.GetPath() == "/")
 			return (HandleRootLocation(server, loc, Uri));
 		else
@@ -126,12 +126,14 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 	std::vector<Location>	Tmp;
 	std::string				path;
 	(void) status;
-	
+
 	std::string root ;
 	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
-		std::cout << "path == " << Tmp[i].GetPath() << " uri " << Uri << std::endl;
+		if (Uri != "/" && Uri[Uri.size() - 1] == '/')
+			Uri = Uri.substr(0, Uri.size() - 1);
+
 		if (Tmp[i].GetPath() ==  Uri )
 		{
 			path = SetFullPath(server, Tmp[i], Uri);
@@ -155,7 +157,6 @@ std::string GetContentType(std::string file)
 
 	// std::cout << file << std::endl;
 	type = file.substr(pos + 1);
-	std::cout << "type == " << type << std::endl;
 	if (type == "html")
 		return ("text/html");
 	else if (type == "pdf")
@@ -183,7 +184,6 @@ std::string	BuildResponse(std::string type, int size, int status)
 	std::stringstream sizefile;
 	std::stringstream code;
 
-	std::cout << "status == " << status << std::endl;
 	code << status;
 	sizefile << size;
 	response += " " + code.str();
@@ -236,7 +236,7 @@ std::string	BuildResponse(std::string type, int size, int status)
 bool SendCgiData(Server& s, Multiplexer& m, int i)
 {
 	(void)s;
-	
+
     std::stringstream response;
     std::string cgi_output = m.GetClient()[i].GetCgi().GetOutput();
 
@@ -249,14 +249,14 @@ bool SendCgiData(Server& s, Multiplexer& m, int i)
         response << BuildResponse("text/html", cgi_output.size(), 200);
         response << cgi_output;
     }
-	
+
     m.GetClient()[i].SetFileSize(response.str().size());
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
     if (toSend > 0)
     {
 		ssize_t sent = send(m.GetClient()[i].GetClientFd(), response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
         if (sent > 0)
-			m.GetClient()[i].SetSentSize((size_t) sent);	
+			m.GetClient()[i].SetSentSize((size_t) sent);
     }
     return true;
 }
@@ -271,13 +271,11 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string>::iterator it;
 
 	mp = s.GetErrorMap();
-	std::cout << "FullPath == "<< FullPath << std::endl;
 	std::ifstream file(FullPath.c_str());
-	if ( !file.is_open() )
+	if ( !file.is_open())
 	{
-		status = NotFound;
+		status = InternalServerError;
 	}
-	
 	data << file.rdbuf();
 	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
 	response << data.str();
@@ -292,6 +290,17 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	}
 	// std::cout << response.str() << std::endl;
 	return true;
+}
+
+bool checkUri(std::string uri)
+{
+	std::string s(ALLOWED_CHAR_URI);
+	for (int j = 0; uri[j]; j++)
+	{
+		if (s.find(uri[j]) == std::string::npos )
+			return (false);
+	}
+	return (true);
 }
 
 std::string GetValuesFromKeysReq(std::map<std::string, std::string > map, std::string key)
@@ -328,6 +337,11 @@ int	GetRequestedLocation(std::vector<Location> &l, const std::string &path)
 
 bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 {
+	if (!checkUri(m.GetClient()[i].GetRequest().getUri()))
+	{
+		std::cout << "BADDDDDDDDDDDDDDDDDDDDDDDDDD\n";
+		return (SendData(s, m, i, BadRequest, location));
+	}
 	SendData(s, m, i, m.GetClient()[i].GetRequest().getStatusCode(), location);
 	return (true);
 }
@@ -361,22 +375,45 @@ std::string GetUploadLocation(Server &s)
 			mp = locs[j].GetCommands();
 			it = mp.find("upload_location");
 			if (it != mp.end())
-				root += "/" + it->second[0];
+				root += "/" + it->second[0] + "/";
 			else
-				root += "/upload";
+				root += "/upload/";
 			return (root);
 		}
 	}
 	return "";
 }
+
+bool checkcontentsize(Multiplexer &m, int &i, Server &s)
+{
+	size_t content_length = atoll(m.GetClient()[i].GetRequest().getHeaders().find("Content-Length")->second.c_str());
+	size_t max;
+	std::map<std::string , std::vector<std::string> > mp = s.GetCommands();
+	std::map<std::string , std::vector<std::string> >::iterator it = mp.find("max_body_size");
+	if (it == mp.end())
+		max = MAX_CLIENT_BODY;
+	else
+		max = (size_t)atoll(it->second[0].c_str());
+	if (max < content_length)
+		return (false);
+	return (true);
+}
+
 int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std::string path)
 {
 	std::ofstream 	file;
 
 	std::string LocationPath = GetUploadLocation(s);
 
-	if (body.empty() || req.getHeaderValue("Content-Length").empty() )
-		return (BadRequest);
+	if (!checkcontentsize(m, i, s))
+	{
+		path = ReturnErrorPath(s, PayloadTooLarge);
+		std::cout << " :: " << path << std::endl;
+		return (SendData(s, m, i, PayloadTooLarge, path), PayloadTooLarge);
+	}
+	if (body.empty() || req.getHeaderValue("Content-Length").empty() || !checkUri(req.getUri()))
+		return (SendData(s, m, i, BadRequest, path), BadRequest);
+	std::cout << LocationPath + GetFileName(req) << std::endl;
 	file.open((LocationPath + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 	{
@@ -419,21 +456,65 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 }
 
 
+bool	checkAllowedMethods(Client &c, Server &s)
+{
+	std::vector<Location> locs = s.GetLocations();
+	std::string Uri = c.GetRequest().getUri();
+
+	if (Uri != "/" && Uri[Uri.size() - 1] == '/')
+	{
+		std::cout << "ljakjhkjh\n\n\n\n";
+		Uri = Uri.substr(0, Uri.size() - 1);
+	}
+
+	size_t j = 0;
+	bool flag;
+	while (j < locs.size())
+	{
+		if (MatchLocationWithUri(c.GetRequest().getUri(), locs[j].GetPath()))
+		{
+			flag = false;
+			break ;
+		}
+		j++;
+	}
+	return (true);
+	std::map<std::string , std::vector<std::string> > mp = locs[j].GetCommands();
+	std::map<std::string , std::vector<std::string> >::iterator it = mp.find("allowed_methods");
+	std::vector<std::string> allowed_methods = it->second;
+	if (it == mp.end())
+		return (true);
+	for (size_t i = 0; i < allowed_methods.size(); i++)
+	{
+		std::cout << allowed_methods[i] << '\n';
+		if (c.GetRequest().getMethod() == allowed_methods[i])
+			return true;
+	}
+	return (false);
+}
+
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
-		path = ReturnErrorPath(server, m.GetClient()[i].GetRequest().getStatusCode());
+		path = ReturnErrorPath(server, NotFound);
 
-	if (m.GetClient()[i].GetRequest().getMethod() == "GET")
+	if (!checkAllowedMethods(m.GetClient()[i], server))
+	{
+		path = ReturnErrorPath(server, Forbidden);
+		SendData(server, m, i, Forbidden, path);
+	}
+	else if (m.GetClient()[i].GetRequest().getMethod() == "GET")
 		RunGet(server, m, i,path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
 		Delete(FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri()));
     else
+	{
         SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
+	}
 	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
 		disconnectClient(m, i);
 	return true;
