@@ -12,4 +12,4 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s);
 bool	SetEventEpoll(Multiplexer &multi);
 bool	InitServers(std::vector<Server> &servers, char *filename);
 void	disconnectClient(Multiplexer &m, int i);
-bool    SendCgiData(Server& s, Multiplexer& m, int i);
+bool    SendCgiData(Multiplexer& m, int i);

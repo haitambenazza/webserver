@@ -10,7 +10,7 @@ echo "<p>This is a PHP CGI script working correctly.</p>\n";
 
 echo "<h2>For Loop Output:</h2>\n";
 echo "<ul>\n";
-for ($i = 1; $i <= 5000; $i++) {
+for ($i = 1; $i <= 5000000; $i++) {
     echo "<li>Loop iteration: $i</li>\n";
 }
 echo "</ul>\n";

@@ -233,32 +233,29 @@ std::string	BuildResponse(std::string type, int size, int status)
 	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
 	return (response);
 }
-bool SendCgiData(Server& s, Multiplexer& m, int i)
+bool SendCgiData(Multiplexer& m, int i)
 {
-	(void)s;
 
     std::stringstream response;
     std::string cgi_output = m.GetClient()[i].GetCgi().GetOutput();
 
-    // Check if CGI output la deja endo HTTP headers
     if (cgi_output.find("Content-Type:") != std::string::npos) {
 
-        response << "HTTP/1.1 200 OK\r\n" << cgi_output; // add status;
+        response << "HTTP/1.1 200 OK\r\n" << cgi_output;
     } else {
-        // Ila makanoch lheaders foutput zidhum
         response << BuildResponse("text/html", cgi_output.size(), 200);
         response << cgi_output;
     }
 
     m.GetClient()[i].SetFileSize(response.str().size());
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
+	std::cout << "send == " << toSend << "BUFFER "<< response.str().size() <<  std::endl;
     if (toSend > 0)
     {
 		ssize_t sent = send(m.GetClient()[i].GetClientFd(), response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
         if (sent > 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
     }
-	// disconnect client
 	else
 	{
 		std::cout << "\033[33mClient disconnected from " << m.GetClient()[i].GetClientFd() << "\033[0m\n";
@@ -350,7 +347,6 @@ bool	RunGet(Server& s, Multiplexer &m, int &i, std::string location)
 {
 	if (!checkUri(m.GetClient()[i].GetRequest().getUri()))
 	{
-		std::cout << "BADDDDDDDDDDDDDDDDDDDDDDDDDD\n";
 		return (SendData(s, m, i, BadRequest, location));
 	}
 	SendData(s, m, i, m.GetClient()[i].GetRequest().getStatusCode(), location);
@@ -457,7 +453,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 				std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
 				if (ValidCgiExtention(ReturnExtention(cgi_path)))
 				{
-					Cgi cgi(m ,m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+					Cgi cgi(m.GetClient()[i].GetRequest(), locs[j], cgi_path);
 					m.GetClient()[i].SetCgi(cgi);
 					m.GetClient()[i].SetCgiFlag(true);
 				}
@@ -510,7 +506,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
-		path = ReturnErrorPath(server, NotImplemented);
+		path = ReturnErrorPath(server, NotFound);
 	}
 
 	if (!checkAllowedMethods(m.GetClient()[i], server))

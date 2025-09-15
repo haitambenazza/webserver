@@ -326,9 +326,6 @@ void Request::printRequestData() const
         if (!it->second.empty())
             std::cout << it->first << ": " << it->second << std::endl;
     }
-    // std::cout << "--- BODY ---" << std::endl;
-    // std::cout << this->body << std::endl;
-
 }
 
 std::string Request::GetContentType()

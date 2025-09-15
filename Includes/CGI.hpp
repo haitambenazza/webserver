@@ -11,14 +11,13 @@ class Cgi
         std::string                 output;
         pid_t                       child_pid;
         std::vector<std::string>    env;
-        int                         ParentFd[2];
-        int                         ChildFd[2];
+        int16_t                     fdchild;
         bool                        IsExecuted;
         time_t                      ForkTime;
 
     public:
         Cgi();
-        Cgi(Multiplexer& m, Request Req, Location& loc, std::string& filepath);
+        Cgi(Request Req, Location& loc, std::string& filepath);
         ~Cgi();
         Cgi(const Cgi& other);
         Cgi& operator=(const Cgi& other);
@@ -26,7 +25,7 @@ class Cgi
         std::vector<char *> GetEnvCgi();
 
         std::string     GetOutput();
-        void            ExecuteCgi( Multiplexer& m, Request& Req , Location& loc, std::string filepath);
+        void            ExecuteCgi( Request& Req , Location& loc, std::string filepath);
         void            SetOutput(std::string s);
         bool            PipePipes();
         bool            CgiFork();
@@ -38,5 +37,7 @@ class Cgi
         void            SetChildPid(pid_t child);
         time_t          GetForkTime() const;
         bool            GetExecutedStatus()const;
-};
+        int16_t         GetFdChild() const;
+    };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);
+
