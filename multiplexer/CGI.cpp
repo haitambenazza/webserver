@@ -7,11 +7,17 @@ Cgi::Cgi()
       child_pid(-1),
       IsExecuted(false)
 {
+    fdchild = -1;
+    filepath = "";
     ForkTime = 0;
+    isdone = false;
+    pidchild = -1;
 }
 
 Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
 {
+    (void)loc;
+    (void)Req;
     child_pid = -1;
     IsExecuted = false;
     script_name = "";
@@ -19,7 +25,10 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
     output = "";
     ForkTime = 0;
     fdchild = -1;
-    ExecuteCgi(  Req , loc, filepath);
+    this->filepath = filepath;
+    isdone = false;
+    pidchild = -1;
+    // ExecuteCgi(  Req , loc, filepath);
 }
 
 Cgi::Cgi(const Cgi &other)
@@ -32,6 +41,9 @@ Cgi::Cgi(const Cgi &other)
     IsExecuted = other.IsExecuted;
     ForkTime = other.ForkTime;
     fdchild = other.fdchild;
+    filepath = other.filepath;
+    isdone = other.isdone;
+    pidchild = other.pidchild;
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -46,6 +58,8 @@ Cgi&    Cgi::operator=(const Cgi &other)
         IsExecuted = other.IsExecuted;
         ForkTime = other.ForkTime;
         fdchild = other.fdchild;
+        isdone = other.isdone;
+        pidchild = other.pidchild;
     }
     return (*this);
 }
@@ -163,6 +177,23 @@ time_t        Cgi::GetForkTime() const
     return (ForkTime);
 }
 
+void            Cgi::SetFilePath(std::string& path)
+{
+    std::cout <<  "path 9bal maytsita : " <<  path << std::endl;
+    filepath = path;
+}
+std::string     Cgi::GetFilePath()
+{
+    return filepath;
+}
+Location        Cgi::GetLocation()
+{
+    return location;
+}
+void            Cgi::SetLocation(Location& loc)
+{
+    location = loc;
+}
 bool Cgi::CgiFork()
 {
     child_pid = fork();
@@ -171,6 +202,8 @@ bool Cgi::CgiFork()
     if (child_pid == -1)
     {
         std::cerr << "Fork failed" << std::endl;
+        perror("fork()");
+        exit(1);
         return false;
     }
     return (true);
@@ -178,7 +211,7 @@ bool Cgi::CgiFork()
 
 void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
 {
-    std::cout << "INSIDE CHILD " << fdchild << '\n';
+    // std::cout << "INSIDE CHILD " << fdchild << '\n';
     if (dup2(fdchild, STDOUT_FILENO) == -1)
     {
         perror("dup2");
@@ -216,41 +249,94 @@ bool           Cgi::GetExecutedStatus()const
 
 void    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
 {
-    SetEnv(Req);
-    std::vector<char *> envp = GetEnvCgi();
-
-    std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
-    if (CgiPath.empty())
-    {
-        std::cerr << "CGI path not found for file: " << filepath << std::endl;
-        return;
-    }
-    
     if (!IsExecuted)
     {
-        std::remove("www/temporary/tmpfile");
-        fdchild = open("www/temporary/tmpfile", O_RDWR | O_CREAT | O_TRUNC , 0644);
+        std::cout << "YAAAAAAAAAA\n" << loc.GetPath() << std::endl;
+        SetEnv(Req);
+        std::vector<char *> envp = GetEnvCgi();
+        
+        std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
+        if (CgiPath.empty())
+        {
+            std::cerr << "CGI path not found for file: " << filepath << std::endl;
+            return;
+        }
+
+        std::remove("www/tmp/tmpfile");
+        fdchild = open("www/tmp/tmpfile", O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)
         {
             perror("Failed to create tmp file");
             return;
         }
-        
+        std::cout << "DKHEL LPARENT\n";
         if (!CgiFork())
-            return;
-        
-        if (child_pid == 0)
         {
+            return;
+        }
+        if (!IsExecuted && child_pid == 0)
+        {
+            std::cout << "DKHEL LPARENT00\n";
             ExecCgiChild(envp, CgiPath, filepath);
         }
         else
         {
-            std::cout << "PARENT " << fdchild << '\n';
+            std::cout << "DKHEL LPARENT01\n";
+            // std::cout << "PARENT " << fdchild << '\n';
             IsExecuted = true;
         }
+        std::cout << "ENV == " << env.data() << std::endl;
+        std::cout << "PATH == " << filepath << std::endl;
+        std::cout << "CGI PATH == " << CgiPath << std::endl;
+        close(fdchild);
     }
     else
     {
+        int status = 0;
+        if (!isdone)
+        {
+            pidchild = waitpid(child_pid , &status , WNOHANG);
+            if (pidchild == -1)
+            {
+                perror("waitpid()");
+                exit(1);
+                return; // return bad gateway
+            }  
+            else if(child_pid == pidchild)
+            {
+                isdone = true;
+                tempfd = open("www/tmp/tmpfile" , O_RDONLY);
+            }
+        }
+        if(isdone)
+        {
+            char Buffer[4096];
+
+            ssize_t byte_read ;
+            if ((byte_read = read(tempfd , Buffer, sizeof(Buffer) - 1)) > 0 )
+            {
+                Buffer[byte_read] = '\0';
+                output += Buffer;
+            }
+            if (byte_read == -1)
+            {
+                    close(tempfd);
+                perror("bytes_read");
+                return; // 500 , internal server error;
+            }
+            else
+            {
+                
+                std::cout << "\n\n----------OUTPUT----------\n\n";
+                close(tempfd);
+                std::cout << output << std::endl;
+                std::cout << "\nSALIT SIFT DB\n";
+            }
+            std::cout << "\n------------BUFFER-------------\n"; 
+            std::cout << Buffer << std::endl;
+            std::cout << "is done brooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n";
+        }
+        
         std::cout << "after child " << fdchild << '\n';
         return;
     }

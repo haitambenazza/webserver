@@ -11,7 +11,6 @@ class Multiplexer
         struct epoll_event                              Events[MAX_EVENT];
         std::vector<Client>                             Clients;
         std::vector<unsigned char>                      DataRead;
-        
 
     public:
         Multiplexer();

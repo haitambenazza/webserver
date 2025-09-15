@@ -14,8 +14,12 @@ class Cgi
         int16_t                     fdchild;
         bool                        IsExecuted;
         time_t                      ForkTime;
-
+        std::string                 filepath;
+        bool                        isdone;
+        pid_t                       pidchild;
+        int                         tempfd;
     public:
+        Location                    location;
         Cgi();
         Cgi(Request Req, Location& loc, std::string& filepath);
         ~Cgi();
@@ -25,19 +29,21 @@ class Cgi
         std::vector<char *> GetEnvCgi();
 
         std::string     GetOutput();
-        void            ExecuteCgi( Request& Req , Location& loc, std::string filepath);
+        void            ExecuteCgi( Request& Req ,Location& loc, std::string filepath);
         void            SetOutput(std::string s);
         bool            PipePipes();
         bool            CgiFork();
         void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
-        bool            AddToEpollCgi(Multiplexer& m);
         bool            CheckExitStatus();
-        int             Getpipefd() const;
         pid_t           GetChildPid() const;
         void            SetChildPid(pid_t child);
         time_t          GetForkTime() const;
         bool            GetExecutedStatus()const;
         int16_t         GetFdChild() const;
+        void            SetFilePath(std::string& path);
+        std::string     GetFilePath();
+        Location        GetLocation();
+        void            SetLocation(Location& loc);
     };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);
 

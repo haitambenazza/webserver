@@ -442,7 +442,7 @@ int		Delete(  std::string path  )
 
 void	HandleCgi( Server& server, Multiplexer& m, int &i)
 {
-	if (!m.GetClient()[i].GetCgiflag())
+	if (!m.GetClient()[i].GetCgiflag() && !m.GetClient()[i].GetCgiRunning())
 	{
 		std::vector<Location> locs = server.GetLocations();
 		for(size_t j = 0; j < locs.size(); j++)
@@ -450,16 +450,24 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 			if (locs[j].GetCgiStatus() == "on")
 			{
 				std::string root = GetRoot(server, locs[j]);
-				std::string cgi_path = root + m.GetClient()[i].GetRequest().getUri();
-				if (ValidCgiExtention(ReturnExtention(cgi_path)))
+				
+				if (ValidCgiExtention(ReturnExtention(m.GetClient()[i].GetRequest().getUri())))
 				{
-					Cgi cgi(m.GetClient()[i].GetRequest(), locs[j], cgi_path);
+					m.GetClient()[i]._cgi_path = root + m.GetClient()[i].GetRequest().getUri();
+					Cgi cgi(m.GetClient()[i].GetRequest(), locs[j],m.GetClient()[i]._cgi_path);
+					m.GetClient()[i].GetCgi().SetFilePath(m.GetClient()[i]._cgi_path);
 					m.GetClient()[i].SetCgi(cgi);
 					m.GetClient()[i].SetCgiFlag(true);
+					// m.GetClient()[i].SetCgiStatus(true);
+					m.GetClient()[i].SetCgiRunning(true);
+					m.GetClient()[i].GetCgi().SetLocation(locs[j]);
+					
 				}
 			}
 		}
 	}
+
+	m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
 }
 
 
@@ -504,6 +512,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
+	std::cout << "asdhgfhghfdghds " << path << std::endl;
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = ReturnErrorPath(server, NotFound);

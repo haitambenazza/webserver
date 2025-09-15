@@ -12,6 +12,7 @@ Client::Client()
     body = "";
     IsCgi = false;
     CgiExecuted = false;
+    CgiRunning = false;
     // cgi = NULL;
 }
 
@@ -29,7 +30,8 @@ Client::Client(const Client& copy)
       sent(copy.sent),
       IsCgi(copy.IsCgi),
       cgi(copy.cgi),
-      CgiExecuted(copy.CgiExecuted)  // THIS IS THE KEY - use initializer list for Cgi
+      CgiExecuted(copy.CgiExecuted),
+      CgiRunning(copy.CgiRunning)  // THIS IS THE KEY - use initializer list for Cgi
 {
     // Empty body - everything initialized above
 }
@@ -51,7 +53,8 @@ Client& Client::operator=(const Client& copy)
         body = copy.body;
         IsCgi = copy.IsCgi;
         cgi = copy.cgi;
-        CgiExecuted = copy.CgiExecuted;  // This is fine for assignment operator
+        CgiExecuted = copy.CgiExecuted;
+        CgiRunning = copy.CgiRunning;  // This is fine for assignment operator
     }
     return *this;
 }
@@ -70,6 +73,15 @@ void            Client::SetCgi( Cgi tmp )
 Cgi&             Client::GetCgi()
 {
     return (cgi);
+}
+
+bool            Client::GetCgiRunning() const
+{
+    return CgiRunning;
+}
+void            Client::SetCgiRunning(bool flag)
+{
+    CgiRunning = flag;
 }
 
 const Cgi& Client::GetCgi() const  // Const version

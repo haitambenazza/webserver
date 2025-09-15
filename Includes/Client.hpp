@@ -20,12 +20,13 @@ class Client
         bool            IsCgi;
         Cgi             cgi;
         bool            CgiExecuted;
+        bool            CgiRunning;
     public :
         Client();
         Client( const Client& copy );
         Client& operator=( const Client& copy );
         ~Client();
-
+        std::string                 _cgi_path;
         void	        SetClient(int16_t val);
         void	        SetServerIndex(int16_t val);
         int16_t	        GetClientFd() const;
@@ -51,4 +52,7 @@ class Client
         const Cgi&      GetCgi() const;
         bool            GetCgiflag() const;
         void            SetCgiFlag(bool flag);
+        bool            GetCgiRunning() const;
+        void            SetCgiRunning(bool flag);
+        
 };
