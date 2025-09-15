@@ -249,7 +249,7 @@ bool SendCgiData(Multiplexer& m, int i)
 
     m.GetClient()[i].SetFileSize(response.str().size());
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
-	std::cout << "send == " << toSend << "BUFFER "<< response.str().size() <<  std::endl;
+	// std::cout << "send == " << toSend << "BUFFER "<< response.str().size() <<  std::endl;
     if (toSend > 0)
     {
 		ssize_t sent = send(m.GetClient()[i].GetClientFd(), response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);

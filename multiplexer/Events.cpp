@@ -243,8 +243,11 @@ void	ExecCgi(Multiplexer &m, Server& s, int S)
 		std::cout << tcg.GetExecutedStatus() << '\n';
 		char Buffer[4096];
 		ssize_t byte_read = read(tcg.GetFdChild(), Buffer, sizeof(Buffer) - 1);
+		std::cout << "CHILD FD == " << tcg.GetFdChild() << std::endl;
+		std::cout << "byte_read == " << byte_read << std::endl;
 		if (byte_read > 0)
 		{
+			std::cout << "ana tan9ra\n";
 			Buffer[byte_read] = '\0';
 			tcg.SetOutput(std::string(Buffer));
 			return;

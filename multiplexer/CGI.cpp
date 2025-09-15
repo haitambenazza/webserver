@@ -23,15 +23,15 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
 }
 
 Cgi::Cgi(const Cgi &other)
-    : script_path(other.script_path),
-      script_name(other.script_name),
-      output(other.output),
-      child_pid(other.child_pid),
-      env(other.env),
-      IsExecuted(other.IsExecuted)
 {
-    // Initialize arrays first to ensure no garbage values
+    script_path = other.script_path;
+    script_name = other.script_name;
+    output = other.output;
+    child_pid = other.child_pid;
+    env = other.env;
+    IsExecuted = other.IsExecuted;
     ForkTime = other.ForkTime;
+    fdchild = other.fdchild;
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -45,6 +45,7 @@ Cgi&    Cgi::operator=(const Cgi &other)
         env = other.env;
         IsExecuted = other.IsExecuted;
         ForkTime = other.ForkTime;
+        fdchild = other.fdchild;
     }
     return (*this);
 }
@@ -177,14 +178,13 @@ bool Cgi::CgiFork()
 
 void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
 {
-    std::remove("www/tmp/tmpfile");
-    fdchild = open("www/tmp/tmpfile", O_RDWR | O_CREAT, O_TRUNC);
     std::cout << "INSIDE CHILD " << fdchild << '\n';
     if (dup2(fdchild, STDOUT_FILENO) == -1)
     {
         perror("dup2");
         close (fdchild);
     }
+    close(fdchild);
     char* cmds[3] = { (char *)CgiPath.c_str(), (char *)(filepath.c_str()), NULL};
     execve(cmds[0] , cmds , &envp[0]);
     exit(1);
@@ -214,9 +214,9 @@ bool           Cgi::GetExecutedStatus()const
     return IsExecuted;
 }
 
-void    Cgi::ExecuteCgi(Request & Req , Location& loc, std::string filepath)
+void    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
 {
-    SetEnv( Req );
+    SetEnv(Req);
     std::vector<char *> envp = GetEnvCgi();
 
     std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
@@ -225,20 +225,33 @@ void    Cgi::ExecuteCgi(Request & Req , Location& loc, std::string filepath)
         std::cerr << "CGI path not found for file: " << filepath << std::endl;
         return;
     }
-    if (!IsExecuted && !CgiFork())
+    
+    if (!IsExecuted)
+    {
+        std::remove("www/temporary/tmpfile");
+        fdchild = open("www/temporary/tmpfile", O_RDWR | O_CREAT | O_TRUNC , 0644);
+        if (fdchild == -1)
+        {
+            perror("Failed to create tmp file");
+            return;
+        }
+        
+        if (!CgiFork())
+            return;
+        
+        if (child_pid == 0)
+        {
+            ExecCgiChild(envp, CgiPath, filepath);
+        }
+        else
+        {
+            std::cout << "PARENT " << fdchild << '\n';
+            IsExecuted = true;
+        }
+    }
+    else
     {
         std::cout << "after child " << fdchild << '\n';
-        return ;
-    }
-    std::cout << "PARENT " << fdchild << '\n';
-    if (child_pid == 0 && !IsExecuted)
-    {
-        ExecCgiChild(envp, CgiPath , filepath);
-        IsExecuted = true;
-    }
-    else if(IsExecuted)
-    {
-        return ;
-
+        return;
     }
 }
