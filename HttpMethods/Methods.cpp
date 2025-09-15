@@ -295,8 +295,8 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , MSG_NOSIGNAL);
 		if (sent >= 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
+		std::cout << m.GetClient()[i].GetSentSize() << '\n';
 	}
-	// std::cout << response.str() << std::endl;
 	return true;
 }
 
@@ -455,6 +455,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 				{
 					m.GetClient()[i]._cgi_path = root + m.GetClient()[i].GetRequest().getUri();
 					Cgi cgi(m.GetClient()[i].GetRequest(), locs[j],m.GetClient()[i]._cgi_path);
+					m.GetClient()[i].GetCgi().SetReadStatus(false);
 					m.GetClient()[i].GetCgi().SetFilePath(m.GetClient()[i]._cgi_path);
 					m.GetClient()[i].SetCgi(cgi);
 					m.GetClient()[i].SetCgiFlag(true);
@@ -466,8 +467,17 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 			}
 		}
 	}
-
-	m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
+	m.GetEvents()[i].events = EPOLLOUT;
+	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
+		return ;
+	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
+	if (m.GetClient()[i].GetCgi().ReadStatus())
+	{
+		SendData(server, m, i, status, "www/tmp/tmpfile.html");
+		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
+		if (!toSend)
+			disconnectClient(m, i);
+	}
 }
 
 

@@ -162,8 +162,7 @@ int	ReadData( Multiplexer &m, int &i)
 {
 	char	tmp[BUFFER_SIZE];
 	int		bytes_read;
-	// Get /index.py HTTP/1.0\r\n
-	// Hos
+
 	bzero(tmp, BUFFER_SIZE);
 	if ((bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp))) > 0)
 	{
@@ -273,7 +272,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 						return (false);
 				}
 			}
-			if ((multiplexer.GetEvents()[i].events & EPOLLOUT))
+			if ((multiplexer.GetEvents()[i].events & EPOLLOUT) && multiplexer.GetClient()[i].GetCgiStatus() == false)
 				return(GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
 			else if (multiplexer.GetClient()[i].GetCgiStatus())
 			{
@@ -303,7 +302,6 @@ bool RunServers(std::vector<Server> &servers)
 	sign.sa_sigaction = &ChangeServerStatus;
 	if (sigaction(SIGINT, &sign, NULL) == -1)
 		perror("sigaction");
-
 	while (running)
 	{
 		if (!EventRoutine(servers, multiplexer))

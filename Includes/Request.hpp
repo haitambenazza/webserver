@@ -13,6 +13,7 @@ enum HttpStatus {
     RequestUriTooLong = 414,
     UnsupportedMediaType = 415,
     InternalServerError = 500,
+    BadGateaway = 502,
     NotImplemented = 501,
     HttpVersionNotSupported = 505
 };

@@ -15,6 +15,7 @@ int             DeleteMethod(  Request& Req  );
 bool	        GetRequest(Server &server, Multiplexer &m, int &i);
 std::string     GetValuesFromKeysReq(std::map<std::string, std::string >& map, std::string key);
 bool	        RunGet(Server &s, Multiplexer &m, int &i, std::string location);
+bool             SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath );
 //post
 //check if upload enabled
 //if so create file with name sent and save body in it

@@ -12,6 +12,7 @@ Cgi::Cgi()
     ForkTime = 0;
     isdone = false;
     pidchild = -1;
+    readDone = false;
 }
 
 Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
@@ -28,6 +29,7 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
     this->filepath = filepath;
     isdone = false;
     pidchild = -1;
+    readDone = false;
     // ExecuteCgi(  Req , loc, filepath);
 }
 
@@ -83,6 +85,12 @@ void            Cgi::SetChildPid(pid_t child)
 {
     child_pid = child;
 }
+
+void            Cgi::SetReadStatus(bool stat)
+{
+    readDone = stat;
+}
+
 std::string ReturnExtention(std::string s)
 {
     if (s.empty())
@@ -247,7 +255,12 @@ bool           Cgi::GetExecutedStatus()const
     return IsExecuted;
 }
 
-void    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
+bool    Cgi::ReadStatus() const
+{
+    return (readDone);
+}
+
+HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
 {
     if (!IsExecuted)
     {
@@ -259,30 +272,27 @@ void    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
         if (CgiPath.empty())
         {
             std::cerr << "CGI path not found for file: " << filepath << std::endl;
-            return;
+            return (NotFound);
         }
-
-        std::remove("www/tmp/tmpfile");
-        fdchild = open("www/tmp/tmpfile", O_RDWR | O_CREAT | O_TRUNC , 0644);
+        
+        std::remove("www/tmp/tmpfile.html");
+        fdchild = open("www/tmp/tmpfile.html", O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)
         {
             perror("Failed to create tmp file");
-            return;
+            return (InternalServerError);
         }
         std::cout << "DKHEL LPARENT\n";
         if (!CgiFork())
         {
-            return;
+            return (InternalServerError);
         }
         if (!IsExecuted && child_pid == 0)
         {
-            std::cout << "DKHEL LPARENT00\n";
             ExecCgiChild(envp, CgiPath, filepath);
         }
         else
         {
-            std::cout << "DKHEL LPARENT01\n";
-            // std::cout << "PARENT " << fdchild << '\n';
             IsExecuted = true;
         }
         std::cout << "ENV == " << env.data() << std::endl;
@@ -300,12 +310,12 @@ void    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
             {
                 perror("waitpid()");
                 exit(1);
-                return; // return bad gateway
+                return (BadGateaway); // return bad gateway
             }  
             else if(child_pid == pidchild)
             {
                 isdone = true;
-                tempfd = open("www/tmp/tmpfile" , O_RDONLY);
+                tempfd = open("www/tmp/tmpfile.html" , O_RDONLY);
             }
         }
         if(isdone)
@@ -320,24 +330,17 @@ void    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
             }
             if (byte_read == -1)
             {
-                    close(tempfd);
+                close(tempfd);
                 perror("bytes_read");
-                return; // 500 , internal server error;
+                return (InternalServerError); // 500 , internal server error;
             }
             else
             {
-                
-                std::cout << "\n\n----------OUTPUT----------\n\n";
+                readDone = true;
                 close(tempfd);
-                std::cout << output << std::endl;
-                std::cout << "\nSALIT SIFT DB\n";
+                return (OK);
             }
-            std::cout << "\n------------BUFFER-------------\n"; 
-            std::cout << Buffer << std::endl;
-            std::cout << "is done brooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n";
-        }
-        
-        std::cout << "after child " << fdchild << '\n';
-        return;
+        }        
     }
+    return (OK);
 }
