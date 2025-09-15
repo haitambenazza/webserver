@@ -166,7 +166,6 @@ int	ReadData( Multiplexer &m, int &i)
 	bzero(tmp, BUFFER_SIZE);
 	if ((bytes_read = read(m.GetEvents()[i].data.fd, &tmp, sizeof(tmp))) > 0)
 	{
-		std::cout << tmp << std::endl;
 		tmp[bytes_read] = 0;
 		if (!m.GetClient()[i].getStatusRead())
 		{
@@ -236,7 +235,7 @@ void	registerTime(Multiplexer &m, int i)
 }
 
 void	ExecCgi(Multiplexer &m, Server& s, int S)
-{	
+{
 	HandleCgi(s, m, S); //fork()
 	return;
 }
@@ -245,10 +244,10 @@ bool gci_working = false;
 bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 {
 	int	isServer = 0;
-	
+
 	if (SetEventEpoll(multiplexer) == false)
 	return (false);
-	
+
 	for (int j = 0; j < multiplexer.GetNumFd(); j++)
 	{
 		isServer = IsServerSocket(multiplexer, server, j);

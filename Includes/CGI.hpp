@@ -19,6 +19,7 @@ class Cgi
         pid_t                       pidchild;
         int                         tempfd;
         bool                        readDone;
+        std::string                 tmpfile;
     public:
         Location                    location;
         Cgi();
@@ -46,6 +47,7 @@ class Cgi
         void            SetLocation(Location& loc);
         bool            ReadStatus() const;
         void            SetReadStatus(bool stat);
+        std::string     GetTmpFile() const;
     };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);
 

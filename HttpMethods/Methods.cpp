@@ -155,7 +155,6 @@ std::string GetContentType(std::string file)
 	std::string type;
 	size_t	pos = file.find('.');
 
-	// std::cout << file << std::endl;
 	type = file.substr(pos + 1);
 	if (type == "html")
 		return ("text/html");
@@ -249,7 +248,6 @@ bool SendCgiData(Multiplexer& m, int i)
 
     m.GetClient()[i].SetFileSize(response.str().size());
     size_t toSend = m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
-	// std::cout << "send == " << toSend << "BUFFER "<< response.str().size() <<  std::endl;
     if (toSend > 0)
     {
 		ssize_t sent = send(m.GetClient()[i].GetClientFd(), response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend, MSG_NOSIGNAL);
@@ -295,7 +293,6 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 		ssize_t sent = send(m.GetEvents()[i].data.fd, response.str().c_str() + m.GetClient()[i].GetSentSize(), toSend , MSG_NOSIGNAL);
 		if (sent >= 0)
 			m.GetClient()[i].SetSentSize((size_t) sent);
-		std::cout << m.GetClient()[i].GetSentSize() << '\n';
 	}
 	return true;
 }
@@ -450,7 +447,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 			if (locs[j].GetCgiStatus() == "on")
 			{
 				std::string root = GetRoot(server, locs[j]);
-				
+
 				if (ValidCgiExtention(ReturnExtention(m.GetClient()[i].GetRequest().getUri())))
 				{
 					m.GetClient()[i]._cgi_path = root + m.GetClient()[i].GetRequest().getUri();
@@ -459,10 +456,9 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 					m.GetClient()[i].GetCgi().SetFilePath(m.GetClient()[i]._cgi_path);
 					m.GetClient()[i].SetCgi(cgi);
 					m.GetClient()[i].SetCgiFlag(true);
-					// m.GetClient()[i].SetCgiStatus(true);
 					m.GetClient()[i].SetCgiRunning(true);
 					m.GetClient()[i].GetCgi().SetLocation(locs[j]);
-					
+
 				}
 			}
 		}
@@ -471,9 +467,16 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
 		return ;
 	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
-	if (m.GetClient()[i].GetCgi().ReadStatus())
+	if (m.GetClient()[i].GetCgi().ReadStatus() && status != OK)
 	{
-		SendData(server, m, i, status, "www/tmp/tmpfile.html");
+		SendData(server, m, i, status, ReturnErrorPath(server, status));
+		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
+		if (!toSend)
+			disconnectClient(m, i);
+	}
+	else if (m.GetClient()[i].GetCgi().ReadStatus() && status == OK)
+	{
+		SendData(server, m, i, status, m.GetClient()[i].GetCgi().GetTmpFile());
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 		if (!toSend)
 			disconnectClient(m, i);
@@ -488,7 +491,6 @@ bool	checkAllowedMethods(Client &c, Server &s)
 
 	if (Uri != "/" && Uri[Uri.size() - 1] == '/')
 	{
-		// std::cout << "ljakjhkjh\n\n\n\n";
 		Uri = Uri.substr(0, Uri.size() - 1);
 	}
 
@@ -522,7 +524,6 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
-	std::cout << "asdhgfhghfdghds " << path << std::endl;
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = ReturnErrorPath(server, NotFound);

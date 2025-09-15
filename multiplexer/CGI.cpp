@@ -13,6 +13,7 @@ Cgi::Cgi()
     isdone = false;
     pidchild = -1;
     readDone = false;
+    tmpfile = "www/tmp/tempfile.html";
 }
 
 Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
@@ -30,7 +31,7 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
     isdone = false;
     pidchild = -1;
     readDone = false;
-    // ExecuteCgi(  Req , loc, filepath);
+    tmpfile = "www/tmp/tempfile.html";
 }
 
 Cgi::Cgi(const Cgi &other)
@@ -46,6 +47,7 @@ Cgi::Cgi(const Cgi &other)
     filepath = other.filepath;
     isdone = other.isdone;
     pidchild = other.pidchild;
+    tmpfile = "www/tmp/tempfile.html";
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -62,8 +64,14 @@ Cgi&    Cgi::operator=(const Cgi &other)
         fdchild = other.fdchild;
         isdone = other.isdone;
         pidchild = other.pidchild;
+        tmpfile = "www/tmp/tempfile.html";
     }
     return (*this);
+}
+
+std::string     Cgi::GetTmpFile() const
+{
+    return (tmpfile);
 }
 
 Cgi::~Cgi(){}
@@ -187,7 +195,6 @@ time_t        Cgi::GetForkTime() const
 
 void            Cgi::SetFilePath(std::string& path)
 {
-    std::cout <<  "path 9bal maytsita : " <<  path << std::endl;
     filepath = path;
 }
 std::string     Cgi::GetFilePath()
@@ -219,7 +226,6 @@ bool Cgi::CgiFork()
 
 void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
 {
-    // std::cout << "INSIDE CHILD " << fdchild << '\n';
     if (dup2(fdchild, STDOUT_FILENO) == -1)
     {
         perror("dup2");
@@ -264,27 +270,28 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
 {
     if (!IsExecuted)
     {
-        std::cout << "YAAAAAAAAAA\n" << loc.GetPath() << std::endl;
         SetEnv(Req);
         std::vector<char *> envp = GetEnvCgi();
-        
+
         std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
         if (CgiPath.empty())
         {
+            readDone = true;
             std::cerr << "CGI path not found for file: " << filepath << std::endl;
             return (NotFound);
         }
-        
-        std::remove("www/tmp/tmpfile.html");
-        fdchild = open("www/tmp/tmpfile.html", O_RDWR | O_CREAT | O_TRUNC , 0644);
+
+        std::remove(tmpfile.c_str());
+        fdchild = open(tmpfile.c_str(), O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)
         {
+            readDone = true;
             perror("Failed to create tmp file");
             return (InternalServerError);
         }
-        std::cout << "DKHEL LPARENT\n";
         if (!CgiFork())
         {
+            readDone = true;
             return (InternalServerError);
         }
         if (!IsExecuted && child_pid == 0)
@@ -295,9 +302,6 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
         {
             IsExecuted = true;
         }
-        std::cout << "ENV == " << env.data() << std::endl;
-        std::cout << "PATH == " << filepath << std::endl;
-        std::cout << "CGI PATH == " << CgiPath << std::endl;
         close(fdchild);
     }
     else
@@ -308,14 +312,22 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             pidchild = waitpid(child_pid , &status , WNOHANG);
             if (pidchild == -1)
             {
+                readDone = true;
                 perror("waitpid()");
                 exit(1);
                 return (BadGateaway); // return bad gateway
-            }  
+            }
             else if(child_pid == pidchild)
             {
                 isdone = true;
-                tempfd = open("www/tmp/tmpfile.html" , O_RDONLY);
+                tempfd = open(tmpfile.c_str() , O_RDONLY);
+            }
+            if (status)
+            {
+                readDone = true;
+                close(tempfd);
+                std::remove(tmpfile.c_str());
+                return (InternalServerError);
             }
         }
         if(isdone)
@@ -330,6 +342,7 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             }
             if (byte_read == -1)
             {
+                readDone = true;
                 close(tempfd);
                 perror("bytes_read");
                 return (InternalServerError); // 500 , internal server error;
@@ -340,7 +353,7 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
                 close(tempfd);
                 return (OK);
             }
-        }        
+        }
     }
     return (OK);
 }
