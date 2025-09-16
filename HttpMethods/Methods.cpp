@@ -472,14 +472,20 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 		SendData(server, m, i, status, ReturnErrorPath(server, status));
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 		if (!toSend)
+		{
+			std::remove(m.GetClient()[i].GetCgi().GetTmpFile().c_str());
 			disconnectClient(m, i);
+		}
 	}
 	else if (m.GetClient()[i].GetCgi().ReadStatus() && status == OK)
 	{
 		SendData(server, m, i, status, m.GetClient()[i].GetCgi().GetTmpFile());
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 		if (!toSend)
+		{
+			std::remove(m.GetClient()[i].GetCgi().GetTmpFile().c_str());
 			disconnectClient(m, i);
+		}
 	}
 }
 
