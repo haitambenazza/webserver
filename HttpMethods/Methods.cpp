@@ -412,16 +412,16 @@ int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std
 	if (!checkcontentsize(m, i, s))
 	{
 		path = ReturnErrorPath(s, PayloadTooLarge);
-		std::cout << " :: " << path << std::endl;
 		return (SendData(s, m, i, PayloadTooLarge, path), PayloadTooLarge);
 	}
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() || !checkUri(req.getUri()))
 		return (SendData(s, m, i, BadRequest, path), BadRequest);
-	std::cout << LocationPath + GetFileName(req) << std::endl;
+	std::cout << (LocationPath + GetFileName(req)) <<'\n';
 	file.open((LocationPath + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 	{
-		std::cerr << "file error" << std::endl;
+		perror("file open");
+		SendData(s, m, i, InternalServerError, ReturnErrorPath(s, InternalServerError));
 		return (InternalServerError);
 	}
 	file << body;
