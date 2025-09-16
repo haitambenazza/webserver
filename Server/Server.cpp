@@ -1,4 +1,5 @@
 #include "../headers/webserver.hpp"
+int     IsWhiteSpace( char c );
 
 bool	Server::SetAddrServer(struct sockaddr_in *addr)
 {
@@ -9,7 +10,21 @@ bool	Server::SetAddrServer(struct sockaddr_in *addr)
     addr->sin_port = htons(atoi(port.c_str()));
     return (true);
 }
-
+void     Server::SetDefaultMap()
+{
+    // DefaultError_map.insert(std::make_pair(200,"error_pages/200.html"));
+    // DefaultError_map.insert(std::make_pair(201,"error_pages/201.html"));
+    DefaultError_map.insert(std::make_pair(400,"error_pages/400.html"));
+    DefaultError_map.insert(std::make_pair(403,"error_pages/403.html"));
+    DefaultError_map.insert(std::make_pair(404,"error_pages/404.html"));
+    DefaultError_map.insert(std::make_pair(405,"error_pages/405.html"));
+    DefaultError_map.insert(std::make_pair(413,"error_pages/413.html"));
+    DefaultError_map.insert(std::make_pair(414,"error_pages/414.html"));
+    DefaultError_map.insert(std::make_pair(415,"error_pages/415.html"));
+    DefaultError_map.insert(std::make_pair(500,"error_pages/500.html"));
+    DefaultError_map.insert(std::make_pair(501,"error_pages/501.html"));
+    DefaultError_map.insert(std::make_pair(505,"error_pages/505.html"));
+}
 void    Server::SetDefaultValue()
 {
     root = ROOT;
@@ -35,8 +50,14 @@ bool    Server::SetServer()
     fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
     if (fd == -1)
         return false;
-    if (setsockopt(fd, SOL_SOCKET,SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)) == -1)
-		return false;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+    {
+        return false;
+    }
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+    {
+        return false;
+    }
 	if (SetAddrServer(&addr) == false)
         return (false);
 	if ((bind(fd, (sockaddr*)&addr, sizeof(addr))) == -1)
@@ -80,6 +101,7 @@ Server::Server( const Server& copy ) : keys(copy.keys), Locations(copy.Locations
     Args = copy.Args;
     status = copy.status;
     error_map = copy.error_map;
+    DefaultError_map = copy.DefaultError_map;
     max_body_size = copy.max_body_size;
     if (!SetServer())
     {
@@ -97,6 +119,7 @@ Server& Server::operator=( const Server& copy )
         Commands = copy.Commands;
         Args = copy.Args;
         error_map = copy.error_map;
+        DefaultError_map = copy.DefaultError_map;
         max_body_size = copy.max_body_size;
         close(fd);
         if (SetServer() == false)
@@ -191,6 +214,11 @@ bool Server::SetServers( Block& block )
     return (true);
 }
 
+std::map<int , std::string>             Server::GetDefaultErrorMap() const
+{
+    return (DefaultError_map);
+}
+
 bool	Server::StringToMap( std::string &s, std::map<std::string, std::vector< std::string> >& Mp, int flag )
 {
 	std::vector< std::string > 	tmp;
@@ -229,6 +257,8 @@ u_int64_t         Server::GetMaxBodySize() const
     return (max_body_size);
 }
 
+
+
 bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
 {
     std::map<std::string , std::vector<std::string> >mp = s.GetCommands();
@@ -253,6 +283,10 @@ bool CheckCommandLocation(Location& L)
         {
             L.SetPath(it->second[0]);
         }
+        if (it->first[0] == '_' && (!it->first[1] || IsWhiteSpace(it->first[1]) || it->first[1] == '_' || !std::isalpha(it->first[1]) ))
+        {
+            return (std::cerr<< "location " << L.GetPath() << " has invalid cgi extention\n", false);
+        }
         if (it->first != "allowed_methods" && it->second.size() != 1)
             return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
         else if ((it->first == "cgi_enable" || it->first == "autoindex"))
@@ -273,7 +307,7 @@ bool CheckCommandLocation(Location& L)
 bool    Server::InitializeServerSettings()
 {
     std::vector<Location> locs = Locations;
-
+    
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
         if (CheckCommandServer(*this, "listen", 1) == false || AllDigit( GetValuesFromKeys(Commands, "listen")) == false)

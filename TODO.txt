@@ -3,3 +3,4 @@ config file:
 	enable_cgi;
 	max_body_size;
 	
+displayed error pages in browser do not work execpt for 404 // 501 and other not working at all check response

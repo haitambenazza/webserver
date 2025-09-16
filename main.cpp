@@ -1,12 +1,10 @@
 
 #include "headers/webserver.hpp"
 
-int main( int ac, char **av, char **envp )
+int main( int ac, char **av)
 {
 	std::vector<Server> 		servers;
-	std::string lol("/home/kbassim/Desktop/webserv");
 
-	(void)envp;
 	if (ac != 2)
 	{
 		std::cerr << "Invalid number of arguments" << std::endl;

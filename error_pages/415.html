@@ -1,48 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>415 Unsupported Media Type</title>
-  <style>
-    body {
-      background-color: #1e1e2f;
-      color: #f2f2f2;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-    h1 {
-      font-size: 5rem;
-      margin-bottom: 0.5em;
-    }
-    p {
-      font-size: 1.5rem;
-      margin-bottom: 2em;
-    }
-    a {
-      color: #00bfff;
-      text-decoration: none;
-      font-weight: bold;
-      border: 2px solid #00bfff;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    a:hover {
-      background-color: #00bfff;
-      color: #1e1e2f;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>415 - Unsupported Media Type</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 50%, #663399 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .error-code {
+            font-size: 12rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #fff, #e8daef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: media-glitch 2.5s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes media-glitch {
+            0%, 100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+            20% { 
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+            40% { 
+                transform: translate(2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+            60% { 
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(270deg);
+            }
+            80% { 
+                transform: translate(2px, 2px);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .media-icon {
+            font-size: 5rem;
+            color: white;
+            animation: media-reject 2s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes media-reject {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            25% { 
+                transform: scale(1.1) rotate(-10deg);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(0.9) rotate(10deg);
+                opacity: 0.6;
+            }
+            75% { 
+                transform: scale(1.05) rotate(-5deg);
+                opacity: 0.9;
+            }
+        }
+
+        .media-message {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: type-flicker 3s ease-in-out infinite;
+        }
+
+        @keyframes type-flicker {
+            0%, 100% { 
+                opacity: 1;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+            50% { 
+                opacity: 0.7;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        .media-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .media-type {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            animation: type-bounce 2s ease-in-out infinite;
+        }
+
+        .media-type:nth-child(odd) {
+            animation-delay: 0.5s;
+        }
+
+        .media-type.unsupported {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.2);
+            animation: reject-shake 1s ease-in-out infinite;
+        }
+
+        .media-type.supported {
+            border-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.2);
+        }
+
+        @keyframes type-bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes reject-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .media-type i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .format-info {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            animation: info-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes info-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        .btn-convert {
+            background: linear-gradient(45deg, #fff, #f8f9fa);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: #9b59b6;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 1s both;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-convert:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.4);
+            color: #9b59b6;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-formats {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .floating-format {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            animation: float-format 10s linear infinite;
+        }
+
+        @keyframes float-format {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .conversion-arrows {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .conversion-arrow {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 2rem;
+            animation: arrow-flow 8s linear infinite;
+        }
+
+        @keyframes arrow-flow {
+            0% {
+                transform: translateX(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        .mime-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: white;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-  <h1>404</h1>
-  <p>Oops! The page you're looking for doesn't exist.</p>
-  <a href="/">Go back to home</a>
+    <div class="floating-formats" id="floatingFormats"></div>
+    <div class="conversion-arrows" id="conversionArrows"></div>
+
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+        <div class="text-center" style="z-index: 10; position: relative;">
+            <i class="fas fa-file-times media-icon"></i>
+            <div class="error-code">415</div>
+            <h1 class="media-message">UNSUPPORTED MEDIA TYPE</h1>
+            
+            <div class="mime-display">
+                <div>Received: <span style="color: #e74c3c;">application/x-unknown</span></div>
+                <div>Expected: <span style="color: #2ecc71;">application/json, text/xml, image/*</span></div>
+            </div>
+            
+            <div class="media-types">
+                <div class="media-type unsupported">
+                    <i class="fas fa-times-circle"></i>
+                    <div>Unknown</div>
+                </div>
+                <div class="media-type supported">
+                    <i class="fas fa-file-code"></i>
+                    <div>JSON</div>
+                </div>
+                <div class="media-type supported">
+                    <i class="fas fa-file-alt"></i>
+                    <div>XML</div>
+                </div>
+                <div class="media-type supported">
+                    <i class="fas fa-image"></i>
+                    <div>Images</div>
+                </div>
+                <div class="media-type supported">
+                    <i class="fas fa-file-pdf"></i>
+                    <div>PDF</div>
+                </div>
+                <div class="media-type supported">
+                    <i class="fas fa-file-word"></i>
+                    <div>Documents</div>
+                </div>
+            </div>
+            
+            <div class="format-info">
+                <h4 class="text-white mb-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Media Type Not Supported
+                </h4>
+                <p class="text-white mb-0">
+                    The media format of the request is not supported by the server.<br>
+                    Please convert to a supported format and try again.
+                </p>
+            </div>
+            
+            <button class="btn btn-convert btn-lg" onclick="convertFormat()">
+                <i class="fas fa-exchange-alt me-2"></i>
+                Convert Format
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function convertFormat() {
+            alert('Format converter activated. Please select a supported media type.');
+        }
+
+        // Create floating format types
+        function createFloatingFormat() {
+            const formats = ['JSON', 'XML', 'PDF', 'PNG', 'JPG', 'MP4', 'DOC', 'TXT', 'CSV', 'HTML'];
+            const format = document.createElement('div');
+            format.className = 'floating-format';
+            format.textContent = formats[Math.floor(Math.random() * formats.length)];
+            format.style.left = Math.random() * 100 + '%';
+            format.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
+            format.style.animationDelay = Math.random() * -10 + 's';
+            
+            document.getElementById('floatingFormats').appendChild(format);
+            
+            setTimeout(() => {
+                format.remove();
+            }, 10000);
+        }
+
+        // Create conversion arrows
+        function createConversionArrow() {
+            const arrow = document.createElement('i');
+            arrow.className = 'fas fa-arrow-right conversion-arrow';
+            arrow.style.top = Math.random() * 100 + '%';
+            arrow.style.animationDelay = Math.random() * -8 + 's';
+            
+            document.getElementById('conversionArrows').appendChild(arrow);
+            
+            setTimeout(() => {
+                arrow.remove();
+            }, 8000);
+        }
+
+        // Create elements periodically
+        setInterval(createFloatingFormat, 1500);
+        setInterval(createConversionArrow, 2000);
+
+        // Add format conversion effect on click
+        document.addEventListener('click', function(e) {
+            const converter = document.createElement('div');
+            converter.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            converter.style.cssText = `
+                position: absolute;
+                left: ${e.clientX - 25}px;
+                top: ${e.clientY - 25}px;
+                width: 50px;
+                height: 50px;
+                color: white;
+                font-size: 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: convert-spin 1s ease-out;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            
+            document.body.appendChild(converter);
+            
+            setTimeout(() => converter.remove(), 1000);
+        });
+
+        // Add conversion animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes convert-spin {
+                0% {
+                    transform: rotate(0deg) scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: rotate(720deg) scale(0);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Animate media types
+        const mediaTypes = document.querySelectorAll('.media-type');
+        setInterval(() => {
+            const randomType = mediaTypes[Math.floor(Math.random() * mediaTypes.length)];
+            randomType.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                randomType.style.transform = 'scale(1)';
+            }, 300);
+        }, 2000);
+    </script>
 </body>
 </html>

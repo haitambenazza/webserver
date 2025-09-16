@@ -12,7 +12,7 @@ void    TrimSpaces( std::string& s )
 	if (s.empty())
 		return ;
     start = 0;
-    end = (int)s.length();
+    end = (int)s.length() - 1;
     while (s[end] && IsWhiteSpace(s[end]))
         end--;
     while (s[start] && IsWhiteSpace(s[start]))

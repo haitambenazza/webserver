@@ -1,48 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>403 Forbidden</title>
-  <style>
-    body {
-      background-color: #1e1e2f;
-      color: #f2f2f2;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-    h1 {
-      font-size: 5rem;
-      margin-bottom: 0.5em;
-    }
-    p {
-      font-size: 1.5rem;
-      margin-bottom: 2em;
-    }
-    a {
-      color: #00bfff;
-      text-decoration: none;
-      font-weight: bold;
-      border: 2px solid #00bfff;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    a:hover {
-      background-color: #00bfff;
-      color: #1e1e2f;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Forbidden</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b69 50%, #11998e 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .forbidden-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        .error-code {
+            font-size: 10rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shake 1.5s infinite;
+            text-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .barrier {
+            position: relative;
+            width: 300px;
+            height: 20px;
+            background: repeating-linear-gradient(
+                45deg,
+                #ffcc02,
+                #ffcc02 20px,
+                #1e1e1e 20px,
+                #1e1e1e 40px
+            );
+            margin: 2rem auto;
+            animation: slide 2s infinite linear;
+            border-radius: 10px;
+        }
+
+        @keyframes slide {
+            0% { background-position: 0px 0px; }
+            100% { background-position: 40px 0px; }
+        }
+
+        .warning-icon {
+            font-size: 3rem;
+            color: #ffcc02;
+            animation: warning-blink 1s infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes warning-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .forbidden-message {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: slideIn 1s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .access-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #ff4757;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 15px 15px 0;
+            backdrop-filter: blur(10px);
+            animation: fadeInRight 1s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-back {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 1s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-back::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-back:hover::before {
+            left: 100%;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(17, 153, 142, 0.3);
+            color: white;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .floating-icon {
+            position: absolute;
+            color: rgba(255, 71, 87, 0.1);
+            animation: float-up 15s infinite linear;
+        }
+
+        .floating-icon:nth-child(odd) {
+            animation-duration: 12s;
+        }
+
+        @keyframes float-up {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            to {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        .security-tape {
+            position: absolute;
+            top: 50%;
+            left: -50px;
+            right: -50px;
+            height: 60px;
+            background: repeating-linear-gradient(
+                -45deg,
+                rgba(255, 204, 2, 0.8),
+                rgba(255, 204, 2, 0.8) 30px,
+                rgba(0, 0, 0, 0.8) 30px,
+                rgba(0, 0, 0, 0.8) 60px
+            );
+            transform: rotate(-15deg);
+            z-index: -1;
+            animation: tape-move 3s infinite linear;
+        }
+
+        @keyframes tape-move {
+            0% { transform: rotate(-15deg) translateX(-100px); }
+            100% { transform: rotate(-15deg) translateX(100px); }
+        }
+    </style>
 </head>
 <body>
-  <h1>404</h1>
-  <p>Oops! The page you're looking for doesn't exist.</p>
-  <a href="/">Go back to home</a>
+    <div class="floating-icons">
+        <i class="fas fa-ban floating-icon fa-2x" style="left: 10%; animation-delay: 0s;"></i>
+        <i class="fas fa-exclamation-triangle floating-icon fa-3x" style="left: 20%; animation-delay: -3s;"></i>
+        <i class="fas fa-shield-alt floating-icon fa-2x" style="left: 30%; animation-delay: -6s;"></i>
+        <i class="fas fa-lock floating-icon fa-3x" style="left: 40%; animation-delay: -9s;"></i>
+        <i class="fas fa-times-circle floating-icon fa-2x" style="left: 50%; animation-delay: -12s;"></i>
+        <i class="fas fa-user-slash floating-icon fa-3x" style="left: 60%; animation-delay: -15s;"></i>
+        <i class="fas fa-eye-slash floating-icon fa-2x" style="left: 70%; animation-delay: -18s;"></i>
+        <i class="fas fa-hand-paper floating-icon fa-3x" style="left: 80%; animation-delay: -21s;"></i>
+        <i class="fas fa-stop floating-icon fa-2x" style="left: 90%; animation-delay: -24s;"></i>
+    </div>
+
+    <div class="security-tape"></div>
+
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+        <div class="forbidden-container text-center">
+            <i class="fas fa-ban warning-icon"></i>
+            <div class="error-code">403</div>
+            <h1 class="forbidden-message">FORBIDDEN</h1>
+            
+            <div class="barrier"></div>
+            
+            <div class="access-info">
+                <h4 class="text-danger mb-3">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Access Restricted
+                </h4>
+                <p class="text-white mb-0">
+                    You don't have permission to access this resource.<br>
+                    This area is restricted to authorized personnel only.
+                </p>
+            </div>
+            
+            <button class="btn btn-back btn-lg" onclick="goHome()">
+                <i class="fas fa-home me-2"></i>
+                Return to Safety
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // Create random floating icons
+        function createFloatingIcon() {
+            const icons = ['fa-ban', 'fa-exclamation-triangle', 'fa-shield-alt', 'fa-lock', 'fa-times-circle'];
+            const icon = document.createElement('i');
+            icon.className = `fas ${icons[Math.floor(Math.random() * icons.length)]} floating-icon`;
+            icon.style.left = Math.random() * 100 + '%';
+            icon.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+            icon.style.animationDelay = Math.random() * -20 + 's';
+            
+            document.querySelector('.floating-icons').appendChild(icon);
+            
+            setTimeout(() => {
+                icon.remove();
+            }, 15000);
+        }
+
+        // Create new floating icons periodically
+        setInterval(createFloatingIcon, 3000);
+
+        // Add click effect
+        document.addEventListener('click', function(e) {
+            const ripple = document.createElement('div');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255, 71, 87, 0.3);
+                width: 20px;
+                height: 20px;
+                left: ${e.clientX - 10}px;
+                top: ${e.clientY - 10}px;
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                0% {
+                    transform: scale(0);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(10);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import signal, sys
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 print("Content-Type: text/html\r")
 print("\r")
 print("<html>")
@@ -8,7 +10,7 @@ print("<body>")
 print("<h1>Hello from CGI!</h1>")
 print("<p>This is a Python CGI script working correctly.</p>")
 print("</body>")
-for i in range(0, 5000):
-	print('a7777', end="\n")
-print("DONE")
+# for i in range(50000): error
+print('a7777', end="\n")
 print("</html>")
+

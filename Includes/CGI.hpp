@@ -2,6 +2,7 @@
 
 #include "Request.hpp"
 
+class Multiplexer;
 class Cgi
 {
     private:
@@ -10,29 +11,44 @@ class Cgi
         std::string                 output;
         pid_t                       child_pid;
         std::vector<std::string>    env;
-        int                         ParentFd[2];
-        int                         ChildFd[2];
+        int16_t                     fdchild;
         bool                        IsExecuted;
-        ssize_t                     ByteRead;
-
+        time_t                      ForkTime;
+        std::string                 filepath;
+        bool                        isdone;
+        pid_t                       pidchild;
+        int                         tempfd;
+        bool                        readDone;
+        std::string                 tmpfile;
+        int                         pipes[2];
     public:
+        Location                    location;
         Cgi();
-        Cgi( Multiplexer& m, Request Req , Location& loc, std::string& filepath);
+        Cgi(Request Req, Location& loc, std::string& filepath);
         ~Cgi();
-        Cgi(const Cgi &other);
-        Cgi& operator=(const Cgi &other);
+        Cgi(const Cgi& other);
+        Cgi& operator=(const Cgi& other);
         void        SetEnv( Request& Req );
         std::vector<char *> GetEnvCgi();
 
         std::string     GetOutput();
-        void            ExecuteCgi( Multiplexer& m, Request& Req , Location& loc, std::string filepath);
-        void            SetOutput(std::string& s);
-        bool            PipePipes();
+        HttpStatus          ExecuteCgi(Request & Req, Location& loc, std::string filepath);
+        void            SetOutput(std::string s);
         bool            CgiFork();
-        void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
-        bool            AddToEpollCgi(Multiplexer& m);
+        void            ExecCgiChild(Request & Req, std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
         bool            CheckExitStatus();
-        ssize_t         GetbyteRead() const;
-        void            SetByteRead( ssize_t val );
-};
-void	HandleCgi( Server& server, Multiplexer& m, int &i );
+        pid_t           GetChildPid() const;
+        void            SetChildPid(pid_t child);
+        time_t          GetForkTime() const;
+        bool            GetExecutedStatus()const;
+        int16_t         GetFdChild() const;
+        void            SetFilePath(std::string& path);
+        std::string     GetFilePath();
+        Location        GetLocation();
+        void            SetLocation(Location& loc);
+        bool            ReadStatus() const;
+        void            SetReadStatus(bool stat);
+        std::string     GetTmpFile() const;
+    };
+void	HandleCgi( Server& server, Multiplexer& m, int &i);
+

@@ -1,48 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>413 Payload Too Large</title>
-  <style>
-    body {
-      background-color: #1e1e2f;
-      color: #f2f2f2;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-    h1 {
-      font-size: 5rem;
-      margin-bottom: 0.5em;
-    }
-    p {
-      font-size: 1.5rem;
-      margin-bottom: 2em;
-    }
-    a {
-      color: #00bfff;
-      text-decoration: none;
-      font-weight: bold;
-      border: 2px solid #00bfff;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    a:hover {
-      background-color: #00bfff;
-      color: #1e1e2f;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>413 - Payload Too Large</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 50%, #ff2f3a 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .error-code {
+            font-size: 12rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #fff, #ffcccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: size-overflow 2s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes size-overflow {
+            0%, 100% { 
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: brightness(1.3);
+            }
+        }
+
+        .payload-icon {
+            font-size: 5rem;
+            color: white;
+            animation: payload-bounce 2s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes payload-bounce {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+            }
+            25% { 
+                transform: translateY(-20px) scale(1.1);
+            }
+            50% { 
+                transform: translateY(-10px) scale(1.2);
+            }
+            75% { 
+                transform: translateY(-5px) scale(1.1);
+            }
+        }
+
+        .payload-message {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: text-expand 3s ease-in-out infinite;
+        }
+
+        @keyframes text-expand {
+            0%, 100% { 
+                letter-spacing: 0px;
+                transform: scaleX(1);
+            }
+            50% { 
+                letter-spacing: 3px;
+                transform: scaleX(1.05);
+            }
+        }
+
+        .size-indicator {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            animation: size-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes size-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-custom {
+            height: 30px;
+            background: linear-gradient(45deg, #fff, #ffcccc);
+            width: 150%;
+            transition: width 0.3s ease;
+            animation: overflow-bar 3s ease-in-out infinite;
+            border-radius: 25px;
+            position: relative;
+        }
+
+        @keyframes overflow-bar {
+            0% { width: 100%; }
+            50% { width: 150%; }
+            100% { width: 100%; }
+        }
+
+        .size-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff4757;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .btn-compress {
+            background: linear-gradient(45deg, #fff, #f1f2f6);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: #ff4757;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 1s both;
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-compress:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.4);
+            color: #ff4757;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-files {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .floating-file {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.2);
+            animation: float-file 8s linear infinite;
+            font-size: 2rem;
+        }
+
+        @keyframes float-file {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .size-warning {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #ff4757;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            animation: warning-flash 1.5s ease-in-out infinite;
+        }
+
+        @keyframes warning-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .file-size-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-  <h1>404</h1>
-  <p>Oops! The page you're looking for doesn't exist.</p>
-  <a href="/">Go back to home</a>
+    <div class="size-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        SIZE LIMIT EXCEEDED
+    </div>
+
+    <div class="floating-files" id="floatingFiles"></div>
+
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+        <div class="text-center" style="z-index: 10; position: relative;">
+            <i class="fas fa-file-archive payload-icon"></i>
+            <div class="error-code">413</div>
+            <h1 class="payload-message">PAYLOAD TOO LARGE</h1>
+            
+            <div class="file-size-display">
+                <div>Request Size: <span style="color: #ff4757;">25.7 MB</span></div>
+                <div>Maximum Allowed: <span style="color: #2ed573;">10.0 MB</span></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar-custom"></div>
+                <div class="size-label">157%</div>
+            </div>
+            
+            <div class="size-indicator">
+                <h4 class="text-white mb-3">
+                    <i class="fas fa-weight-hanging me-2"></i>
+                    Request Too Heavy
+                </h4>
+                <p class="text-white mb-0">
+                    The request payload exceeds the maximum allowed size.<br>
+                    Please reduce the file size or split into smaller chunks.
+                </p>
+            </div>
+            
+            <button class="btn btn-compress btn-lg" onclick="compressFile()">
+                <i class="fas fa-compress-alt me-2"></i>
+                Compress & Retry
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function compressFile() {
+            alert('Compressing file... Please try uploading again with a smaller file.');
+        }
+
+        // Create floating files
+        function createFloatingFile() {
+            const fileTypes = ['fa-file-pdf', 'fa-file-image', 'fa-file-video', 'fa-file-archive', 'fa-file-code', 'fa-file-word'];
+            const file = document.createElement('i');
+            file.className = `fas ${fileTypes[Math.floor(Math.random() * fileTypes.length)]} floating-file`;
+            file.style.left = Math.random() * 100 + '%';
+            file.style.animationDelay = Math.random() * -8 + 's';
+            file.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+            
+            document.getElementById('floatingFiles').appendChild(file);
+            
+            setTimeout(() => {
+                file.remove();
+            }, 8000);
+        }
+
+        // Create files periodically
+        setInterval(createFloatingFile, 1000);
+
+        // Simulate file size animation
+        let currentSize = 157;
+        const sizeLabel = document.querySelector('.size-label');
+        
+        setInterval(() => {
+            currentSize += Math.random() * 10 - 5;
+            if (currentSize < 100) currentSize = 100;
+            if (currentSize > 200) currentSize = 200;
+            sizeLabel.textContent = Math.round(currentSize) + '%';
+        }, 2000);
+
+        // Add click effect for compression
+        document.addEventListener('click', function(e) {
+            const compress = document.createElement('div');
+            compress.style.cssText = `
+                position: absolute;
+                width: 100px;
+                height: 100px;
+                left: ${e.clientX - 50}px;
+                top: ${e.clientY - 50}px;
+                border: 3px solid white;
+                border-radius: 50%;
+                animation: compress-effect 0.8s ease-out;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            
+            document.body.appendChild(compress);
+            
+            setTimeout(() => compress.remove(), 800);
+        });
+
+        // Add compression animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes compress-effect {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(0.1);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
