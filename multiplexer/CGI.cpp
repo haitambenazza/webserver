@@ -69,6 +69,11 @@ Cgi&    Cgi::operator=(const Cgi &other)
     return (*this);
 }
 
+bool            Cgi::GetExecutionstatus() const
+{
+    return (isdone);
+}
+
 std::string     Cgi::GetTmpFile() const
 {
     return (tmpfile);
@@ -320,39 +325,17 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             else if(child_pid == pidchild)
             {
                 isdone = true;
-                tempfd = open(tmpfile.c_str() , O_RDONLY);
             }
             if (status)
             {
                 readDone = true;
-                close(tempfd);
                 std::remove(tmpfile.c_str());
                 return (InternalServerError);
             }
         }
         if(isdone)
         {
-            char Buffer[4096];
-
-            ssize_t byte_read ;
-            if ((byte_read = read(tempfd , Buffer, sizeof(Buffer) - 1)) > 0 )
-            {
-                Buffer[byte_read] = '\0';
-                output += Buffer;
-            }
-            if (byte_read == -1)
-            {
-                readDone = true;
-                close(tempfd);
-                perror("bytes_read");
-                return (InternalServerError); // 500 , internal server error;
-            }
-            else
-            {
-                readDone = true;
-                close(tempfd);
                 return (OK);
-            }
         }
     }
     return (OK);

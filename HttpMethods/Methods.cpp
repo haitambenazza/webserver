@@ -467,7 +467,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
 		return ;
 	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
-	if (m.GetClient()[i].GetCgi().ReadStatus() && status != OK)
+	if (m.GetClient()[i].GetCgi().GetExecutionstatus() && status != OK)
 	{
 		SendData(server, m, i, status, ReturnErrorPath(server, status));
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
@@ -477,7 +477,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 			disconnectClient(m, i);
 		}
 	}
-	else if (m.GetClient()[i].GetCgi().ReadStatus() && status == OK)
+	else if (m.GetClient()[i].GetCgi().GetExecutionstatus() && status == OK)
 	{
 		SendData(server, m, i, status, m.GetClient()[i].GetCgi().GetTmpFile());
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();

@@ -17,7 +17,6 @@ class Cgi
         std::string                 filepath;
         bool                        isdone;
         pid_t                       pidchild;
-        int                         tempfd;
         bool                        readDone;
         std::string                 tmpfile;
     public:
@@ -47,6 +46,7 @@ class Cgi
         void            SetLocation(Location& loc);
         bool            ReadStatus() const;
         void            SetReadStatus(bool stat);
+        bool            GetExecutionstatus() const;
         std::string     GetTmpFile() const;
     };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);
