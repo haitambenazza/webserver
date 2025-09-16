@@ -18,6 +18,7 @@ class Server
 		std::string                                             index;
 		u_int64_t	                                            max_body_size;
 		std::map<int , std::string>                             error_map;
+        std::map<int , std::string>                             DefaultError_map;
         bool                                                    status;
         std::vector<int16_t>                                    ClientFd;
 
@@ -52,6 +53,8 @@ class Server
         u_int64_t                                               GetMaxBodySize() const;
         std::string                                             GetArgs() const;
         void                                                    SetArgs(std::string s);
+        void                                                    SetDefaultMap();
+        std::map<int , std::string>                             GetDefaultErrorMap() const;
 };
 
 std::vector<std::string>	FillVector( std::vector<std::string> Src );

@@ -1,7 +1,17 @@
 #include "../headers/webserver.hpp"
 
 
-Request::Request() : method(""), uri(""), version(""), body("") , status_code(OK),query_string(""), ScriptName(""), Scriptpath(""){}
+Request::Request()
+{
+    method = "";
+    uri = "";
+    version = "";
+    body = "";
+    status_code = OK;
+    query_string = "";
+    ScriptName = "";
+    Scriptpath = "";
+}
 
 Request::Request(const std::string& request_string) {
     this->parse(request_string);
@@ -114,6 +124,7 @@ bool Request::parseRequestLine(const std::string &line)
     std::stringstream ss(line);
     std::string temp_method, temp_uri, temp_version;
     ss >> temp_method >> temp_uri >> temp_version;
+    std::string s(ALLOWED_CHAR_URI);
 
     if ((temp_method != "GET" && temp_method != "POST" && temp_method != "DELETE"))
     {
@@ -128,7 +139,15 @@ bool Request::parseRequestLine(const std::string &line)
 
     if (!temp_uri.empty())
     {
-        // std::cout << "URI == " << temp_uri << std::endl;
+        std::string tmp = temp_uri;
+        for (size_t i = 0; i < tmp.size(); i++)
+        {
+            if (s.find(tmp[i]) == std::string::npos)
+            {
+                status_code = BadRequest;
+                return(false);
+            }
+        }
         if (temp_uri.size() > URI_MAX_LENGTH)
         {
             status_code = RequestUriTooLong;
@@ -139,21 +158,21 @@ bool Request::parseRequestLine(const std::string &line)
             status_code = BadRequest;
             return false;
         }
-        // if (!ReturnExtention(temp_uri).empty() && ReturnExtention(temp_uri) != ".html")
-        // {
-        //     if (temp_uri.find("?") != std::string::npos)
-        //     {
-        //         if (!split(temp_uri, "?")[0].empty())
-        //             ScriptName = split(temp_uri, "?")[0];
-        //         if (!split(temp_uri, "?")[1].empty())
-        //             query_string = split(temp_uri, "?")[1];
-        //     }
-        //     else
-        //         ScriptName = temp_uri;
-        //     Scriptpath = "/www" + ScriptName;
-        //     if (ValidCgiExtention(ReturnExtention(ScriptName)) == false)
-        //         return (false);
-        // }
+        if (!ReturnExtention(temp_uri).empty() && ValidCgiExtention(ReturnExtention(temp_uri)))
+        {
+            if (temp_uri.find("?") != std::string::npos)
+            {
+                if (!split(temp_uri, "?")[0].empty())
+                    ScriptName = split(temp_uri, "?")[0];
+                if (!split(temp_uri, "?")[1].empty())
+                    query_string = split(temp_uri, "?")[1];
+            }
+            else
+                ScriptName = temp_uri;
+            Scriptpath = "/www" + ScriptName;
+            if (ValidCgiExtention(ReturnExtention(ScriptName)) == false)
+                return (false);
+        }
     }
 
     if (temp_version != "HTTP/1.0" && temp_version != "HTTP/1.1")
@@ -191,7 +210,7 @@ void Request::parseHeaders(std::stringstream &str)
             std::string key = line.substr(0, colon);
             std::string value = line.substr(colon + 1);
 
-            if (key.empty())
+            if (key.empty() || value.empty())
             {
                 status_code = BadRequest;
                 return;
@@ -199,7 +218,6 @@ void Request::parseHeaders(std::stringstream &str)
             for (size_t i = 0; i < key.size(); ++i)
             {
                 unsigned char c = key[i];
-                // allowed characters
                 if (!(std::isalnum(c) || c == '-'))
                 {
                     status_code = BadRequest;
@@ -219,7 +237,6 @@ void Request::parseHeaders(std::stringstream &str)
         }
         else
         {
-            // no colon found
             status_code = BadRequest;
             return;
         }
@@ -263,7 +280,7 @@ bool Request::parse(const std::string& request_string)
 {
     std::stringstream str(request_string);
     std::string line;
-    
+
     if (!std::getline(str, line))
     {
         status_code = BadRequest;
@@ -298,9 +315,6 @@ void Request::printRequestData() const
         if (!it->second.empty())
             std::cout << it->first << ": " << it->second << std::endl;
     }
-    std::cout << "--- BODY ---" << std::endl;
-    std::cout << this->body << std::endl;
-
 }
 
 std::string Request::GetContentType()

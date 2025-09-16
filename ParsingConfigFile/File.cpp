@@ -57,7 +57,10 @@ std::string&         File::GetRawString()
     return (RawString);
 }
 
-
+bool iswtspaces(char c)
+{
+    return (c == 32 || (c >= 9 && c <= 13));
+}
 void    File::ReadLines()
 {
     std::string                 line;
@@ -73,8 +76,17 @@ void    File::ReadLines()
     {
         TrimSpaces( line );
         if (line.empty() || line[0] == '#')
+        {
+            i++;
             continue ;
-        if (line[line.size() - 1] != ';')
+        }
+        if (line[line.size() - 1] == ';')
+        {
+            i++;
+            RawString += line;
+            continue ;
+        }
+        else
         {
             if (line[line.size() - 1] != '{' && line[line.size() - 1] != '}')
             {
@@ -83,21 +95,43 @@ void    File::ReadLines()
                 tmp = line;
                 std::getline(file, line);
                 TrimSpaces( line );
-                if (!line.compare("{"))
+                if (!line.compare("{") || !line.compare("}"))
                 {
-                    if (!line.compare("{"))
-                    {
-                        i++;
-                        RawString += line;
-                        continue ;
-                    }
+                    i++;
+                    RawString += line;
+                    continue ;
                 }
                 else
                 {
-                    std::cerr << "Error at line " << i  << " " << tmp << std::endl;
-                    RawString.clear();
-                    file.close();
-                    return ;
+                    TrimSpaces( tmp );
+                    size_t pos1 = tmp.find(';');
+                    size_t pos2 = tmp.find('#');
+                    if (tmp[tmp.size() - 1] == ';')
+                        continue ;
+                    if (pos1 != std::string::npos && pos2 != std::string::npos && pos2 > pos1)
+                    {
+                        if (tmp[pos1] == ';')
+                            pos1++;
+                        while (iswtspaces(tmp[pos1]))
+                            pos1++;
+                        if (tmp[pos1] && tmp[pos1] != '#')
+                        {
+                            std::cerr << "Error at line " << i  << " " << tmp << std::endl;
+                            RawString.clear();
+                            file.close();
+                            return ;
+                        }
+                        std::string trimmed = tmp.substr(0, pos2);
+                        TrimSpaces( trimmed );
+                        RawString += trimmed;
+                    }
+                    else
+                    {
+                        std::cerr << "Error at line " << i  << " " << tmp << std::endl;
+                        RawString.clear();
+                        file.close();
+                        return ;
+                    }
                 }
             }
         }

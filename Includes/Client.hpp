@@ -1,6 +1,7 @@
 
 #pragma once
 #include "Request.hpp"
+#include "CGI.hpp"
 
 class Client
 {
@@ -16,12 +17,16 @@ class Client
         size_t          readeSize;
         size_t          FileSize;
 	    size_t          sent;
+        bool            IsCgi;
+        Cgi             cgi;
+        bool            CgiExecuted;
+        bool            CgiRunning;
     public :
         Client();
         Client( const Client& copy );
         Client& operator=( const Client& copy );
         ~Client();
-
+        std::string                 _cgi_path;
         void	        SetClient(int16_t val);
         void	        SetServerIndex(int16_t val);
         int16_t	        GetClientFd() const;
@@ -40,4 +45,14 @@ class Client
         void            SetSentSize( size_t size );
         size_t          GetFileSize() const;
         size_t          GetSentSize() const;
+        void            SetCgiStatus(bool stat);
+        bool            GetCgiStatus() const;
+        void            SetCgi( Cgi tmp );
+        Cgi&            GetCgi();
+        const Cgi&      GetCgi() const;
+        bool            GetCgiflag() const;
+        void            SetCgiFlag(bool flag);
+        bool            GetCgiRunning() const;
+        void            SetCgiRunning(bool flag);
+        
 };

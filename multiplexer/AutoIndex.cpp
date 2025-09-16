@@ -6,7 +6,6 @@ std::string    AutoIndex( std::string root, std::string path )
     struct dirent   *it;
     std::ofstream   index("www/AutoIndex.html");
 
-
     if (!index.is_open())
         return("");
     if (path.empty() || root.empty())
@@ -28,10 +27,24 @@ std::string    AutoIndex( std::string root, std::string path )
     it = readdir(Dir);
     if (it == NULL)
         return ( index.close(), "" );
-    while (it != NULL)
+
+    while ((it = readdir(Dir)) != NULL)
     {
-        index << "      <li><a href=\"" << path + '/' + it->d_name << "\">" << it->d_name <<"</a></li>" << std::endl;
-        it = readdir(Dir);
+        std::string href;
+        if (it->d_type == DT_DIR)
+        {
+            if (path[path.length() - 1] != '/')
+                href = path + "/" + it->d_name;
+            else
+                href = path + it->d_name;
+        }
+        else
+        {
+            if (path == "/")
+                path = "";
+            href = path + "/" + it->d_name;
+        }
+        index << "      <li><a href=\"" << href << "\">" << it->d_name <<"</a></li>" << std::endl;
     }
     index << "     </ul>" << std::endl;
     index << "</body>" << std::endl;

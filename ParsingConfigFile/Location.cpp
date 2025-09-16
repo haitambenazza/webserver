@@ -110,6 +110,7 @@ void        Location::SetCgiPathMap( std::string &s )
     tmp = split(s, ";");
     for (size_t i = 0; i < tmp.size(); i++)
     {
+        // std::cout << tmp[i] << "\n";
         if (tmp[i][0] == '_')
         {
             std::vector<std::string> lst = split(tmp[i], " ");

@@ -8,23 +8,36 @@ Client::Client()
     readeSize = 0;
     FileSize = 0;
     sent = 0;
+    headers = "";
+    body = "";
+    IsCgi = false;
+    CgiExecuted = false;
+    CgiRunning = false;
+    // cgi = NULL;
 }
 
-Client::Client( const Client& copy )
+// Fixed Client.cpp copy constructor
+Client::Client(const Client& copy)
+    : fd(copy.fd),
+      ServerIndex(copy.ServerIndex),
+      connectedTime(copy.connectedTime),
+      headers(copy.headers),
+      body(copy.body),
+      Req(copy.Req),
+      readDone(copy.readDone),
+      readeSize(copy.readeSize),
+      FileSize(copy.FileSize),
+      sent(copy.sent),
+      IsCgi(copy.IsCgi),
+      cgi(copy.cgi),
+      CgiExecuted(copy.CgiExecuted),
+      CgiRunning(copy.CgiRunning)  // THIS IS THE KEY - use initializer list for Cgi
 {
-    fd = copy.fd;
-    connectedTime = copy.connectedTime;
-    ServerIndex = copy.ServerIndex;
-    readDone = copy.readDone;
-    readeSize = copy.readeSize;
-    FileSize = copy.FileSize;
-    sent = copy.sent;
-    Req = copy.Req;
-    headers = copy.headers;
-    body = copy.body;
+    // Empty body - everything initialized above
 }
 
-Client& Client::operator=( const Client& copy )
+// Also fix the assignment operator to be consistent
+Client& Client::operator=(const Client& copy)
 {
     if (this != &copy)
     {
@@ -38,16 +51,42 @@ Client& Client::operator=( const Client& copy )
         Req = copy.Req;
         headers = copy.headers;
         body = copy.body;
+        IsCgi = copy.IsCgi;
+        cgi = copy.cgi;
+        CgiExecuted = copy.CgiExecuted;
+        CgiRunning = copy.CgiRunning;  // This is fine for assignment operator
     }
-    return (*this);
+    return *this;
 }
 
 Client::~Client()
 {
-    std::cout << headers << '\n';
-    std::cout << body << '\n';
-    headers = std::string();
-    body = std::string();
+    // if (IsCgi)
+    //     cgi.CheckExitStatus();
+}
+
+void            Client::SetCgi( Cgi tmp )
+{
+    cgi = tmp;
+}
+
+Cgi&             Client::GetCgi()
+{
+    return (cgi);
+}
+
+bool            Client::GetCgiRunning() const
+{
+    return CgiRunning;
+}
+void            Client::SetCgiRunning(bool flag)
+{
+    CgiRunning = flag;
+}
+
+const Cgi& Client::GetCgi() const  // Const version
+{
+    return cgi;
 }
 
 void	Client::SetClient(int16_t val)
@@ -137,4 +176,25 @@ void            Client::clearBuffer()
 {
     headers = std::string();
     body = std::string();
+}
+
+void            Client::SetCgiStatus(bool stat)
+{
+    IsCgi = stat;
+}
+
+bool            Client::GetCgiStatus() const
+{
+    return IsCgi;
+}
+
+
+bool            Client::GetCgiflag() const
+{
+    return (CgiExecuted);
+}
+
+void            Client::SetCgiFlag(bool flag)
+{
+    CgiExecuted = flag;
 }

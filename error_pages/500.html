@@ -1,48 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>500 Internal Server Error</title>
-  <style>
-    body {
-      background-color: #1e1e2f;
-      color: #f2f2f2;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      text-align: center;
-    }
-    h1 {
-      font-size: 5rem;
-      margin-bottom: 0.5em;
-    }
-    p {
-      font-size: 1.5rem;
-      margin-bottom: 2em;
-    }
-    a {
-      color: #00bfff;
-      text-decoration: none;
-      font-weight: bold;
-      border: 2px solid #00bfff;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      transition: background-color 0.3s;
-    }
-    a:hover {
-      background-color: #00bfff;
-      color: #1e1e2f;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Internal Server Error</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .error-code {
+            font-size: 12rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glitch 1.5s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { 
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+            20% { 
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+            40% { 
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+            60% { 
+                transform: translate(2px, 2px);
+                filter: hue-rotate(270deg);
+            }
+            80% { 
+                transform: translate(2px, -2px);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .server-crash {
+            font-size: 5rem;
+            color: #e74c3c;
+            animation: explosion 2s ease-in-out infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes explosion {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.3) rotate(180deg);
+                opacity: 0.7;
+            }
+        }
+
+        .server-error-message {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            animation: typewriter 3s steps(20) forwards;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid #e74c3c;
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .error-details {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            animation: fadeInUp 1s ease-out 1s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-report {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 1.5s both;
+            margin: 0 10px;
+        }
+
+        .btn-report:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+            color: white;
+        }
+
+        .sparks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #e74c3c;
+            border-radius: 50%;
+            animation: spark-fly 2s ease-out infinite;
+        }
+
+        @keyframes spark-fly {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--random-x), var(--random-y)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .circuit-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            z-index: -1;
+        }
+    </style>
 </head>
 <body>
-  <h1>404</h1>
-  <p>Oops! The page you're looking for doesn't exist.</p>
-  <a href="/">Go back to home</a>
+    <canvas class="circuit-lines" id="circuit"></canvas>
+    
+    <div class="sparks" id="sparks"></div>
+
+    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+        <div class="text-center" style="z-index: 10; position: relative;">
+            <i class="fas fa-server server-crash"></i>
+            <div class="error-code">500</div>
+            <h1 class="server-error-message">SYSTEM MALFUNCTION</h1>
+            
+            <div class="error-details">
+                <h4 class="text-danger mb-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Internal Server Error
+                </h4>
+                <p class="text-white-50 mb-0">
+                    Our servers encountered an unexpected condition.<br>
+                    Our engineers have been notified and are working to fix this issue.
+                </p>
+            </div>
+            
+            <div class="d-flex justify-content-center flex-wrap">
+                <button class="btn btn-report btn-lg" onclick="reportIssue()">
+                    <i class="fas fa-bug me-2"></i>Report Issue
+                </button>
+                <button class="btn btn-report btn-lg" onclick="goHome()" style="background: linear-gradient(45deg, #27ae60, #2ecc71);">
+                    <i class="fas fa-home me-2"></i>Go Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function reportIssue() {
+            alert('Issue reported to our technical team. Thank you!');
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // Create sparks
+        function createSpark() {
+            const spark = document.createElement('div');
+            spark.className = 'spark';
+            spark.style.left = Math.random() * 100 + '%';
+            spark.style.top = Math.random() * 100 + '%';
+            spark.style.setProperty('--random-x', (Math.random() - 0.5) * 200 + 'px');
+            spark.style.setProperty('--random-y', (Math.random() - 0.5) * 200 + 'px');
+            spark.style.animationDelay = Math.random() * 2 + 's';
+            
+            document.getElementById('sparks').appendChild(spark);
+            
+            setTimeout(() => {
+                spark.remove();
+            }, 2000);
+        }
+
+        // Generate sparks periodically
+        setInterval(createSpark, 300);
+
+        // Circuit board background
+        const canvas = document.getElementById('circuit');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function drawCircuit() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 1;
+            
+            // Draw grid
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            // Draw random circuit paths
+            for (let i = 0; i < 20; i++) {
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+        }
+
+        drawCircuit();
+
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawCircuit();
+        });
+    </script>
 </body>
 </html>
