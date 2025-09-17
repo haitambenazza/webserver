@@ -173,7 +173,7 @@ bool CheckValidKeys(const std::vector<std::string> str)
 	valid_keys.push_back("root");
 	valid_keys.push_back("index");
 	valid_keys.push_back("location");
-	valid_keys.push_back("client_max_body_size");
+	valid_keys.push_back("max_body_size");
 	valid_keys.push_back("allowed_methods");
 	valid_keys.push_back("return");
 	valid_keys.push_back("autoindex");

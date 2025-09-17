@@ -14,8 +14,6 @@ Cgi::Cgi()
     pidchild = -1;
     readDone = false;
     tmpfile = "www/tmp/tempfile.html";
-    pipes[0] = -1;
-    pipes[1] = -1;
 }
 
 Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
@@ -34,8 +32,6 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
     pidchild = -1;
     readDone = false;
     tmpfile = "www/tmp/tempfile.html";
-    pipes[0] = -1;
-    pipes[1] = -1;
 }
 
 Cgi::Cgi(const Cgi &other)
@@ -52,8 +48,6 @@ Cgi::Cgi(const Cgi &other)
     isdone = other.isdone;
     pidchild = other.pidchild;
     tmpfile = "www/tmp/tempfile.html";
-    // pipes[0] = other.pipes[0];
-    // pipes[1] = other.pipes[1];
 }
 
 Cgi&    Cgi::operator=(const Cgi &other)
@@ -71,10 +65,13 @@ Cgi&    Cgi::operator=(const Cgi &other)
         isdone = other.isdone;
         pidchild = other.pidchild;
         tmpfile = "www/tmp/tempfile.html";
-        // pipes[0] = other.pipes[0];
-        // pipes[1] = other.pipes[1];
     }
     return (*this);
+}
+
+bool            Cgi::GetExecutionstatus() const
+{
+    return (isdone);
 }
 
 std::string     Cgi::GetTmpFile() const
@@ -233,18 +230,8 @@ bool Cgi::CgiFork()
     return (true);
 }
 
-void       Cgi::ExecCgiChild(Request & Req, std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
+void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
 {
-    if (Req.getMethod() == "POST")
-    {
-        close(pipes[1]);
-        if (dup2(pipes[0], STDIN_FILENO) == -1)
-        {
-            perror("dup20000");
-            close (pipes[0]);
-        }
-        close(pipes[0]);
-    }
     if (dup2(fdchild, STDOUT_FILENO) == -1)
     {
         perror("dup2");
@@ -287,14 +274,12 @@ bool    Cgi::ReadStatus() const
 
 HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
 {
-    std::string method = Req.getMethod();
     if (!IsExecuted)
     {
         SetEnv(Req);
         std::vector<char *> envp = GetEnvCgi();
 
         std::string CgiPath = ReturnCgiPath(filepath, loc.GetCgiPathMap());
-        // std::cout << Req.getBody();
         if (CgiPath.empty())
         {
             readDone = true;
@@ -310,14 +295,6 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             perror("Failed to create tmp file");
             return (InternalServerError);
         }
-        // Before fork
-        if (Req.getMethod() == "POST") {
-            if (pipe(pipes) == -1) {
-                perror("pipe");
-                return InternalServerError;
-            }
-        }
-
         if (!CgiFork())
         {
             readDone = true;
@@ -325,19 +302,10 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
         }
         if (!IsExecuted && child_pid == 0)
         {
-            ExecCgiChild(Req ,envp, CgiPath, filepath);
+            ExecCgiChild(envp, CgiPath, filepath);
         }
         else
         {
-            if (Req.getMethod() == "POST")
-            {
-                close(pipes[0]);
-                ssize_t byte_written = write(pipes[1], Req.getBody().c_str(), Req.getBody().size());
-                std::cout << byte_written << " byte_written \n";
-                if (byte_written == -1)
-                    return (InternalServerError);
-                close(pipes[1]);
-            }
             IsExecuted = true;
         }
         close(fdchild);
@@ -352,45 +320,23 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             {
                 readDone = true;
                 perror("waitpid()");
-                // exit(1);
-                return (BadGateaway);
+                exit(1);
+                return (BadGateaway); // return bad gateway
             }
             else if(child_pid == pidchild)
             {
                 isdone = true;
-                tempfd = open(tmpfile.c_str() , O_RDONLY);
             }
             if (status)
             {
                 readDone = true;
-                close(tempfd);
                 std::remove(tmpfile.c_str());
                 return (InternalServerError);
             }
         }
         if(isdone)
         {
-            char Buffer[4096];
-
-            ssize_t byte_read ;
-            if ((byte_read = read(tempfd , Buffer, sizeof(Buffer) - 1)) > 0 )
-            {
-                Buffer[byte_read] = '\0';
-                output += Buffer;
-            }
-            if (byte_read == -1)
-            {
-                readDone = true;
-                close(tempfd);
-                perror("bytes_read");
-                return (InternalServerError);
-            }
-            else
-            {
-                readDone = true;
-                close(tempfd);
                 return (OK);
-            }
         }
     }
     return (OK);

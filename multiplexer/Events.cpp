@@ -185,6 +185,9 @@ int	ReadData( Multiplexer &m, int &i)
 		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
 			return (1);
 	}
+
+	if (bytes_read == -1)
+		;;
 	if (isPostValid(m, i))
 		return (1);
 	if (bytes_read == 0)

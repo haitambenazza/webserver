@@ -224,6 +224,15 @@ void Request::parseHeaders(std::stringstream &str)
                     return;
                 }
             }
+            // if (key == "Content-Length")
+            // {
+            //     if (!AllDigit(value))
+            //     {
+            //         std::cout << "KAYN\n";
+            //         status_code = BadRequest;
+            //         return;/* code */
+            //     }
+            // }
             if (key.find(' ') != std::string::npos || key.find('\t') != std::string::npos)
             {
                 status_code = BadRequest;

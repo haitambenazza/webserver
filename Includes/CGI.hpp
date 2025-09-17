@@ -17,10 +17,8 @@ class Cgi
         std::string                 filepath;
         bool                        isdone;
         pid_t                       pidchild;
-        int                         tempfd;
         bool                        readDone;
         std::string                 tmpfile;
-        int                         pipes[2];
     public:
         Location                    location;
         Cgi();
@@ -35,7 +33,7 @@ class Cgi
         HttpStatus          ExecuteCgi(Request & Req, Location& loc, std::string filepath);
         void            SetOutput(std::string s);
         bool            CgiFork();
-        void            ExecCgiChild(Request & Req, std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
+        void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
         bool            CheckExitStatus();
         pid_t           GetChildPid() const;
         void            SetChildPid(pid_t child);
@@ -48,6 +46,7 @@ class Cgi
         void            SetLocation(Location& loc);
         bool            ReadStatus() const;
         void            SetReadStatus(bool stat);
+        bool            GetExecutionstatus() const;
         std::string     GetTmpFile() const;
     };
 void	HandleCgi( Server& server, Multiplexer& m, int &i);
