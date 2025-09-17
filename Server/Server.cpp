@@ -48,6 +48,7 @@ bool    Server::SetServer()
         return (false);
     }
     fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+    std::cout << "fd == " << getpid() << std::endl;
     if (fd == -1)
         return false;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
