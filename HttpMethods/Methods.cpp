@@ -269,7 +269,7 @@ std::string	BuildResponse(std::string type, int size, int status)
 			response += " Unknown Status\r\n";
 			break;
 	}
-	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
+	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n";
 	return (response);
 }
 bool SendCgiData(Multiplexer& m, int i)
@@ -316,15 +316,65 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
-	mp = s.GetErrorMap();
 	std::ifstream file(FullPath.c_str());
 	if ( !file.is_open())
 	{
 		status = InternalServerError;
 	}
-	data << file.rdbuf();
-	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
-	response << data.str();
+	mp = s.GetErrorMap();
+	// std::cout << "fullpath == " << FullPath << std::endl;
+	// if (hada machi cgi)
+	if (!m.GetClient()[i].GetCgiStatus())
+	{
+		data << file.rdbuf();
+		response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
+		response << "\r\n";
+		response << data.str();
+	}
+	else if(m.GetClient()[i].GetCgiStatus() && m.GetClient()[i].GetCgi().GetExecutedStatus())
+	{
+		std::string headers;
+		data << file.rdbuf();
+		std::string s = data.str();
+		std::map<std::string , std::string >mp ;
+		size_t pos = data.str().find("\r\n\r\n");
+		if ( pos != std::string::npos ) {
+			headers = data.str().substr(0, pos);
+
+			std::vector <std::string> vec = split(headers, "\r\n");
+			std::vector <std::string> vec1;
+			
+			for (size_t i = 0; i < vec.size(); i++)
+			{
+				vec1 = split(vec[i], ":");
+				TrimSpaces(vec1[1]);
+				mp.insert(std::make_pair(vec1[0], vec1[1]));
+			}
+		}
+		std::string content_type = mp["Content-Type"];
+		if (content_type.empty())
+			content_type = "application/octet-stream";
+		std::string content_length = mp["Content-Length"];
+		size_t content_len;
+		if (content_length.empty())
+			content_len = data.str().size();
+		else
+			content_len = atol(content_length.c_str());
+
+		response << BuildResponse(content_type, content_len, status);
+		for (std::map<std::string , std::string >::iterator it = mp.begin(); it != mp.end(); it++) {
+			if (it->first != "Content-Type" && it->first != "Content-Length") {
+				response << it->first << ": " << it->second << "\r\n";
+				std::cerr << it->first << ": " << it->second << "\r\n";
+			}
+		}
+		response << "\r\n";
+		response << data.str().substr(pos + 4);
+	}
+	// else hada cgi
+	// call the function that can pars the headrs of the response for cgi
+
+
 
 	m.GetClient()[i].SetFileSize(response.str().size());
 	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
@@ -513,17 +563,18 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 		if (!toSend)
 		{
-			std::remove(m.GetClient()[i].GetCgi().GetTmpFile().c_str());
+			// std::remove(m.GetClient()[i].GetCgi().GetTmpFile().c_str());
 			disconnectClient(m, i);
 		}
 	}
 	else if (m.GetClient()[i].GetCgi().GetExecutionstatus() && status == OK)
 	{
+		// ParseCgiResponse();
 		SendData(server, m, i, status, m.GetClient()[i].GetCgi().GetTmpFile());
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 		if (!toSend)
 		{
-			std::remove(m.GetClient()[i].GetCgi().GetTmpFile().c_str());
+			// std::remove(m.GetClient()[i].GetCgi().GetTmpFile().c_str());
 			disconnectClient(m, i);
 		}
 	}
@@ -569,9 +620,6 @@ bool	checkAllowedMethods(Client &c, Server &s)
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
-
-	std::cout << "path == " << path << std::endl;
-
 
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{

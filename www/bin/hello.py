@@ -3,6 +3,9 @@
 import signal, sys
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 print("Content-Type: text/html\r")
+print("test1: text/html\r")
+print("test2: text/html\r")
+print("test3: text/html\r")
 print("\r")
 print("<html>")
 print("<head><title>CGI Test</title></head>")

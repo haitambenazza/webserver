@@ -171,6 +171,10 @@ void    Cgi::SetEnv( Request& Req )
     env.push_back("CONTENT_LENGTH=" + Req.getHeaderValue("Content-Length"));
     env.push_back("SERVER_PROTOCOL=HTTP/1.1");
     env.push_back("REQUEST_URI=" + Req.getUri());
+    std::map<std::string, std::string> headers = Req.getHeaders();
+    std::map<std::string, std::string>::iterator it = headers.find("Cookie");
+    if (it != headers.end())
+        env.push_back("HTTP_COOKIE=" + it->second);
 }
 
 std::vector<char *> Cgi::GetEnvCgi()
@@ -307,7 +311,7 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             return (NotFound);
         }
 
-        std::remove(tmpfile.c_str());
+        // std::remove(tmpfile.c_str());
         fdchild = open(tmpfile.c_str(), O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)
         {
@@ -370,14 +374,13 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             {
                 isdone = true;
                 readDone = true;
-                std::remove(tmpfile.c_str());
+                // std::remove(tmpfile.c_str());
                 return (InternalServerError);
             }
         }
         if(isdone)
         {
-
-                return (OK);
+            return (OK);
         }
     }
     return (OK);
