@@ -22,9 +22,10 @@ class Location
         Location( const Location&  copy );
         Location&   operator=( const Location&  copy );
         ~Location();
-        std::map < std::string, std::vector< std::string > >    GetCommands();
+        void                                                    SetLocation();
+        std::map < std::string, std::vector< std::string > >    GetCommands() const;
         std::string&                                            GetPath();
-        void                                                    SetPath( std::string& s );
+        void                                                    SetPath( std::string s );
         void                                                    SetCommands( std::map < std::string, std::vector< std::string > >& Ref );
         std::string&                                            GetCgiStatus();
         std::string&                                            GetAutoIndex();

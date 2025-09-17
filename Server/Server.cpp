@@ -1,4 +1,5 @@
 #include "../headers/webserver.hpp"
+int     IsWhiteSpace( char c );
 
 bool	Server::SetAddrServer(struct sockaddr_in *addr)
 {
@@ -256,6 +257,8 @@ u_int64_t         Server::GetMaxBodySize() const
     return (max_body_size);
 }
 
+
+
 bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
 {
     std::map<std::string , std::vector<std::string> >mp = s.GetCommands();
@@ -269,6 +272,9 @@ bool CheckCommandServer(Server& s, std::string ToFind, size_t size)
     return (true);
 }
 
+
+
+
 bool CheckCommandLocation(Location& L)
 {
     std::map<std::string , std::vector<std::string> >mp = L.GetCommands();
@@ -276,9 +282,10 @@ bool CheckCommandLocation(Location& L)
 
     while (it != mp.end())
     {
-        if (it->first == "redirect")
+        
+        if (it->first[0] == '_' && (!it->first[1] || IsWhiteSpace(it->first[1]) || it->first[1] == '_' || !std::isalpha(it->first[1]) ))
         {
-            L.SetPath(it->second[0]);
+            return (std::cerr<< "location " << L.GetPath() << " has invalid cgi extention\n", false);
         }
         if (it->first != "allowed_methods" && it->second.size() != 1)
             return (std::cerr<< "location " << L.GetPath() << " has invalid arguments\n", false);
@@ -294,12 +301,13 @@ bool CheckCommandLocation(Location& L)
         }
         it++;
     }
+    
     return (true);
 }
 
 bool    Server::InitializeServerSettings()
 {
-    std::vector<Location> locs = Locations;
+    std::vector<Location>& locs = Locations;
     
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
@@ -331,17 +339,25 @@ bool    Server::InitializeServerSettings()
             return (std::cerr << "invalid index\n", false);
         index = GetValuesFromKeys(Commands, "index");
     }
-    if (GetValuesFromKeys(Commands, "Max_Client_Body_size") != "")
+    if (GetValuesFromKeys(Commands, "max_body_size") != "")
     {
-        if (CheckCommandServer(*this, "Max_Clent_Body_size", 1) == false || AllDigit( GetValuesFromKeys(Commands, "Max_Client_Body_size")) == false)
-            return(std::cerr << "invalid Max_Client_Body_size\n", false);
-        max_body_size = atoll(GetValuesFromKeys(Commands, "Max_Client_Body_size").c_str());
+        if (CheckCommandServer(*this, "max_body_size", 1) == false || AllDigit( GetValuesFromKeys(Commands, "max_body_size")) == false)
+            return(std::cerr << "invalid max_body_size\n", false);
+        max_body_size = atoll(GetValuesFromKeys(Commands, "max_body_size").c_str());
+        std::cout << max_body_size << " mx " << "\n";
     }
     size_t i = 0;
     while (i < locs.size())
     {
-        if (CheckCommandLocation(locs[i]) == false)
-            return (false);
+        locs[i].SetLocation();
+        // std::cout << "ha redir == " << locs[i].GetRedirect() << std::endl;
+        i++;
+    }
+    i = 0;
+    while (i < locs.size())
+    {
+        if (!locs[i].GetRedirect().empty())
+            std::cout << "ha redir == " << locs[i].GetRedirect() << std::endl;
         i++;
     }
     return (true);

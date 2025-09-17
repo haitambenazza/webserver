@@ -158,7 +158,7 @@ std::string&         Location::GetPath()
 {
     return (Path);
 }
-void                 Location::SetPath( std::string& s )
+void                 Location::SetPath( std::string s )
 {
     Path = s;
 }
@@ -177,7 +177,20 @@ void                Location::SetAutoIndexStatus(bool stat)
 	AutoIndexStatus = stat;
 }
 
-std::map < std::string, std::vector< std::string > >    Location::GetCommands()
+void Location::SetLocation()
+{
+    std::map<std::string , std::vector<std::string> >::iterator it = this->Commands.begin();
+    while (it != this->Commands.end())
+    {
+        if (it->first == "redirect")
+        {
+            Redirect = it->second[0];
+        }
+        it++;
+    }
+}
+
+std::map < std::string, std::vector< std::string > >    Location::GetCommands() const
 {
     return (Commands);
 }

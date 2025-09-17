@@ -136,6 +136,7 @@ bool ValidCgiExtention(std::string extention)
 
 std::string Matchkeytoextention(std::string& s)
 {
+    
     if (s == ".py")
         return ("_py");
     else if (s == ".pl")

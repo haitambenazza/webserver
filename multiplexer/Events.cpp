@@ -171,7 +171,7 @@ int	ReadData( Multiplexer &m, int &i)
 		{
 			if (appendToHeader(m, i, tmp, bytes_read) == false)
 				return (1);
-			if (ValidCgiExtention((ReturnExtention(m.GetClient()[i].GetRequest().getUri()))))
+			if (ValidCgiExtention((ReturnExtention(m.GetClient()[i].GetRequest().getUri()))) && (m.GetClient()[i].GetRequest().getMethod() != "DELETE"))
 			{
 				m.GetClient()[i].SetCgiStatus(true);
 			}

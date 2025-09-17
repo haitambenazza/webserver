@@ -218,7 +218,6 @@ void Request::parseHeaders(std::stringstream &str)
             for (size_t i = 0; i < key.size(); ++i)
             {
                 unsigned char c = key[i];
-                // allowed characters
                 if (!(std::isalnum(c) || c == '-'))
                 {
                     status_code = BadRequest;
@@ -247,7 +246,6 @@ void Request::parseHeaders(std::stringstream &str)
         }
         else
         {
-            // no colon found
             status_code = BadRequest;
             return;
         }

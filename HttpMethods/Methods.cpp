@@ -81,27 +81,71 @@ std::string HandleRootLocation(Server &server, Location loc, std::string Uri)
 	return (path);
 }
 
-std::string HandleOtherLocation(Server &server, Location loc, std::string Uri)
+std::string matchlocation(Server &server, std::string &s, std::string& root)
+{
+	std::string path;
+	std::vector<Location>& locs = server.GetLocations();
+	std::map<std::string, std::vector<std::string> >mp ;
+	std::map<std::string, std::vector<std::string> >::iterator it;
+	for (size_t i = 0; i < locs.size(); i++)
+	{
+		path = locs[i].GetPath();
+		if (path == s)
+		{
+			if (locs[i].GetAutoIndex() == "on")
+			{
+				return (AutoIndex(root, path));
+			}
+			else
+			{
+				mp = locs[i].GetCommands();
+				it = mp.find("index");
+				if (it != mp.end())
+				{
+					return (root + "/"+ it->second[0]);
+				}
+			}
+		}
+	}
+	return  ("");
+}
+
+std::string HandleOtherLocation(Server &server, Location& loc, std::string Uri)
 {
 	std::string path;
 	std::string root;
+	std::string dir;
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
+
 
 	root = GetRoot(server, loc);
 	mp = loc.GetCommands();
+	if (!loc.GetRedirect().empty())
+	{
+		dir = loc.GetRedirect();
+		return (matchlocation(server, dir, root));
+	}
 	it = mp.find("index");
 	if ( it != mp.end() )
-		path = root + loc.GetPath()+ "/" + it->second[0] ;
+	{
+		if (dir.empty())
+			dir = loc.GetPath();
+		path = root + dir + "/" + it->second[0] ;
+	}
 	else
-		path = root + Uri;
+	{
+		if ( loc.GetAutoIndex() == "on" )
+			return (AutoIndex(root , Uri));
+		else
+			return "";
+	}
 
-	if ( loc.GetAutoIndex() == "on" )
-		return (AutoIndex(root , Uri));
+
 	return (path);
 }
 
-std::string SetFullPath(Server &server, Location loc, std::string Uri)
+std::string SetFullPath(Server &server, Location& loc, std::string Uri)
 {
 	std::string path;
 	std::string root;
@@ -109,26 +153,31 @@ std::string SetFullPath(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 
+	if (loc.GetPath() == "/")
+		return (HandleRootLocation(server, loc, Uri));
+	else
+		return (HandleOtherLocation(server,loc, Uri));
+	return "";
+}
 
-	if (MatchLocationWithUri(Uri, loc.GetPath()))
+std::string ReturnRedirect( Location& l )
+{
+	std::map<std::string , std::vector<std::string> >mp = l.GetCommands();
+	std::map<std::string , std::vector<std::string> >::iterator it = mp.find("iterator");
+
+	if (it != mp.end() && !it->second.empty())
 	{
-
-		if (loc.GetPath() == "/")
-			return (HandleRootLocation(server, loc, Uri));
-		else
-			return HandleOtherLocation(server,loc, Uri);
+		return (l.GetRedirect());
 	}
 	return "";
 }
 
 std::string	FullPath(int status, Server &server, std::string Uri)
 {
-	std::vector<Location>	Tmp;
+	std::vector<Location>&	Tmp = server.GetLocations();
 	std::string				path;
 	(void) status;
 
-	std::string root ;
-	Tmp = server.GetLocations();
 	for (int i = 0; i < (int)Tmp.size(); i++)
 	{
 		if (Uri != "/" && Uri[Uri.size() - 1] == '/')
@@ -142,11 +191,7 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 				return (path);
 			}
 		}
-		//return (ReturnErrorPath(server, status));
 	}
-	root = GetRoot(server, Tmp[0]);
-	if (!Uri.empty())
-		return (root + Uri);
 	return "";
 }
 
@@ -429,12 +474,12 @@ int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std
 	return (OK);
 }
 
-int		Delete(  std::string path  )
+int		Delete( Server &s, Multiplexer& m,int& i , std::string path )
 {
 	if (access(path.c_str(), F_OK) == -1)
-		return (NotFound);
+		return (SendData(s, m, i, NotFound, path), NotFound);
 	std::remove(path.c_str());
-	return (OK);
+	return (SendData(s, m, i, OK, path), OK);
 }
 
 void	HandleCgi( Server& server, Multiplexer& m, int &i)
@@ -545,7 +590,9 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
 		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
 	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-		Delete(FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri()));
+	{
+		Delete(server, m, i , path);
+	}
     else
 	{
         SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
