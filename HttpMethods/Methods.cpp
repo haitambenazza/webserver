@@ -574,7 +574,6 @@ bool	checkAllowedMethods(Client &c, Server &s)
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
-
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = ReturnErrorPath(server, NotFound);

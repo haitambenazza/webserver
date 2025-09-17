@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WebServer Functionalities - Ultrakill Style</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    margin: 0;
+    padding: 3rem 2rem;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+  .container {
+    max-width: 680px;
+    border: 3px solid #fff;
+    padding: 2rem 3rem;
+    box-sizing: border-box;
+    background: #000;
+    user-select: none;
+  }
+
+  h1 {
+    font-size: 3.5rem;
+    letter-spacing: 0.1em;
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    border-bottom: 3px solid #fff;
+    padding-bottom: 0.5rem;
+  }
+
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 1.8rem;
+    line-height: 2.4rem;
+  }
+
+  li {
+    position: relative;
+    padding-left: 3rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+  }
+
+  li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #fff;
+    font-weight: 900;
+  }
+
+  /* Hover highlight effect */
+  li:hover {
+    color: #aaa;
+    cursor: default;
+  }
+
+  @media (max-width: 600px) {
+    .container {
+      padding: 1.5rem 2rem;
+      max-width: 100%;
+    }
+    h1 {
+      font-size: 2.6rem;
+      margin-bottom: 1rem;
+    }
+    li {
+      font-size: 1.5rem;
+      padding-left: 2.4rem;
+      line-height: 2rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Core Functionalities</h1>
+    <ul>
+      <li>Handles HTTP methods: GET, POST, DELETE, and more</li>
+      <li>Supports execution of CGI scripts for dynamic responses</li>
+      <li>Includes auto-indexing to display directory contents automatically</li>
+      <li>Efficient request processing and serving of static and dynamic content</li>
+    </ul>
+  </div>
+</body>
+</html>
