@@ -136,7 +136,7 @@ bool ValidCgiExtention(std::string extention)
 
 std::string Matchkeytoextention(std::string& s)
 {
-    
+
     if (s == ".py")
         return ("_py");
     else if (s == ".pl")
@@ -308,9 +308,8 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             readDone = true;
             isdone = true;
             std::cerr << "CGI path not found for file: " << filepath << std::endl;
-            return (NotFound);
+            return (InternalServerError);
         }
-
         // std::remove(tmpfile.c_str());
         fdchild = open(tmpfile.c_str(), O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)

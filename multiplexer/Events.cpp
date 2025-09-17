@@ -119,13 +119,13 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 bool appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 {
     m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
-    
+
     if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
     {
         m.GetClient()[i].changeStatusRead(true);
         size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
         m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
-        
+
         // ✅ Only parse once when we have complete headers
         if (m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true)) == false)
             return (false);
@@ -259,7 +259,7 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	{
 		if (i < (int)multiplexer.GetClient().size())
 		{
-			registerTime(multiplexer, i);
+			registerTime(multiplexer, i);// i == client id
 			if ((multiplexer.GetEvents()[i].events & EPOLLIN))
 			{
 				multiplexer.GetClient()[i].SetStatus(ReadData(multiplexer, i));
