@@ -69,6 +69,7 @@ std::string HandleRootLocation(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 
+
 	root = GetRoot(server, loc);
 	mp = loc.GetCommands();
 	it = mp.find("index");
@@ -102,7 +103,7 @@ std::string matchlocation(Server &server, std::string &s, std::string& root)
 				it = mp.find("index");
 				if (it != mp.end())
 				{
-					return (root + "/"+ it->second[0]);
+					return (root +  path + "/"+ it->second[0]);
 				}
 			}
 		}
@@ -126,21 +127,24 @@ std::string HandleOtherLocation(Server &server, Location& loc, std::string Uri)
 		dir = loc.GetRedirect();
 		return (matchlocation(server, dir, root));
 	}
+	else if ( loc.GetAutoIndex() == "on" )
+	{
+		if ( loc.GetAutoIndex() == "on" )
+			return (AutoIndex(root , Uri));
+	}
 	it = mp.find("index");
 	if ( it != mp.end() )
 	{
-		if (dir.empty())
-			dir = loc.GetPath();
+		dir = loc.GetPath();
 		path = root + dir + "/" + it->second[0] ;
 	}
 	else
 	{
-		if ( loc.GetAutoIndex() == "on" )
-			return (AutoIndex(root , Uri));
+		if (Uri.find(".") != std::string::npos)
+			return (root + Uri);
 		else
 			return "";
 	}
-
 
 	return (path);
 }
@@ -157,20 +161,9 @@ std::string SetFullPath(Server &server, Location& loc, std::string Uri)
 		return (HandleRootLocation(server, loc, Uri));
 	else
 		return (HandleOtherLocation(server,loc, Uri));
-	return "";
+	return ("");
 }
 
-std::string ReturnRedirect( Location& l )
-{
-	std::map<std::string , std::vector<std::string> >mp = l.GetCommands();
-	std::map<std::string , std::vector<std::string> >::iterator it = mp.find("iterator");
-
-	if (it != mp.end() && !it->second.empty())
-	{
-		return (l.GetRedirect());
-	}
-	return "";
-}
 
 std::string	FullPath(int status, Server &server, std::string Uri)
 {
@@ -192,7 +185,9 @@ std::string	FullPath(int status, Server &server, std::string Uri)
 			}
 		}
 	}
-	return "";
+	if (Uri.find(".") != std::string::npos)
+		return ( GetRoot(server, Tmp[0]) + Uri);
+	return ("");
 }
 
 std::string GetContentType(std::string file)
@@ -574,6 +569,10 @@ bool	checkAllowedMethods(Client &c, Server &s)
 bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
+
+	std::cout << "path == " << path << std::endl;
+
+
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = ReturnErrorPath(server, NotFound);
