@@ -174,7 +174,6 @@ int	ReadData( Multiplexer &m, int &i)
 			if (ValidCgiExtention((ReturnExtention(m.GetClient()[i].GetRequest().getUri()))))
 			{
 				m.GetClient()[i].SetCgiStatus(true);
-				return 0;
 			}
 		}
 		else
@@ -185,7 +184,6 @@ int	ReadData( Multiplexer &m, int &i)
 		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
 			return (1);
 	}
-
 	if (bytes_read == -1)
 		;;
 	if (isPostValid(m, i))
@@ -262,18 +260,19 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 		if (i < (int)multiplexer.GetClient().size())
 		{
 			registerTime(multiplexer, i);
-			if ((multiplexer.GetEvents()[i].events & EPOLLIN) && multiplexer.GetClient()[i].GetCgiStatus() == false)
+			if ((multiplexer.GetEvents()[i].events & EPOLLIN))
 			{
-				if (ReadData(multiplexer, i) == 1)
+				multiplexer.GetClient()[i].SetStatus(ReadData(multiplexer, i));
+				if (multiplexer.GetClient()[i].Getstatus() == 1 && multiplexer.GetClient()[i].GetCgiStatus() == false)
 				{
 					multiplexer.GetEvents()[i].events = EPOLLOUT;
 					if (AddToEpoll(multiplexer.GetEpollFd(),  EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]) == false)
-						return (false);
+					return (false);
 				}
 			}
 			if ((multiplexer.GetEvents()[i].events & EPOLLOUT) && multiplexer.GetClient()[i].GetCgiStatus() == false)
 				return(GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
-			else if (multiplexer.GetClient()[i].GetCgiStatus())
+			else if (multiplexer.GetClient()[i].GetCgiStatus() && multiplexer.GetClient()[i].Getstatus() == 1)
 			{
 				HandleCgi(server[multiplexer.GetClient()[i].GetserverIndex()] , multiplexer, i);
 			}

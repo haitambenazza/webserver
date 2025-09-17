@@ -282,6 +282,7 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
         if (CgiPath.empty())
         {
             readDone = true;
+            isdone = true;
             std::cerr << "CGI path not found for file: " << filepath << std::endl;
             return (NotFound);
         }
@@ -291,12 +292,14 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
         if (fdchild == -1)
         {
             readDone = true;
+            isdone = true;
             perror("Failed to create tmp file");
             return (InternalServerError);
         }
         if (!CgiFork())
         {
             readDone = true;
+            isdone = true;
             return (InternalServerError);
         }
         if (!IsExecuted && child_pid == 0)
@@ -328,6 +331,7 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             }
             if (status)
             {
+                isdone = true;
                 readDone = true;
                 std::remove(tmpfile.c_str());
                 return (InternalServerError);

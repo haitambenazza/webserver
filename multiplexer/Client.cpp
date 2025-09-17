@@ -14,6 +14,7 @@ Client::Client()
     CgiExecuted = false;
     CgiRunning = false;
     // cgi = NULL;
+    status = 0;
 }
 
 // Fixed Client.cpp copy constructor
@@ -31,7 +32,8 @@ Client::Client(const Client& copy)
       IsCgi(copy.IsCgi),
       cgi(copy.cgi),
       CgiExecuted(copy.CgiExecuted),
-      CgiRunning(copy.CgiRunning)  // THIS IS THE KEY - use initializer list for Cgi
+      CgiRunning(copy.CgiRunning),
+        status(copy.status)// THIS IS THE KEY - use initializer list for Cgi
 {
     // Empty body - everything initialized above
 }
@@ -55,6 +57,7 @@ Client& Client::operator=(const Client& copy)
         cgi = copy.cgi;
         CgiExecuted = copy.CgiExecuted;
         CgiRunning = copy.CgiRunning;  // This is fine for assignment operator
+        status = copy.status;
     }
     return *this;
 }
@@ -161,6 +164,15 @@ std::string     Client::getBuffer(bool which) const
     if (which)
         return (headers);
     return (body);
+}
+
+void            Client::SetStatus(int stat)
+{
+    status = stat;
+}
+int             Client::Getstatus() const
+{
+    return (status);
 }
 
 void            Client::changeStatusRead(bool stat)
