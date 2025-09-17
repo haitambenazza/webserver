@@ -466,7 +466,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 	m.GetEvents()[i].events = EPOLLOUT;
 	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
 		return ;
-	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
+	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i], m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
 	if (m.GetClient()[i].GetCgi().GetExecutionstatus() && status != OK)
 	{
 		SendData(server, m, i, status, ReturnErrorPath(server, status));

@@ -13,6 +13,8 @@ Cgi::Cgi()
     isdone = false;
     pidchild = -1;
     readDone = false;
+    pipes[0] = -1;
+    pipes[1] = -1;
     tmpfile = "www/tmp/tempfile.html";
 }
 
@@ -31,6 +33,8 @@ Cgi::Cgi( Request Req , Location& loc, std::string& filepath)
     isdone = false;
     pidchild = -1;
     readDone = false;
+    pipes[0] = -1;
+    pipes[1] = -1;
     tmpfile = "www/tmp/tempfile.html";
 }
 
@@ -47,6 +51,8 @@ Cgi::Cgi(const Cgi &other)
     filepath = other.filepath;
     isdone = other.isdone;
     pidchild = other.pidchild;
+    pipes[0] = other.pipes[0];
+    pipes[1] = other.pipes[1];
     tmpfile = "www/tmp/tempfile.html";
 }
 
@@ -64,6 +70,8 @@ Cgi&    Cgi::operator=(const Cgi &other)
         fdchild = other.fdchild;
         isdone = other.isdone;
         pidchild = other.pidchild;
+        pipes[0] = other.pipes[0];
+        pipes[1] = other.pipes[1];
         tmpfile = "www/tmp/tempfile.html";
     }
     return (*this);
@@ -229,8 +237,19 @@ bool Cgi::CgiFork()
     return (true);
 }
 
-void       Cgi::ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
+void       Cgi::ExecCgiChild(std::string Method, std::vector<char *> envp, std::string& CgiPath , std::string& filepath)
 {
+    (void)Method;
+    if (Method == "POST")
+    {
+        close(pipes[1]);
+        if (dup2(pipes[0], STDIN_FILENO) == -1)
+        {
+            perror("dup2");
+            close(pipes[1]);
+        }
+        close(pipes[0]);
+    }
     if (dup2(fdchild, STDOUT_FILENO) == -1)
     {
         perror("dup2");
@@ -271,7 +290,7 @@ bool    Cgi::ReadStatus() const
     return (readDone);
 }
 
-HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath)
+HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::string filepath)
 {
     if (!IsExecuted)
     {
@@ -296,6 +315,15 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
             perror("Failed to create tmp file");
             return (InternalServerError);
         }
+        if (Req.getMethod() == "POST")
+        {
+            if (pipe(pipes) == -1)
+            {
+                perror("pipe");
+                isdone = true;
+                return (InternalServerError);
+            }
+        }
         if (!CgiFork())
         {
             readDone = true;
@@ -304,10 +332,18 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
         }
         if (!IsExecuted && child_pid == 0)
         {
-            ExecCgiChild(envp, CgiPath, filepath);
+            ExecCgiChild(Req.getMethod(), envp, CgiPath, filepath);
         }
         else
         {
+            if (Req.getMethod() == "POST")
+            {
+                close(pipes[0]);
+                ssize_t byte_written = write(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size());
+                if (byte_written == -1)
+                    return (close(pipes[0]), InternalServerError);
+            }
+            close(pipes[1]);
             IsExecuted = true;
         }
         close(fdchild);
@@ -339,6 +375,7 @@ HttpStatus    Cgi::ExecuteCgi(Request & Req, Location& loc, std::string filepath
         }
         if(isdone)
         {
+
                 return (OK);
         }
     }

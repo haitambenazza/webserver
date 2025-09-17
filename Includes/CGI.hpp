@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Request.hpp"
+#include "Client.hpp"
+
 
 class Multiplexer;
+class Client;
 class Cgi
 {
     private:
@@ -19,6 +22,7 @@ class Cgi
         pid_t                       pidchild;
         bool                        readDone;
         std::string                 tmpfile;
+        int                         pipes[2];
     public:
         Location                    location;
         Cgi();
@@ -30,10 +34,10 @@ class Cgi
         std::vector<char *> GetEnvCgi();
 
         std::string     GetOutput();
-        HttpStatus          ExecuteCgi(Request & Req, Location& loc, std::string filepath);
+        HttpStatus      ExecuteCgi(Client &cl, Request & Req, Location& loc, std::string filepath);
         void            SetOutput(std::string s);
         bool            CgiFork();
-        void            ExecCgiChild(std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
+        void            ExecCgiChild(std::string Method, std::vector<char *> envp, std::string& CgiPath , std::string& filepath);
         bool            CheckExitStatus();
         pid_t           GetChildPid() const;
         void            SetChildPid(pid_t child);
