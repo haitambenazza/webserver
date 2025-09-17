@@ -170,7 +170,7 @@ void      Server::SetErrorMap()
             }
             error_map.insert(std::make_pair(atoi(tmp1[1].c_str()), tmp1[2]));
         }
-    } 
+    }
 }
 
 void       Server::SetArgs(std::string s)
@@ -283,7 +283,7 @@ bool CheckCommandLocation(Location& L)
 
     while (it != mp.end())
     {
-        
+
         if (it->first[0] == '_' && (!it->first[1] || IsWhiteSpace(it->first[1]) || it->first[1] == '_' || !std::isalpha(it->first[1]) ))
         {
             return (std::cerr<< "location " << L.GetPath() << " has invalid cgi extention\n", false);
@@ -302,14 +302,14 @@ bool CheckCommandLocation(Location& L)
         }
         it++;
     }
-    
+
     return (true);
 }
 
 bool    Server::InitializeServerSettings()
 {
     std::vector<Location>& locs = Locations;
-    
+
     if (GetValuesFromKeys(Commands, "listen") != "")
     {
         if (CheckCommandServer(*this, "listen", 1) == false || AllDigit( GetValuesFromKeys(Commands, "listen")) == false)
@@ -351,6 +351,7 @@ bool    Server::InitializeServerSettings()
     while (i < locs.size())
     {
         locs[i].SetLocation();
+        CheckCommandLocation(locs[i]);
         // std::cout << "ha redir == " << locs[i].GetRedirect() << std::endl;
         i++;
     }

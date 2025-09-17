@@ -116,22 +116,22 @@ bool	AcceptNewClient(Multiplexer &m, int fd, std::vector<Server> &s)
 	return true;
 }
 
-bool	appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
+bool appendToHeader(Multiplexer &m, int i, char *tmp, size_t bytes_read)
 {
-	m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
-	if(m.GetClient()[i].GetRequest().parse(tmp) == false)
-		return false;
+    m.GetClient()[i].appendToBuffer(tmp, bytes_read, true);
 
-	if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
-	{
-		m.GetClient()[i].changeStatusRead(true);
-		size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
-		m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
-		if (m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true)) == false)
-			return (false);
-	}
-	m.GetClient()[i].SetReadSize(m.GetClient()[i].getBuffer(false).size());
-	return (true);
+    if (m.GetClient()[i].getBuffer(true).find("\r\n\r\n") != std::string::npos)
+    {
+        m.GetClient()[i].changeStatusRead(true);
+        size_t pos = m.GetClient()[i].getBuffer(true).find("\r\n\r\n") + 4;
+        m.GetClient()[i].appendToBuffer(m.GetClient()[i].getBuffer(true).substr(pos, m.GetClient()[i].getBuffer(true).size() - pos).c_str(), m.GetClient()[i].getBuffer(true).size() - pos, false);
+
+        // ✅ Only parse once when we have complete headers
+        if (m.GetClient()[i].GetRequest().parse(m.GetClient()[i].getBuffer(true)) == false)
+            return (false);
+    }
+    m.GetClient()[i].SetReadSize(m.GetClient()[i].getBuffer(false).size());
+    return (true);
 }
 
 void	disconnectClient(Multiplexer &m, int i)
@@ -174,7 +174,6 @@ int	ReadData( Multiplexer &m, int &i)
 			if (ValidCgiExtention((ReturnExtention(m.GetClient()[i].GetRequest().getUri()))) && (m.GetClient()[i].GetRequest().getMethod() != "DELETE"))
 			{
 				m.GetClient()[i].SetCgiStatus(true);
-				return 0;
 			}
 		}
 		else
@@ -185,7 +184,6 @@ int	ReadData( Multiplexer &m, int &i)
 		if (m.GetClient()[i].GetRequest().getMethod() != "POST" && m.GetClient()[i].getStatusRead())
 			return (1);
 	}
-
 	if (bytes_read == -1)
 		;;
 	if (isPostValid(m, i))
@@ -261,19 +259,20 @@ bool EventRoutine(std::vector<Server> &server, Multiplexer &multiplexer)
 	{
 		if (i < (int)multiplexer.GetClient().size())
 		{
-			registerTime(multiplexer, i);
-			if ((multiplexer.GetEvents()[i].events & EPOLLIN) && multiplexer.GetClient()[i].GetCgiStatus() == false)
+			registerTime(multiplexer, i);// i == client id
+			if ((multiplexer.GetEvents()[i].events & EPOLLIN))
 			{
-				if (ReadData(multiplexer, i) == 1)
+				multiplexer.GetClient()[i].SetStatus(ReadData(multiplexer, i));
+				if (multiplexer.GetClient()[i].Getstatus() == 1 && multiplexer.GetClient()[i].GetCgiStatus() == false)
 				{
 					multiplexer.GetEvents()[i].events = EPOLLOUT;
 					if (AddToEpoll(multiplexer.GetEpollFd(),  EPOLL_CTL_MOD, multiplexer.GetEvents()[i].data.fd, &multiplexer.GetEvents()[i]) == false)
-						return (false);
+					return (false);
 				}
 			}
 			if ((multiplexer.GetEvents()[i].events & EPOLLOUT) && multiplexer.GetClient()[i].GetCgiStatus() == false)
 				return(GetRequest(server[multiplexer.GetClient()[i].GetserverIndex()], multiplexer, i));
-			else if (multiplexer.GetClient()[i].GetCgiStatus())
+			else if (multiplexer.GetClient()[i].GetCgiStatus() && multiplexer.GetClient()[i].Getstatus() == 1)
 			{
 				HandleCgi(server[multiplexer.GetClient()[i].GetserverIndex()] , multiplexer, i);
 			}

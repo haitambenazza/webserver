@@ -21,6 +21,7 @@ class Client
         Cgi             cgi;
         bool            CgiExecuted;
         bool            CgiRunning;
+        int             status;
     public :
         Client();
         Client( const Client& copy );
@@ -54,5 +55,7 @@ class Client
         void            SetCgiFlag(bool flag);
         bool            GetCgiRunning() const;
         void            SetCgiRunning(bool flag);
-        
+        void            SetStatus(int stat);
+        int             Getstatus() const;
+
 };

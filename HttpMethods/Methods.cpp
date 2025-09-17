@@ -9,11 +9,7 @@ bool	MatchLocationWithUri(std::string Uri, std::string Loc)
 	if (Uri.empty() || Loc.empty())
 		return (false);
 	Loc = Loc.substr(1, Loc.size());
-	if (Loc.empty())
-		return true;
 	vec = split(Uri, "/");
-	if (vec.size() == 0)
-		return true;
 	if (!vec.empty() && vec[0] == Loc)
 	{
 		return (true);
@@ -69,7 +65,7 @@ std::string HandleRootLocation(Server &server, Location loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 
-	
+
 	root = GetRoot(server, loc);
 	mp = loc.GetCommands();
 	it = mp.find("index");
@@ -119,7 +115,7 @@ std::string HandleOtherLocation(Server &server, Location& loc, std::string Uri)
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
 
-	
+
 	root = GetRoot(server, loc);
 	mp = loc.GetCommands();
 	if (!loc.GetRedirect().empty())
@@ -269,7 +265,7 @@ std::string	BuildResponse(std::string type, int size, int status)
 			response += " Unknown Status\r\n";
 			break;
 	}
-	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n\r\n";
+	response += "Content-Type: " + type + "\r\nContent-Length: " + sizefile.str() + "\r\n";
 	return (response);
 }
 bool SendCgiData(Multiplexer& m, int i)
@@ -316,15 +312,61 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 	std::map<int, std::string> mp;
 	std::map<int, std::string>::iterator it;
 
-	mp = s.GetErrorMap();
 	std::ifstream file(FullPath.c_str());
 	if ( !file.is_open())
 	{
 		status = InternalServerError;
 	}
-	data << file.rdbuf();
-	response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
-	response << data.str();
+	mp = s.GetErrorMap();
+	if (!m.GetClient()[i].GetCgiStatus())
+	{
+		data << file.rdbuf();
+		response << BuildResponse(GetContentType(FullPath), data.str().size(), status);
+		response << "\r\n";
+		response << data.str();
+	}
+	else if(m.GetClient()[i].GetCgiStatus() && m.GetClient()[i].GetCgi().GetExecutionstatus())
+	{
+		std::string headers;
+		data << file.rdbuf();
+		std::string s = data.str();
+		std::map<std::string , std::string >mp ;
+		size_t pos = data.str().find("\r\n\r\n");
+		if ( pos != std::string::npos ) {
+			headers = data.str().substr(0, pos);
+
+			std::vector <std::string> vec = split(headers, "\r\n");
+			std::vector <std::string> vec1;
+
+			for (size_t i = 0; i < vec.size(); i++)
+			{
+				vec1 = split(vec[i], ":");
+				TrimSpaces(vec1[1]);
+				mp.insert(std::make_pair(vec1[0], vec1[1]));
+			}
+		}
+		std::string content_type = mp["Content-Type"];
+		if (content_type.empty())
+			content_type = "text/html";
+		std::string content_length = mp["Content-Length"];
+		size_t content_len;
+		if (content_length.empty())
+			content_len = data.str().size();
+		else
+			content_len = atol(content_length.c_str());
+
+		response << BuildResponse(content_type, content_len, status);
+		for (std::map<std::string , std::string >::iterator it = mp.begin(); it != mp.end(); it++) {
+			if (it->first != "Content-Type" && it->first != "Content-Length") {
+				response << it->first << ": " << it->second << "\r\n";
+			}
+		}
+		response << "\r\n";
+		response << s.substr(pos + 1);
+	}
+	// else hada cgi
+	// call the function that can pars the headrs of the response for cgi
+
 
 	m.GetClient()[i].SetFileSize(response.str().size());
 	size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
@@ -421,7 +463,9 @@ std::string GetUploadLocation(Server &s)
 			if (it != mp.end())
 				root += "/" + it->second[0] + "/";
 			else
+			{
 				root += "/upload/";
+			}
 			return (root);
 		}
 	}
@@ -456,7 +500,6 @@ int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std
 	}
 	if (body.empty() || req.getHeaderValue("Content-Length").empty() || !checkUri(req.getUri()))
 		return (SendData(s, m, i, BadRequest, path), BadRequest);
-	std::cout << (LocationPath + GetFileName(req)) <<'\n';
 	file.open((LocationPath + GetFileName(req)).c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 	{
@@ -506,7 +549,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 	m.GetEvents()[i].events = EPOLLOUT;
 	if (AddToEpoll(m.GetEpollFd(),  EPOLL_CTL_MOD, m.GetEvents()[i].data.fd, &m.GetEvents()[i]) == false)
 		return ;
-	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
+	HttpStatus status =  m.GetClient()[i].GetCgi().ExecuteCgi(m.GetClient()[i], m.GetClient()[i].GetRequest() , m.GetClient()[i].GetCgi().location ,m.GetClient()[i]._cgi_path);
 	if (m.GetClient()[i].GetCgi().GetExecutionstatus() && status != OK)
 	{
 		SendData(server, m, i, status, ReturnErrorPath(server, status));
@@ -519,6 +562,7 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 	}
 	else if (m.GetClient()[i].GetCgi().GetExecutionstatus() && status == OK)
 	{
+		// ParseCgiResponse();
 		SendData(server, m, i, status, m.GetClient()[i].GetCgi().GetTmpFile());
 		size_t toSend =  m.GetClient()[i].GetFileSize() - m.GetClient()[i].GetSentSize();
 		if (!toSend)
@@ -530,38 +574,35 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 }
 
 
-bool	checkAllowedMethods(Client &c, Server &s)
+bool	checkAllowedMethods(Client &c, Server &s, std::string method)
 {
-	std::vector<Location> locs = s.GetLocations();
-	std::string Uri = c.GetRequest().getUri();
+	std::vector<Location>& locs = s.GetLocations();
 
-	if (Uri != "/" && Uri[Uri.size() - 1] == '/')
+	for(size_t i = 0; i < locs.size(); i++)
 	{
-		Uri = Uri.substr(0, Uri.size() - 1);
-	}
-
-	size_t j = 0;
-	bool flag;
-	while (j < locs.size())
-	{
-		if (MatchLocationWithUri(c.GetRequest().getUri(), locs[j].GetPath()))
-		{
-			flag = false;
-			break ;
-		}
-		j++;
-	}
-	return (true);
-	std::map<std::string , std::vector<std::string> > mp = locs[j].GetCommands();
-	std::map<std::string , std::vector<std::string> >::iterator it = mp.find("allowed_methods");
-	std::vector<std::string> allowed_methods = it->second;
-	if (it == mp.end())
-		return (true);
-	for (size_t i = 0; i < allowed_methods.size(); i++)
-	{
-		std::cout << allowed_methods[i] << '\n';
-		if (c.GetRequest().getMethod() == allowed_methods[i])
-			return true;
+			if (MatchLocationWithUri(c.GetRequest().getUri(), locs[i].GetPath()) && locs[i].GetPath() != "/")
+			{
+				std::vector<std::string> tmp = locs[i].GetAllowedMethods();
+				if (tmp.empty())
+					return (true);
+				for (size_t j = 0; j < tmp.size(); j++)
+				{
+					if (tmp[j] == method)
+						return (true);
+					std::cout << tmp[j] << " : " << method << '\n';
+				}
+			}
+			else if (locs[i].GetPath() == "/")
+			{
+				std::vector<std::string> tmp = locs[i].GetAllowedMethods();
+				if (tmp.empty())
+					return (true);
+				for (size_t j = 0; j < tmp.size(); j++)
+				{
+					if (tmp[j] == method)
+						return (true);
+				}
+			}
 	}
 	return (false);
 }
@@ -570,15 +611,11 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 {
 	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
-	std::cout << "path == " << path << std::endl;
-	
-
 	if (path.empty() || access(path.c_str(), R_OK) == -1)
 	{
 		path = ReturnErrorPath(server, NotFound);
 	}
-
-	if (!checkAllowedMethods(m.GetClient()[i], server))
+	if (!checkAllowedMethods(m.GetClient()[i], server, m.GetClient()[i].GetRequest().getMethod()))
 	{
 		path = ReturnErrorPath(server, Forbidden);
 		SendData(server, m, i, Forbidden, path);
@@ -593,7 +630,7 @@ bool	GetRequest(Server &server, Multiplexer &m, int &i)
 	}
     else
 	{
-        SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), path);
+        SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), ReturnErrorPath(server, NotImplemented));
 	}
 	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
 		disconnectClient(m, i);
