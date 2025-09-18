@@ -311,8 +311,7 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             return (InternalServerError);
         }
         // std::remove(tmpfile.c_str());
-        if (!IsExecuted)
-            fdchild = open(tmpfile.c_str(), O_RDWR | O_CREAT | O_TRUNC , 0644);
+        fdchild = open(tmpfile.c_str(), O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)
         {
             readDone = true;
@@ -320,9 +319,8 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             perror("Failed to create tmp file");
             return (InternalServerError);
         }
-        if (Req.getMethod() == "POST" && !IsExecuted)
+        if (Req.getMethod() == "POST")
         {
-            std::cout << IsExecuted << '\n';
             if (pipe(pipes) == -1)
             {
                 perror("pipe");
@@ -346,9 +344,9 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             if (Req.getMethod() == "POST")
             {
                 close(pipes[0]);
-                ssize_t byte_written = send(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size(), MSG_NOSIGNAL);
+                ssize_t byte_written = write(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size());
                 if (byte_written == -1)
-                    return (close(pipes[0]), close(fdchild), InternalServerError);
+                    return (close(pipes[0]), InternalServerError);
             }
             close(pipes[1]);
             IsExecuted = true;
@@ -376,7 +374,6 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             {
                 isdone = true;
                 readDone = true;
-                // std::remove(tmpfile.c_str());
                 return (InternalServerError);
             }
         }
