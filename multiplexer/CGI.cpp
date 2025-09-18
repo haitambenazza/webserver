@@ -343,7 +343,7 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             if (Req.getMethod() == "POST")
             {
                 close(pipes[0]);
-                ssize_t byte_written = write(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size());
+                ssize_t byte_written = send(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size(), MSG_NOSIGNAL);
                 if (byte_written == -1)
                     return (close(pipes[0]), InternalServerError);
             }

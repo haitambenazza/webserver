@@ -1,20 +1,18 @@
 #include "../headers/webserver.hpp"
 
 
-bool	MatchLocationWithUri(std::string Uri, std::string Loc)
+bool    MatchLocationWithUri(std::string Uri, std::string Loc)
 {
-	std::vector<std::string> vec;
+    std::vector<std::string> vec;
 
 
-	if (Uri.empty() || Loc.empty())
-		return (false);
-	Loc = Loc.substr(1, Loc.size());
-	vec = split(Uri, "/");
-	if (!vec.empty() && vec[0] == Loc)
-	{
-		return (true);
-	}
-	return(false);
+    if (Uri.empty() || Loc.empty())
+        return (false);
+    if (Loc[Loc.size() - 1] != '/')
+        Loc += "/";
+    if (Uri[Uri.size() - 1] != '/')
+        Uri += "/";
+    return(!Uri.find(Loc));
 }
 
 std::string ReturnErrorPath(Server &server, int code)
@@ -574,65 +572,69 @@ void	HandleCgi( Server& server, Multiplexer& m, int &i)
 }
 
 
-bool	checkAllowedMethods(Client &c, Server &s, std::string method)
+bool checkAllowedMethods(Client &c, Server &s, std::string method)
 {
-	std::vector<Location>& locs = s.GetLocations();
+    std::vector<Location>& locs = s.GetLocations();
+    std::string Uri = c.GetRequest().getUri();
+    Location*    loc = NULL;
 
-	for(size_t i = 0; i < locs.size(); i++)
-	{
-			if (MatchLocationWithUri(c.GetRequest().getUri(), locs[i].GetPath()) && locs[i].GetPath() != "/")
-			{
-				std::vector<std::string> tmp = locs[i].GetAllowedMethods();
-				if (tmp.empty())
-					return (true);
-				for (size_t j = 0; j < tmp.size(); j++)
-				{
-					if (tmp[j] == method)
-						return (true);
-					std::cout << tmp[j] << " : " << method << '\n';
-				}
-			}
-			else if (locs[i].GetPath() == "/")
-			{
-				std::vector<std::string> tmp = locs[i].GetAllowedMethods();
-				if (tmp.empty())
-					return (true);
-				for (size_t j = 0; j < tmp.size(); j++)
-				{
-					if (tmp[j] == method)
-						return (true);
-				}
-			}
-	}
-	return (false);
+    for (size_t i = 0; i < locs.size(); i++)
+    {
+        if (MatchLocationWithUri(Uri, locs[i].GetPath()))
+            loc = &locs[i];
+    }
+    if (loc)
+    {
+        std::vector<std::string> tmp = loc->GetAllowedMethods();
+        if (tmp.empty())
+            return (true);
+        for (size_t j = 0; j < tmp.size(); j++)
+        {
+            if (tmp[j] == method)
+                return (true);
+        }
+        return (false);
+    }
+    return (false);
 }
 
-bool	GetRequest(Server &server, Multiplexer &m, int &i)
+bool validMethod(std::string method)
 {
-	std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
+    return (method == "POST" || method == "DELETE" || method == "GET");
+}
 
-	if (path.empty() || access(path.c_str(), R_OK) == -1)
-	{
-		path = ReturnErrorPath(server, NotFound);
-	}
-	if (!checkAllowedMethods(m.GetClient()[i], server, m.GetClient()[i].GetRequest().getMethod()))
-	{
-		path = ReturnErrorPath(server, Forbidden);
-		SendData(server, m, i, Forbidden, path);
-	}
-	else if (m.GetClient()[i].GetRequest().getMethod() == "GET")
-		RunGet(server, m, i,path);
-	else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
-		Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
-	else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
-	{
-		Delete(server, m, i , path);
-	}
+
+bool    GetRequest(Server &server, Multiplexer &m, int &i)
+{
+    std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
+
+    std::cout << path << std::endl;
+    if (path.empty() || access(path.c_str(), R_OK) == -1)
+    {
+        m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
+        path = ReturnErrorPath(server, NotFound);
+    }
+
+    if (!checkAllowedMethods(m.GetClient()[i], server, m.GetClient()[i].GetRequest().getMethod()) && validMethod( m.GetClient()[i].GetRequest().getMethod()))
+    {
+        std::cout << "yooooo\n";
+        path = ReturnErrorPath(server, Forbidden);
+        SendData(server, m, i, Forbidden, path);
+    }
+    else if (m.GetClient()[i].GetRequest().getMethod() == "GET")
+        RunGet(server, m, i,path);
+    else if (m.GetClient()[i].GetRequest().getMethod() == "POST")
+        Post(server, m, m.GetClient()[i].getBuffer(false), m.GetClient()[i].GetRequest(), i, path);
+    else if (m.GetClient()[i].GetRequest().getMethod() == "DELETE")
+    {
+        Delete(server, m, i , path);
+    }
     else
-	{
-        SendData(server, m, i, m.GetClient()[i].GetRequest().getStatusCode(), ReturnErrorPath(server, NotImplemented));
-	}
-	if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
-		disconnectClient(m, i);
-	return true;
+    {
+        path = ReturnErrorPath(server, NotImplemented);
+        SendData(server, m, i, NotImplemented , path);
+    }
+    if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+        disconnectClient(m, i);
+    return true;
 }
