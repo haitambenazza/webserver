@@ -1,397 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>414 - URI Too Long</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 50%, #d35400 100%);
-            min-height: 100vh;
-            font-family: 'Arial', sans-serif;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>414 URI Too Long</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-        .error-code {
-            font-size: 12rem;
-            font-weight: 900;
-            background: linear-gradient(45deg, #fff, #f1c40f);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: stretch-code 3s ease-in-out infinite;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-        }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Share Tech Mono', monospace;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
 
-        @keyframes stretch-code {
-            0%, 100% { 
-                transform: scaleX(1);
-                letter-spacing: 0px;
-            }
-            50% { 
-                transform: scaleX(1.2);
-                letter-spacing: 10px;
-            }
-        }
+  #background-gif {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 80vmin;
+    height: 80vmin;
+    max-width: 90vw;
+    max-height: 90vh;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 8px;
+    overflow: hidden;
+  }
 
-        .uri-icon {
-            font-size: 5rem;
-            color: white;
-            animation: link-stretch 2s ease-in-out infinite;
-            margin-bottom: 2rem;
-        }
+  #background-gif iframe,
+  #background-gif video,
+  #background-gif img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
 
-        @keyframes link-stretch {
-            0%, 100% { 
-                transform: scaleX(1) rotate(0deg);
-            }
-            50% { 
-                transform: scaleX(1.5) rotate(5deg);
-            }
-        }
+  .error-container {
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #fff;
+    padding: 3rem 2rem;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    user-select: none;
+    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+  }
 
-        .uri-message {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            animation: text-stretch 4s ease-in-out infinite;
-        }
+  h1 {
+    font-size: 8rem;
+    margin: 0;
+    letter-spacing: 0.15em;
+    color: #fff;
+    filter: drop-shadow(0 0 10px #fff);
+    animation: flicker 2s infinite alternate;
+  }
 
-        @keyframes text-stretch {
-            0%, 100% { 
-                letter-spacing: 0px;
-                transform: scaleX(1);
-            }
-            25% { 
-                letter-spacing: 5px;
-                transform: scaleX(1.1);
-            }
-            75% { 
-                letter-spacing: 2px;
-                transform: scaleX(1.05);
-            }
-        }
+  h2 {
+    font-size: 2rem;
+    margin: 1rem 0 2rem;
+    letter-spacing: 0.1em;
+    color: #fff;
+    position: relative;
+    display: inline-block;
+  }
 
-        .url-display {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin: 2rem 0;
-            backdrop-filter: blur(10px);
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            color: white;
-            word-break: break-all;
-            max-height: 150px;
-            overflow: hidden;
-            position: relative;
-            animation: url-scroll 8s linear infinite;
-        }
+  h2::before,
+  h2::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+  }
 
-        @keyframes url-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+  h2::before {
+    left: 2px;
+    text-shadow: -2px 0 #00fff7;
+    animation: glitch-anim-1 3s infinite linear alternate-reverse;
+  }
 
-        .url-length {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 1rem 0;
-            color: white;
-            font-family: 'Courier New', monospace;
-        }
+  h2::after {
+    left: -2px;
+    text-shadow: -2px 0 #ff00b3;
+    animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
+  }
 
-        .length-bar {
-            width: 100%;
-            max-width: 400px;
-            margin: 2rem auto;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 25px;
-            overflow: hidden;
-            position: relative;
-            height: 30px;
-        }
+  p {
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+  }
 
-        .length-progress {
-            height: 100%;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            width: 0%;
-            animation: length-overflow 4s ease-in-out infinite;
-            border-radius: 25px;
-            position: relative;
-        }
+  .btn-back {
+    display: inline-block;
+    background: #fff;
+    color: #000;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 1rem 3rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    outline: 2px solid #fff;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+    text-decoration: none;
+  }
 
-        @keyframes length-overflow {
-            0% { width: 100%; }
-            50% { width: 150%; }
-            100% { width: 100%; }
-        }
+  .btn-back:hover {
+    filter: invert(100%);
+  }
 
-        .length-label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-weight: bold;
-            z-index: 10;
-            font-size: 0.9rem;
-        }
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+    }
+    20%, 22%, 24%, 55% {
+      opacity: 0.3;
+    }
+  }
 
-        .btn-shorten {
-            background: linear-gradient(45deg, #fff, #f8f9fa);
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            color: #f39c12;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            animation: fadeInUp 1s ease-out 1s both;
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
-        }
+  @keyframes glitch-anim-1 {
+    0% {
+      clip: rect(24px, 9999px, 56px, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      clip: rect(85px, 9999px, 140px, 0);
+      transform: translate(2px, -2px);
+    }
+    100% {
+      clip: rect(24px, 9999px, 56px, 0);
+      transform: translate(0, 0);
+    }
+  }
 
-        .btn-shorten:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(255, 255, 255, 0.4);
-            color: #f39c12;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .scrolling-url {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-            opacity: 0.1;
-        }
-
-        .url-fragment {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.3);
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            animation: scroll-fragment 15s linear infinite;
-            white-space: nowrap;
-        }
-
-        @keyframes scroll-fragment {
-            0% {
-                transform: translateX(100vw);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        .chain-links {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 2;
-        }
-
-        .chain-link {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.1);
-            font-size: 2rem;
-            animation: float-chain 12s linear infinite;
-        }
-
-        @keyframes float-chain {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .uri-info {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 2rem 0;
-            backdrop-filter: blur(10px);
-            animation: info-pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes info-pulse {
-            0%, 100% { 
-                transform: scale(1);
-                box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-            }
-            50% { 
-                transform: scale(1.02);
-                box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
-            }
-        }
-    </style>
+  @keyframes glitch-anim-2 {
+    0% {
+      clip: rect(50px, 9999px, 100px, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      clip: rect(80px, 9999px, 120px, 0);
+      transform: translate(-2px, 2px);
+    }
+    100% {
+      clip: rect(50px, 9999px, 100px, 0);
+      transform: translate(0, 0);
+    }
+  }
+</style>
 </head>
 <body>
-    <div class="scrolling-url" id="scrollingUrl"></div>
-    <div class="chain-links" id="chainLinks"></div>
-
-    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
-        <div class="text-center" style="z-index: 10; position: relative;">
-            <i class="fas fa-link uri-icon"></i>
-            <div class="error-code">414</div>
-            <h1 class="uri-message">URI TOO LONG</h1>
-            
-            <div class="url-length">
-                <div>Current Length: <span style="color: #e74c3c;">2,847 characters</span></div>
-                <div>Maximum Allowed: <span style="color: #2ed573;">2,048 characters</span></div>
-            </div>
-            
-            <div class="length-bar">
-                <div class="length-progress"></div>
-                <div class="length-label">139% of limit</div>
-            </div>
-            
-            <div class="url-display">
-                https://example.com/api/v1/users/search?query=very-long-search-term-that-goes-on-and-on&filter=active&sort=name&page=1&limit=50&include=profile,settings,preferences&format=json&callback=handleResponse&timestamp=1234567890&token=abcdefghijklmnopqrstuvwxyz&session=xyz123&debug=true&verbose=true&cache=false&version=2.1&locale=en-US&timezone=UTC&theme=dark&layout=grid&view=detailed...
-            </div>
-            
-            <div class="uri-info">
-                <h4 class="text-white mb-3">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    URL Length Exceeded
-                </h4>
-                <p class="text-white mb-0">
-                    The requested URL is too long for the server to process.<br>
-                    Please shorten the URL or use POST method for large data.
-                </p>
-            </div>
-            
-            <button class="btn btn-shorten btn-lg" onclick="shortenUrl()">
-                <i class="fas fa-cut me-2"></i>
-                Shorten URL
-            </button>
-        </div>
+  <div id="background-gif" aria-hidden="true">
+    <div class="tenor-gif-embed" data-postid="23649259" data-share-method="host" data-aspect-ratio="1" data-width="100%">
+      <a href="https://tenor.com/view/ultrakill-death-skull-laughing-laugh-gif-23649259">Ultrakill Death GIF</a> from <a href="https://tenor.com/search/ultrakill-gifs">Ultrakill GIFs</a>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function shortenUrl() {
-            alert('URL shortening service activated. Please try with a shorter URL.');
-        }
+  <div class="error-container" role="main" aria-labelledby="error-title">
+    <h1 id="error-title">414</h1>
+    <h2 data-text="URI TOO LONG">URI TOO LONG</h2>
+    <p>The requested URI is too long to process.</p>
+    <a href="/" class="btn-back" role="button" aria-label="Go back to Home page">Go Back Home</a>
+  </div>
 
-        // Create scrolling URL fragments
-        function createUrlFragment() {
-            const fragments = [
-                'https://example.com/very/long/path/to/resource?param1=value1&param2=value2&param3=value3',
-                'api/v1/users/search?query=long-search-term&filter=active&sort=name&page=1',
-                'www.example.com/path/to/resource/with/many/parameters?a=1&b=2&c=3&d=4&e=5',
-                'subdomain.domain.com/api/endpoint?token=verylongtoken123456789&session=abc',
-                'https://api.service.com/v2/data?format=json&callback=function&timestamp=123'
-            ];
-            
-            const fragment = document.createElement('div');
-            fragment.className = 'url-fragment';
-            fragment.textContent = fragments[Math.floor(Math.random() * fragments.length)];
-            fragment.style.top = Math.random() * 100 + '%';
-            fragment.style.animationDelay = Math.random() * -15 + 's';
-            
-            document.getElementById('scrollingUrl').appendChild(fragment);
-            
-            setTimeout(() => {
-                fragment.remove();
-            }, 15000);
-        }
-
-        // Create chain links
-        function createChainLink() {
-            const link = document.createElement('i');
-            link.className = 'fas fa-link chain-link';
-            link.style.left = Math.random() * 100 + '%';
-            link.style.animationDelay = Math.random() * -12 + 's';
-            link.style.fontSize = (Math.random() * 2 + 1) + 'rem';
-            
-            document.getElementById('chainLinks').appendChild(link);
-            
-            setTimeout(() => {
-                link.remove();
-            }, 12000);
-        }
-
-        // Create elements periodically
-        setInterval(createUrlFragment, 2000);
-        setInterval(createChainLink, 1500);
-
-        // Animate length percentage
-        let currentLength = 139;
-        const lengthLabel = document.querySelector('.length-label');
-        
-        setInterval(() => {
-            currentLength += Math.random() * 20 - 10;
-            if (currentLength < 100) currentLength = 100;
-            if (currentLength > 200) currentLength = 200;
-            lengthLabel.textContent = Math.round(currentLength) + '% of limit';
-        }, 3000);
-
-        // Add scissors effect on click
-        document.addEventListener('click', function(e) {
-            const scissors = document.createElement('i');
-            scissors.className = 'fas fa-cut';
-            scissors.style.cssText = `
-                position: absolute;
-                left: ${e.clientX}px;
-                top: ${e.clientY}px;
-                color: white;
-                font-size: 2rem;
-                animation: cut-effect 1s ease-out;
-                pointer-events: none;
-                z-index: 1000;
-            `;
-            
-            document.body.appendChild(scissors);
-            
-            setTimeout(() => scissors.remove(), 1000);
-        });
-
-        // Add cut animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes cut-effect {
-                0% {
-                    transform: rotate(0deg) scale(1);
-                    opacity: 1;
-                }
-                50% {
-                    transform: rotate(180deg) scale(1.5);
-                    opacity: 0.8;
-                }
-                100% {
-                    transform: rotate(360deg) scale(0);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </body>
 </html>

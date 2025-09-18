@@ -1,209 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>400 - Bad Request</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>400 Error - Bad Request</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-        .error-container {
-            position: relative;
-            z-index: 10;
-        }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Share Tech Mono', monospace;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
 
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            top: 0;
-            left: 0;
-        }
+  #background-gif {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 80vmin;
+    height: 80vmin;
+    max-width: 90vw;
+    max-height: 90vh;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 8px;
+    overflow: hidden;
+  }
 
-        .shape {
-            position: absolute;
-            opacity: 0.1;
-            animation: float 20s infinite linear;
-        }
+  #background-gif iframe,
+  #background-gif video,
+  #background-gif img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
 
-        .shape:nth-child(1) {
-            top: 10%;
-            left: 20%;
-            animation-delay: 0s;
-        }
+  .error-container {
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #fff;
+    padding: 3rem 2rem;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    user-select: none;
+    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+  }
 
-        .shape:nth-child(2) {
-            top: 70%;
-            left: 80%;
-            animation-delay: -5s;
-        }
+  h1 {
+    font-size: 8rem;
+    margin: 0;
+    letter-spacing: 0.15em;
+    color: #fff;
+    filter: drop-shadow(0 0 10px #fff);
+    animation: flicker 2s infinite alternate;
+  }
 
-        .shape:nth-child(3) {
-            top: 40%;
-            left: 10%;
-            animation-delay: -10s;
-        }
+  h2 {
+    font-size: 2rem;
+    margin: 1rem 0 2rem;
+    letter-spacing: 0.1em;
+    color: #fff;
+    position: relative;
+    display: inline-block;
+  }
 
-        @keyframes float {
-            0% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-100px) rotate(180deg);
-            }
-            100% {
-                transform: translateY(0px) rotate(360deg);
-            }
-        }
+  h2::before,
+  h2::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+  }
 
-        .error-code {
-            font-size: 8rem;
-            font-weight: 900;
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
-            animation: pulse 2s infinite;
-        }
+  h2::before {
+    left: 2px;
+    text-shadow: -2px 0 #00fff7;
+    animation: glitch-anim-1 3s infinite linear alternate-reverse;
+  }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-        }
+  h2::after {
+    left: -2px;
+    text-shadow: -2px 0 #ff00b3;
+    animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
+  }
 
-        .error-message {
-            font-size: 2rem;
-            color: white;
-            margin-bottom: 2rem;
-            animation: slideInUp 1s ease-out;
-        }
+  p {
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+  }
 
-        .error-description {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.2rem;
-            animation: slideInUp 1s ease-out 0.2s both;
-        }
+  .btn-back {
+    display: inline-block;
+    background: #fff;
+    color: #000;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 1rem 3rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    outline: 2px solid #fff;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+    text-decoration: none;
+  }
 
-        @keyframes slideInUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+  .btn-back:hover {
+    filter: invert(100%);
+  }
 
-        .btn-custom {
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            border: none;
-            padding: 12px 30px;
-            font-weight: 600;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            animation: slideInUp 1s ease-out 0.4s both;
-        }
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+    }
+    20%, 22%, 24%, 55% {
+      opacity: 0.3;
+    }
+  }
 
-        .btn-custom:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
-        }
+  @keyframes glitch-anim-1 {
+    0% {
+      clip: rect(24px, 9999px, 56px, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      clip: rect(85px, 9999px, 140px, 0);
+      transform: translate(2px, -2px);
+    }
+    100% {
+      clip: rect(24px, 9999px, 56px, 0);
+      transform: translate(0, 0);
+    }
+  }
 
-        .glitch {
-            position: relative;
-            animation: glitch 2s infinite;
-        }
-
-        @keyframes glitch {
-            0%, 100% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-        }
-    </style>
+  @keyframes glitch-anim-2 {
+    0% {
+      clip: rect(50px, 9999px, 100px, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      clip: rect(80px, 9999px, 120px, 0);
+      transform: translate(-2px, 2px);
+    }
+    100% {
+      clip: rect(50px, 9999px, 100px, 0);
+      transform: translate(0, 0);
+    }
+  }
+</style>
 </head>
 <body>
-    <div class="floating-shapes">
-        <div class="shape"><i class="fas fa-exclamation-triangle fa-3x"></i></div>
-        <div class="shape"><i class="fas fa-bug fa-2x"></i></div>
-        <div class="shape"><i class="fas fa-times-circle fa-3x"></i></div>
+  <div id="background-gif" aria-hidden="true">
+    <div class="tenor-gif-embed" data-postid="23649259" data-share-method="host" data-aspect-ratio="1" data-width="100%">
+      <a href="https://tenor.com/view/ultrakill-death-skull-laughing-laugh-gif-23649259">Ultrakill Death GIF</a> from <a href="https://tenor.com/search/ultrakill-gifs">Ultrakill GIFs</a>
     </div>
+  </div>
 
-    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
-        <div class="error-container text-center">
-            <div class="error-code glitch">400</div>
-            <h1 class="error-message">Bad Request</h1>
-            <p class="error-description mb-4">
-                Oops! Your request couldn't be understood by the server.<br>
-                Please check your request and try again.
-            </p>
-            <button class="btn btn-custom btn-lg" onclick="goBack()">
-                <i class="fas fa-arrow-left me-2"></i>Go Back
-            </button>
-        </div>
-    </div>
+  <div class="error-container" role="main" aria-labelledby="error-title">
+    <h1 id="error-title">400</h1>
+    <h2 data-text="PAGE NOT FOUND">BAD REQUEST</h2>
+    <p>bad move...you are dead</p>
+    <a href="index.html" class="btn-back" role="button" aria-label="Go back to Home page">Go Back Home</a>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function goBack() {
-            window.history.back();
-        }
-
-        // Add some interactive particles
-        document.addEventListener('mousemove', function(e) {
-            createParticle(e.clientX, e.clientY);
-        });
-
-        function createParticle(x, y) {
-            const particle = document.createElement('div');
-            particle.style.cssText = `
-                position: fixed;
-                width: 4px;
-                height: 4px;
-                background: rgba(255, 255, 255, 0.6);
-                border-radius: 50%;
-                pointer-events: none;
-                left: ${x}px;
-                top: ${y}px;
-                animation: particle 1s ease-out forwards;
-                z-index: 1000;
-            `;
-            
-            document.body.appendChild(particle);
-            
-            setTimeout(() => {
-                particle.remove();
-            }, 1000);
-        }
-
-        // Add CSS for particle animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes particle {
-                0% {
-                    transform: scale(0) translateY(0);
-                    opacity: 1;
-                }
-                100% {
-                    transform: scale(1) translateY(-50px);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </body>
 </html>
