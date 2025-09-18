@@ -362,8 +362,6 @@ bool SendData( Server&s ,Multiplexer &m, int i, int status, std::string FullPath
 		response << "\r\n";
 		response << s.substr(pos + 1);
 	}
-	// else hada cgi
-	// call the function that can pars the headrs of the response for cgi
 
 
 	m.GetClient()[i].SetFileSize(response.str().size());
@@ -446,11 +444,38 @@ std::string	GetFileName(Request&	req)
 	return FileName;
 }
 
-std::string GetUploadLocation(Server &s)
+bool LocHasPost(std::vector<std::string> tmp)
+{
+	for (size_t j = 0; j < tmp.size(); j++)
+	{
+		if (tmp[j] == "POST")
+			return true;
+	}
+	return false;
+}
+
+bool LocHasAllowedMethods(Location &loc)
+{
+	std::map<std::string, std::vector<std::string> > mp = loc.GetCommands();
+	std::map<std::string, std::vector<std::string> >::iterator it = mp.begin();
+	while(it != mp.end())
+	{
+		if (it->first == "allowed_methods")
+		{
+			if (LocHasPost(it->second))
+				return (true);
+		}
+		it++;
+	}
+	return (false);
+}
+
+std::string ReturnUpload(Server &s)
 {
 	std::vector<Location> locs = s.GetLocations();
 	std::map<std::string, std::vector<std::string> > mp;
 	std::map<std::string, std::vector<std::string> >::iterator it;
+
 	for(size_t j = 0; j < locs.size(); j++)
 	{
 		if (locs[j].GetPath() == "/upload")
@@ -466,6 +491,26 @@ std::string GetUploadLocation(Server &s)
 			}
 			return (root);
 		}
+	}
+	return ("");
+}
+
+std::string GetUploadLocation(Server &s, std::string& Uri)
+{
+	std::vector<Location> locs = s.GetLocations();
+	std::map<std::string, std::vector<std::string> > mp;
+	std::map<std::string, std::vector<std::string> >::iterator it;
+	for(size_t j = 0; j < locs.size(); j++)
+	{
+		std::cout << "Uri == " << Uri << " : " << locs[j].GetPath() << "\n";
+		if (MatchLocationWithUri(locs[j].GetPath(), Uri))
+		{
+			std::string root = GetRoot(s, locs[j]);
+			if (LocHasAllowedMethods(locs[j]))
+				return ( root + Uri + "/");
+		}
+		else 
+			return (ReturnUpload(s));
 	}
 	return "";
 }
@@ -489,8 +534,15 @@ int		Post(Server &s, Multiplexer& m, std::string body,Request& req, int& i , std
 {
 	std::ofstream 	file;
 
-	std::string LocationPath = GetUploadLocation(s);
+	std::string Uri = req.getUri();
+	std::string LocationPath = GetUploadLocation(s, Uri);
 
+	std::cout << LocationPath << " : \n";
+	if (LocationPath.empty())
+	{
+		path = ReturnErrorPath(s, NotFound);
+		return (SendData(s, m, i, NotFound, path), NotFound);
+	}
 	if (!checkcontentsize(m, i, s))
 	{
 		path = ReturnErrorPath(s, PayloadTooLarge);
@@ -608,16 +660,14 @@ bool    GetRequest(Server &server, Multiplexer &m, int &i)
 {
     std::string path = FullPath(m.GetClient()[i].GetRequest().getStatusCode(), server, m.GetClient()[i].GetRequest().getUri());
 
-    std::cout << path << std::endl;
     if (path.empty() || access(path.c_str(), R_OK) == -1)
     {
         m.GetClient()[i].GetRequest().SetStatusCode(NotFound);
         path = ReturnErrorPath(server, NotFound);
+		SendData(server, m, i, NotFound, path);
     }
-
-    if (!checkAllowedMethods(m.GetClient()[i], server, m.GetClient()[i].GetRequest().getMethod()) && validMethod( m.GetClient()[i].GetRequest().getMethod()))
+    else if (!checkAllowedMethods(m.GetClient()[i], server, m.GetClient()[i].GetRequest().getMethod()) && validMethod( m.GetClient()[i].GetRequest().getMethod()))
     {
-        std::cout << "yooooo\n";
         path = ReturnErrorPath(server, Forbidden);
         SendData(server, m, i, Forbidden, path);
     }
@@ -635,6 +685,8 @@ bool    GetRequest(Server &server, Multiplexer &m, int &i)
         SendData(server, m, i, NotImplemented , path);
     }
     if (m.GetClient()[i].GetSentSize() == m.GetClient()[i].GetFileSize())
+	{
         disconnectClient(m, i);
+	}
     return true;
 }

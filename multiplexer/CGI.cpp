@@ -310,7 +310,7 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             std::cerr << "CGI path not found for file: " << filepath << std::endl;
             return (InternalServerError);
         }
-        // std::remove(tmpfile.c_str());
+        std::remove(tmpfile.c_str());
         fdchild = open(tmpfile.c_str(), O_RDWR | O_CREAT | O_TRUNC , 0644);
         if (fdchild == -1)
         {
@@ -332,6 +332,7 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
         {
             readDone = true;
             isdone = true;
+            close(fdchild);
             return (InternalServerError);
         }
         if (!IsExecuted && child_pid == 0)
@@ -343,7 +344,7 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             if (Req.getMethod() == "POST")
             {
                 close(pipes[0]);
-                ssize_t byte_written = send(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size(), MSG_NOSIGNAL);
+                ssize_t byte_written = write(pipes[1], cl.getBuffer(false).c_str(), Req.getBody().size());
                 if (byte_written == -1)
                     return (close(pipes[0]), InternalServerError);
             }
@@ -373,7 +374,6 @@ HttpStatus    Cgi::ExecuteCgi(Client &cl, Request & Req, Location& loc, std::str
             {
                 isdone = true;
                 readDone = true;
-                // std::remove(tmpfile.c_str());
                 return (InternalServerError);
             }
         }
