@@ -1,303 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>505 - HTTP Version Not Supported</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            min-height: 100vh;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>505 HTTP Version Not Supported</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-        .error-code {
-            font-size: 12rem;
-            font-weight: 900;
-            background: linear-gradient(45deg, #00d4ff, #0099cc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: version-glitch 3s ease-in-out infinite;
-            text-shadow: 0 0 50px rgba(0, 212, 255, 0.5);
-        }
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Share Tech Mono', monospace;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+    background: #000;
+  }
 
-        @keyframes version-glitch {
-            0%, 100% { 
-                transform: translate(0);
-                filter: hue-rotate(0deg);
-            }
-            10% { 
-                transform: translate(-3px, 3px);
-                filter: hue-rotate(90deg);
-            }
-            20% { 
-                transform: translate(3px, -3px);
-                filter: hue-rotate(180deg);
-            }
-            30% { 
-                transform: translate(-3px, -3px);
-                filter: hue-rotate(270deg);
-            }
-            40% { 
-                transform: translate(3px, 3px);
-                filter: hue-rotate(360deg);
-            }
-            50% { 
-                transform: translate(0);
-                filter: hue-rotate(0deg);
-            }
-        }
+  #background-gif {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 80vmin;
+    height: 80vmin;
+    max-width: 90vw;
+    max-height: 90vh;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 8px;
+    overflow: hidden;
+  }
 
-        .version-icon {
-            font-size: 5rem;
-            color: #00d4ff;
-            animation: version-spin 4s linear infinite;
-            margin-bottom: 2rem;
-        }
+  #background-gif iframe,
+  #background-gif video,
+  #background-gif img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
 
-        @keyframes version-spin {
-            0% { transform: rotateY(0deg) scale(1); }
-            25% { transform: rotateY(90deg) scale(1.1); }
-            50% { transform: rotateY(180deg) scale(1); }
-            75% { transform: rotateY(270deg) scale(1.1); }
-            100% { transform: rotateY(360deg) scale(1); }
-        }
+  .error-container {
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #fff;
+    padding: 3rem 2rem;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    user-select: none;
+    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+  }
 
-        .version-message {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            animation: digital-flicker 2s ease-in-out infinite;
-        }
+  h1 {
+    font-size: 8rem;
+    margin: 0;
+    letter-spacing: 0.15em;
+    color: #fff;
+    filter: drop-shadow(0 0 10px #fff);
+    animation: flicker 2s infinite alternate;
+  }
 
-        @keyframes digital-flicker {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px #00d4ff; }
-            50% { opacity: 0.8; text-shadow: 0 0 20px #00d4ff, 0 0 30px #0099cc; }
-        }
+  h2 {
+    font-size: 2rem;
+    margin: 1rem 0 2rem;
+    letter-spacing: 0.1em;
+    color: #fff;
+    position: relative;
+    display: inline-block;
+  }
 
-        .version-info {
-            background: rgba(0, 212, 255, 0.1);
-            border: 2px solid #00d4ff;
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 2rem 0;
-            backdrop-filter: blur(15px);
-            animation: pulse-border 3s ease-in-out infinite;
-        }
+  h2::before,
+  h2::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    overflow: hidden;
+    clip: rect(0, 900px, 0, 0);
+  }
 
-        @keyframes pulse-border {
-            0%, 100% { border-color: #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
-            50% { border-color: #0099cc; box-shadow: 0 0 40px rgba(0, 153, 204, 0.5); }
-        }
+  h2::before {
+    left: 2px;
+    text-shadow: -2px 0 #00fff7;
+    animation: glitch-anim-1 3s infinite linear alternate-reverse;
+  }
 
-        .btn-upgrade {
-            background: linear-gradient(45deg, #00d4ff, #0099cc);
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            animation: fadeInUp 1s ease-out 1s both;
-            position: relative;
-            overflow: hidden;
-        }
+  h2::after {
+    left: -2px;
+    text-shadow: -2px 0 #ff00b3;
+    animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
+  }
 
-        .btn-upgrade::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
+  p {
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    margin-bottom: 2.5rem;
+  }
 
-        .btn-upgrade:hover::before {
-            left: 100%;
-        }
+  .btn-back {
+    display: inline-block;
+    background: #fff;
+    color: #000;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 1rem 3rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    outline: 2px solid #fff;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+    text-decoration: none;
+  }
 
-        .btn-upgrade:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
-            color: white;
-        }
+  .btn-back:hover {
+    filter: invert(100%);
+  }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+  @keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+    }
+    20%, 22%, 24%, 55% {
+      opacity: 0.3;
+    }
+  }
 
-        .digital-rain {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            opacity: 0.1;
-        }
+  @keyframes glitch-anim-1 {
+    0% {
+      clip: rect(24px, 9999px, 56px, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      clip: rect(85px, 9999px, 140px, 0);
+      transform: translate(2px, -2px);
+    }
+    100% {
+      clip: rect(24px, 9999px, 56px, 0);
+      transform: translate(0, 0);
+    }
+  }
 
-        .version-numbers {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 2;
-        }
-
-        .version-number {
-            position: absolute;
-            color: rgba(0, 212, 255, 0.3);
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            animation: float-version 10s linear infinite;
-        }
-
-        @keyframes float-version {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .protocol-display {
-            font-family: 'Courier New', monospace;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00d4ff;
-            border-radius: 10px;
-            padding: 1rem;
-            margin: 1rem 0;
-            color: #00d4ff;
-            animation: protocol-blink 2s ease-in-out infinite;
-        }
-
-        @keyframes protocol-blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-    </style>
+  @keyframes glitch-anim-2 {
+    0% {
+      clip: rect(50px, 9999px, 100px, 0);
+      transform: translate(0, 0);
+    }
+    50% {
+      clip: rect(80px, 9999px, 120px, 0);
+      transform: translate(-2px, 2px);
+    }
+    100% {
+      clip: rect(50px, 9999px, 100px, 0);
+      transform: translate(0, 0);
+    }
+  }
+</style>
 </head>
 <body>
-    <canvas class="digital-rain" id="digitalRain"></canvas>
-    
-    <div class="version-numbers" id="versionNumbers"></div>
-
-    <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
-        <div class="text-center" style="z-index: 10; position: relative;">
-            <i class="fas fa-code-branch version-icon"></i>
-            <div class="error-code">505</div>
-            <h1 class="version-message">VERSION NOT SUPPORTED</h1>
-            
-            <div class="protocol-display">
-                <div>Current: HTTP/3.0</div>
-                <div>Supported: HTTP/1.1, HTTP/2.0</div>
-            </div>
-            
-            <div class="version-info">
-                <h4 class="text-info mb-3">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    HTTP Version Mismatch
-                </h4>
-                <p class="text-white mb-0">
-                    The HTTP protocol version used in the request is not supported by this server.<br>
-                    Please use a supported HTTP version.
-                </p>
-            </div>
-            
-            <button class="btn btn-upgrade btn-lg" onclick="checkVersion()">
-                <i class="fas fa-sync-alt me-2"></i>
-                Check Compatibility
-            </button>
-        </div>
+  <div id="background-gif" aria-hidden="true">
+    <div class="tenor-gif-embed" data-postid="23649259" data-share-method="host" data-aspect-ratio="1" data-width="100%">
+      <a href="https://tenor.com/view/ultrakill-death-skull-laughing-laugh-gif-23649259">Ultrakill Death GIF</a> from <a href="https://tenor.com/search/ultrakill-gifs">Ultrakill GIFs</a>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function checkVersion() {
-            alert('Checking HTTP version compatibility...');
-        }
+  <div class="error-container" role="main" aria-labelledby="error-title">
+    <h1 id="error-title">505</h1>
+    <h2 data-text="HTTP VERSION NOT SUPPORTED">HTTP VERSION NOT SUPPORTED</h2>
+    <p>The server does not support the HTTP protocol version used in the request.</p>
+    <a href="/" class="btn-back" role="button" aria-label="Go back to Home page">Go Back Home</a>
+  </div>
 
-        // Digital rain effect
-        const canvas = document.getElementById('digitalRain');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const versions = "1.0 1.1 2.0 3.0 HTTP HTTPS";
-        const versionArray = versions.split(" ");
-        const fontSize = 14;
-        const columns = canvas.width / fontSize;
-        const drops = [];
-
-        for(let x = 0; x < columns; x++) {
-            drops[x] = 1;
-        }
-
-        function drawRain() {
-            ctx.fillStyle = 'rgba(26, 26, 46, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#00d4ff';
-            ctx.font = fontSize + 'px monospace';
-
-            for(let i = 0; i < drops.length; i++) {
-                const text = versionArray[Math.floor(Math.random() * versionArray.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
-
-        setInterval(drawRain, 50);
-
-        // Floating version numbers
-        function createVersionNumber() {
-            const versions = ['HTTP/1.0', 'HTTP/1.1', 'HTTP/2.0', 'HTTP/3.0', 'HTTPS', 'SSL', 'TLS'];
-            const versionEl = document.createElement('div');
-            versionEl.className = 'version-number';
-            versionEl.textContent = versions[Math.floor(Math.random() * versions.length)];
-            versionEl.style.left = Math.random() * 100 + '%';
-            versionEl.style.fontSize = (Math.random() * 1.5 + 0.8) + 'rem';
-            versionEl.style.animationDelay = Math.random() * -10 + 's';
-            
-            document.getElementById('versionNumbers').appendChild(versionEl);
-            
-            setTimeout(() => {
-                versionEl.remove();
-            }, 10000);
-        }
-
-        setInterval(createVersionNumber, 2000);
-
-        window.addEventListener('resize', function() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-    </script>
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </body>
 </html>
